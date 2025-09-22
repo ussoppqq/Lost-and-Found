@@ -16,9 +16,10 @@ return new class extends Migration
     $table->uuid('company_id');
     $table->uuid('role_id');
     $table->string('full_name');
-    $table->string('email')->unique();
-    $table->string('phone_number')->nullable();
+    $table->string('email')->nullable()->unique();
+    $table->string('phone_number')->unique();
     $table->string('password')->nullable();
+    $table->boolean('is_verified')->default(false);
     $table->timestamps();
 
     $table->foreign('company_id')->references('company_id')->on('companies');
