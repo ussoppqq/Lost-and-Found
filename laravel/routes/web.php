@@ -1,10 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Livewire\Auth\RegisterPhone;
-use App\Livewire\Auth\VerifyOtp;
-use App\Livewire\Auth\RegisterExtra;
-
 
 Route::get('/', function () {
     return view('welcome');
