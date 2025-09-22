@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @stack('styles')
 </head>
+
 <body class="bg-gray-50 text-gray-900">
 
     {{-- Navbar --}}
@@ -18,7 +20,7 @@
             </div>
             <ul class="flex space-x-6">
                 <li><a href="#" class="hover:text-green-600">MAPS</a></li>
-                <li><a href="{{ route('found.form') }}" class="hover:text-green-600">FOUND/LOST</a></li>
+                <li><a href="/found-form" class="hover:text-green-600">FOUND/LOST</a></li>
                 <li><a href="#" class="hover:text-green-600">LOGIN</a></li>
             </ul>
         </div>
@@ -58,4 +60,5 @@
 
     @stack('scripts')
 </body>
+
 </html>
