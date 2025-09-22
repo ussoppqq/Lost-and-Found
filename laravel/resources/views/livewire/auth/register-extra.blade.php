@@ -1,3 +1,6 @@
+@extends('layouts.app')
+
+@section('content')
 <div class="flex h-screen">
     <!-- Left: Gambar -->
     <div class="w-1/2 h-screen hidden md:block">
@@ -45,3 +48,4 @@
         </div>
     </div>
 </div>
+@endsection

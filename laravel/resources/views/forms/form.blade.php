@@ -6,7 +6,7 @@
 <div class="bg-white shadow-md rounded-lg p-6 max-w-2xl mx-auto">
     <h1 class="text-xl font-bold mb-4">Submit Found Item Report</h1>
 
-    <form action="{{ route('found.store') }}" method="POST" enctype="multipart/form-data">
+    <form  method="POST" enctype="multipart/form-data">
         @csrf
 
         {{-- Name --}}
