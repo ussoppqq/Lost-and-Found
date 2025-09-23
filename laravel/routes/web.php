@@ -21,3 +21,7 @@ Route::get('/verify-otp', function () {
 Route::get('/register-extra', function () {
     return view('livewire.auth.register-extra');
 });
+
+Route::get('/forgotpassword', function () {
+    return view('livewire.auth.forgotpassword');
+});
