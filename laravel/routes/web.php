@@ -4,16 +4,14 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Auth\RegisterPhone;
 use App\Livewire\Auth\VerifyOtp;
 use App\Livewire\Auth\RegisterExtra;
+use App\Livewire\FoundForm;
 
 
 
 Route::get('/', function () {
     return view('livewire.auth.home');
 });
-
-Route::get('/forms', function () {
-    return view('forms.found-form');
-});
+Route::get('/found-form', FoundForm::class);
 Route::get('/register-phone', function () {
     return view('livewire.auth.register-phone');
 });
@@ -24,3 +22,6 @@ Route::get('/register-extra', function () {
     return view('livewire.auth.register-extra');
 });
 
+Route::get('/found', function () {
+    return view('found');// -> resources/views/found.blade.php
+})->name('found');
