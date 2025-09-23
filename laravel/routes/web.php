@@ -15,14 +15,8 @@ Route::get('/found-form', FoundForm::class);
 Route::get('/register-phone', function () {
     return view('livewire.auth.register-phone');
 });
-Route::get('/verify-otp', function () {
-    return view('livewire.auth.verify-otp');
-});
-Route::get('register-extra', RegisterExtra::class)->name('register-extra');
 
-Route::get('/register-extra', function () {
-    return view('livewire.auth.register-extra');
-});
+Route::get('register-extra', RegisterExtra::class)->name('register-extra');
 
 Route::get('/login', function () {
     return view('livewire.auth.login');
