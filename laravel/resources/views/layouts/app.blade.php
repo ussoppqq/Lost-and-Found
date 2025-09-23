@@ -31,7 +31,7 @@
 
     {{-- Content --}}
     <main class="container mx-auto py-8">
-        @yield('content')
+        {{ $slot }}
     </main>
 
     {{-- Footer --}}

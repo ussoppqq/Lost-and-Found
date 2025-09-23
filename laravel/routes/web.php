@@ -18,6 +18,8 @@ Route::get('/register-phone', function () {
 Route::get('/verify-otp', function () {
     return view('livewire.auth.verify-otp');
 });
+Route::get('register-extra', RegisterExtra::class)->name('register-extra');
+
 Route::get('/register-extra', function () {
     return view('livewire.auth.register-extra');
 });
