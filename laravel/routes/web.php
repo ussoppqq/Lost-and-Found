@@ -5,8 +5,10 @@ use App\Livewire\Auth\RegisterPhone;
 use App\Livewire\Auth\VerifyOtp;
 use App\Livewire\Auth\RegisterExtra;
 
+
+
 Route::get('/', function () {
-    return view('welcome');
+    return view('livewire.auth.home');
 });
 
 Route::get('/forms', function () {
@@ -21,3 +23,4 @@ Route::get('/verify-otp', function () {
 Route::get('/register-extra', function () {
     return view('livewire.auth.register-extra');
 });
+
