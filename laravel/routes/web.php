@@ -10,7 +10,7 @@ Route::get('/', function () {
 });
 
 Route::get('/forms', function () {
-    return view('forms.form');
+    return view('forms.found-form');
 });
 Route::get('/register-phone', function () {
     return view('livewire.auth.register-phone');
