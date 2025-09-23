@@ -24,7 +24,7 @@
             <ul class="flex space-x-6">
                 <li><a href="#" class="hover:text-green-600">MAPS</a></li>
                 <li><a href="/found-form" class="hover:text-green-600">FOUND/LOST</a></li>
-                <li><a href="#" class="hover:text-green-600">LOGIN</a></li>
+                <li><a href="{{ route('login') }}" class="hover:text-green-600">LOGIN</a></li>
             </ul>
         </div>
     </nav>

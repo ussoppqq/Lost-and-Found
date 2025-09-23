@@ -22,6 +22,10 @@ Route::get('/register-extra', function () {
     return view('livewire.auth.register-extra');
 });
 
+Route::get('/login', function () {
+    return view('livewire.auth.login');
+})->name('login');
+
 Route::get('/found', function () {
     return view('found');// -> resources/views/found.blade.php
 })->name('found');
