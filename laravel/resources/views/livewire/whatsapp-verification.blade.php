@@ -1,4 +1,4 @@
-<x-layouts.app>
+
     <div class="min-h-screen flex items-center justify-center bg-gray-50 py-10"
          x-data="{ code: @entangle('generatedCode') }">
         <div class="w-full max-w-md bg-white rounded-2xl shadow p-8">
@@ -68,4 +68,4 @@
             </form>
         </div>
     </div>
-</x-layouts.app>
+

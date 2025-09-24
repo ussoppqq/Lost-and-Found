@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire\Auth;
+namespace App\Livewire;
 
 use Livewire\Component;
 
-class WhatsappVerification extends Component
+class WhatsappVerification extends \Livewire\Component
 {
     public $country_code = '+62';
     public $phone;
@@ -13,7 +13,6 @@ class WhatsappVerification extends Component
 
     public function mount()
     {
-        // generate initial captcha code
         $this->generatedCode = $this->randomCode();
     }
 
@@ -29,7 +28,6 @@ class WhatsappVerification extends Component
             'captcha' => 'required|in:' . $this->generatedCode,
         ]);
 
-        // Here you’d send the real WhatsApp OTP
         session()->flash('success', 'Demo: OTP sent to ' . $this->country_code . ' ' . $this->phone);
         $this->reset('phone','captcha');
         $this->refreshCaptcha();
@@ -37,7 +35,8 @@ class WhatsappVerification extends Component
 
     public function render()
     {
-        return view('livewire.auth.whatsapp-verification');
+        return view('livewire.whatsapp-verification')
+            ->layout('components.layouts.app'); 
     }
 
     private function randomCode()
