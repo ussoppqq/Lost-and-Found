@@ -1,13 +1,16 @@
 <?php
 
 namespace App\Livewire;
-
+use Livewire\Attributes\Title;
 use Livewire\Component;
+
+
+#[Title('Forgot Password')]
 
 class Forgotpassword extends Component
 {
     public function render()
     {
-        return view('livewire.forgotpassword');
+        return view('livewire.auth.forgotpassword');
     }
 }
