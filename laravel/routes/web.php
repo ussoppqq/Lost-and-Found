@@ -15,5 +15,7 @@ Route::get('register-extra', RegisterExtra::class)->name('register-extra');
 
 Route::get(uri:'/login', action:Login::class)->name(name:'login');
 
-Route::get('/forgot-password', Forgotpassword::class)->name('forgot-password');
+Route::get('/forgot-password', function () {
+    return view('livewire.auth.forgotpassword');
+})->name('forgot-password');
 
