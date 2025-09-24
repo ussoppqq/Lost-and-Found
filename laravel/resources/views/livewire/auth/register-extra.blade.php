@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-
 <div class="flex h-screen">
     <!-- Left: Gambar -->
     <div class="w-1/2 h-screen hidden md:block">
@@ -112,17 +111,4 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-document.addEventListener('livewire:initialized', () => {
-    Livewire.on('otp-sent', () => {
-        setTimeout(() => {
-            document.querySelector('input[wire\\:model="otp"]').focus();
-        }, 100);
-    });
-});
-</script>
-@endpush
-
 @endsection

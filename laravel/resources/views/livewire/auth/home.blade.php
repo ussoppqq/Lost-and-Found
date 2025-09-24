@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-
-
 @section('content')
 
     {{-- ========== HERO (edge-to-edge inside container) ========== --}}
