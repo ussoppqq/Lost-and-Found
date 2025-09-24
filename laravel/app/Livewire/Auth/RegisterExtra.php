@@ -141,5 +141,5 @@ class RegisterExtra extends Component
     public function render()
     {
         return view('livewire.auth.register-extra');
-    }
+    }
 }
