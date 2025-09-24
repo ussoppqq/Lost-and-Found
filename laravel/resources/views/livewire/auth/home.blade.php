@@ -1,7 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
-
+<x-layouts.app>
     {{-- ========== HERO (edge-to-edge inside container) ========== --}}
     <section class="-mx-4 md:-mx-8">
         <div class="relative">
@@ -104,5 +101,4 @@
             </div>
         </div>
     </section>
-
-@endsection
+</x-layouts.app>

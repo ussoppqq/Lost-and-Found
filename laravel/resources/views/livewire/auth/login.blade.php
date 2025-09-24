@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
+<x-layouts.app>
 <div class="flex h-screen">
     <div class="w-1/2 h-screen hidden md:block">
         <img src="{{ asset('storage/images/krb.jpg') }}" class="w-full h-full object-cover">
@@ -50,4 +48,4 @@
         </div>
     </div>
 </div>
-@endsection
+</x-layouts.app>

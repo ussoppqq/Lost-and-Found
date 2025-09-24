@@ -4,11 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\FoundForm;
 use App\Livewire\Auth\RegisterExtra;
 
-
-
 Route::get('/', function () {
     return view('livewire.auth.home');
 });
+
 Route::get('/found-form', FoundForm::class);
 
 Route::get('register-extra', RegisterExtra::class)->name('register-extra');
@@ -20,3 +19,7 @@ Route::get('/login', function () {
 Route::get('/found', function () {
     return view('found');
 })->name('found');
+
+Route::get('/forgot-password', function () {
+    return view('livewire.auth.forgotpassword');
+})->name('forgot-password');

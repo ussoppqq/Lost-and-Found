@@ -1,4 +1,3 @@
-@extends('layouts.app')
-@section('content')
-   @livewire('found-form')
-@endsection
+<x-layouts.app>
+    @livewire('found-form')
+</x-layouts.app>

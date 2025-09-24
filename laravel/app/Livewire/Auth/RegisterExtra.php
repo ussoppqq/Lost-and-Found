@@ -6,7 +6,6 @@ use Livewire\Component;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 use App\Services\FonnteService;
 use Illuminate\Support\Facades\Log;
 
@@ -19,7 +18,6 @@ class RegisterExtra extends Component
     public $otp;
     public $otpSent = false;
 
-    // Mount method untuk inisialisasi
     public function mount()
     {
         $this->otpSent = false;
@@ -30,24 +28,20 @@ class RegisterExtra extends Component
      */
     public function sendOtp()
     {
-        // Reset error sebelumnya
         $this->resetErrorBag(['phone', 'otp']);
-        
+
         if (empty($this->phone)) {
             $this->addError('phone', 'Nomor HP harus diisi sebelum mengirim OTP.');
             return;
         }
 
-        // Format nomor wajib diawali 62
         if (!preg_match('/^62[0-9]{9,13}$/', $this->phone)) {
             $this->addError('phone', 'Nomor HP harus diawali 62 dan minimal 10 digit.');
             return;
         }
 
-        // Generate OTP 6 digit
         $otp = rand(100000, 999999);
 
-        // Simpan di session dengan timestamp untuk expiry
         session([
             'otp_code' => $otp,
             'otp_phone' => $this->phone,
@@ -60,21 +54,18 @@ class RegisterExtra extends Component
 
             Log::info('Fonnte Response:', $response);
 
-            // Cek response dari Fonnte
             if (isset($response['status']) && $response['status'] === true) {
                 session()->flash('success', 'OTP berhasil dikirim ke WhatsApp ' . $this->phone);
                 $this->dispatch('otp-sent');
             } else {
-                $errorMsg = isset($response['reason']) ? $response['reason'] : 'Unknown error';
+                $errorMsg = $response['reason'] ?? 'Unknown error';
                 Log::error("Gagal kirim OTP ke {$this->phone}: " . json_encode($response));
                 $this->addError('otp', 'Gagal mengirim OTP: ' . $errorMsg);
-                return;
             }
         } catch (\Exception $e) {
             Log::error("Error OTP: " . $e->getMessage());
             $this->addError('otp', 'Terjadi error saat mengirim OTP: ' . $e->getMessage());
             $this->otpSent = false;
-            return;
         }
     }
 
@@ -90,19 +81,16 @@ class RegisterExtra extends Component
             'otp' => 'required|digits:6'
         ]);
 
-        // Cek apakah OTP ada di session
         if (!session('otp_code')) {
             $this->addError('otp', 'Silakan kirim OTP terlebih dahulu.');
             return;
         }
 
-        // Cek apakah nomor HP sama dengan yang digunakan untuk kirim OTP
         if (session('otp_phone') !== $this->phone) {
             $this->addError('otp', 'Nomor HP tidak sesuai dengan yang digunakan untuk OTP.');
             return;
         }
 
-        // Cek expiry OTP (5 menit = 300 detik)
         if (time() - session('otp_time', 0) > 300) {
             session()->forget(['otp_code', 'otp_phone', 'otp_time']);
             $this->addError('otp', 'Kode OTP sudah kadaluarsa. Silakan kirim ulang.');
@@ -110,7 +98,6 @@ class RegisterExtra extends Component
             return;
         }
 
-        // Cek kode OTP
         if ($this->otp != session('otp_code')) {
             $this->addError('otp', 'Kode OTP salah.');
             return;
@@ -124,13 +111,11 @@ class RegisterExtra extends Component
                 'is_verified' => true,
             ]);
 
-            // Hapus session OTP
             session()->forget(['otp_code', 'otp_phone', 'otp_time']);
 
             Auth::login($user);
 
             session()->flash('success', 'Registrasi berhasil! Selamat datang.');
-            
             return redirect('/dashboard');
         } catch (\Exception $e) {
             Log::error('Registration error: ' . $e->getMessage());
@@ -140,6 +125,9 @@ class RegisterExtra extends Component
 
     public function render()
     {
-        return view('livewire.auth.register-extra');
-    }
+        return view('livewire.auth.register-extra')
+            ->layout('components.layouts.app', [
+                'title' => 'Register Extra'
+            ]);
+    }
 }
