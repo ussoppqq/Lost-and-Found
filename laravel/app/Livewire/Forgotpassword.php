@@ -11,7 +11,6 @@ class Forgotpassword extends Component
 {
     public function render()
     {
-        return view('livewire.auth.forgotpassword')
-            ->layout('components.layouts.app', ['title' => 'Forgot Password']);
+        return view('livewire.auth.forgotpassword');
     }
 }
