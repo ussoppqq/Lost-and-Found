@@ -6,6 +6,9 @@ use Livewire\Component;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use App\Services\FonnteService;
+use Illuminate\Support\Facades\Log;
 
 class RegisterExtra extends Component
 {
@@ -52,7 +55,7 @@ class RegisterExtra extends Component
         ]);
 
         try {
-            $message = "Kode OTP kamu adalah: *{$otp}*\n\nJangan bagikan kode ini ke siapapun.\n\nKode akan kadaluarsa dalam 5 menit.";
+            $message = "Kode OTP kamu adalah: {$otp}\n\nJangan bagikan kode ini ke siapapun.\n\nKode akan kadaluarsa dalam 5 menit.";
             $response = FonnteService::sendMessage($this->phone, $message);
 
             Log::info('Fonnte Response:', $response);
@@ -138,5 +141,5 @@ class RegisterExtra extends Component
     public function render()
     {
         return view('livewire.auth.register-extra');
-    }
+    }
 }
