@@ -13,13 +13,7 @@ Route::get('/found-form', FoundForm::class);
 
 Route::get('register-extra', RegisterExtra::class)->name('register-extra');
 
-Route::get('/login', function () {
-    return view('livewire.auth.login');
-})->name('login');
+Route::get(uri:'/login', action:Login::class)->name(name:'login');
 
 Route::get('/forgot-password', Forgotpassword::class)->name('forgot-password');
-
-Route::get('/found', function () {
-    return view('found');
-})->name('found');
 

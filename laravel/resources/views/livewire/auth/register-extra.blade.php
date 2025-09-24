@@ -2,7 +2,7 @@
     <div class="flex h-screen">
         <!-- Left: Gambar -->
         <div class="w-1/2 h-screen hidden md:block">
-            <img src="/kebunraya.jpg" class="w-full h-full object-cover">
+            <img src="{{ asset('storage/images/kebunraya.jpg') }}" class="w-full h-full object-cover">
         </div>
 
         <!-- Right: Form -->
@@ -10,7 +10,7 @@
             <div class="w-3/4 max-w-md">
                 <div class="text-center mb-6">
                     <a href="/">
-                        <img src="/footer-logo.png" class="mx-auto h-12 mb-4 hover:opacity-80 transition">
+                        <img src="{{ asset('storage/images/footer-logo.png') }}" class="mx-auto h-12 mb-4 hover:opacity-80 transition">
                     </a>
                     <h2 class="text-xl tracking-wide">COMPLETE YOUR ACCOUNT</h2>
                 </div>
@@ -42,7 +42,7 @@
                                     placeholder="Masukkan 6 digit OTP" maxlength="6">
 
                                 <button type="button" wire:click="sendOtp" wire:loading.attr="disabled"
-                                    class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded transition">
+                                    class="bg-black hover:bg-gray-800 disabled:bg-gray-400 text-white px-4 py-2 rounded transition">
                                     <span wire:loading.remove wire:target="sendOtp">
                                         Kirim OTP
                                     </span>
@@ -90,7 +90,7 @@
                         </div>
 
                         <button type="submit" wire:loading.attr="disabled"
-                            class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-2 rounded transition">
+                            class="w-full bg-black hover:bg-gray-800 disabled:bg-gray-400 text-white py-2 rounded transition">
                             <span wire:loading.remove wire:target="register">Register</span>
                             <span wire:loading wire:target="register">Mendaftarkan...</span>
                         </button>

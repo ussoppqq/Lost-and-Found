@@ -1,4 +1,3 @@
-<x-layouts.app>
 <div class="min-h-screen bg-cover bg-center flex items-center justify-center"
     style="background-image: url('{{ asset('storage/images/location-bogor.jpg') }}');">
 
@@ -31,4 +30,3 @@
         </form>
     </div>
 </div>
-</x-layouts.app>
