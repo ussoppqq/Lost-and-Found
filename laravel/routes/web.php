@@ -12,9 +12,6 @@ Route::get('/', function () {
     return view('livewire.auth.home');
 });
 Route::get('/found-form', FoundForm::class);
-Route::get('/register-phone', function () {
-    return view('livewire.auth.register-phone');
-});
 
 Route::get('register-extra', RegisterExtra::class)->name('register-extra');
 
@@ -23,5 +20,5 @@ Route::get('/login', function () {
 })->name('login');
 
 Route::get('/found', function () {
-    return view('found');// -> resources/views/found.blade.php
+    return view('found');
 })->name('found');
