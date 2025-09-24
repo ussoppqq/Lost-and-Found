@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 
@@ -11,7 +12,6 @@ class Login extends Component
 {
     public function render()
     {
-        return view('livewire.auth.login')
-            ->layout('components.layouts.auth');
+        return view('livewire.auth.login');
     }
 }

@@ -38,7 +38,7 @@ class FoundForm extends Component
 
     public function render()
     {
-        return view('livewire.found-form')
-            ->layout('components.layouts.app');
+        return view('livewire.found-form');
     }
+
 }
