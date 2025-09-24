@@ -126,7 +126,7 @@ class RegisterExtra extends Component
     public function render()
     {
         return view('livewire.auth.register-extra')
-            ->layout('components.layouts.app', [
+            ->layout('components.layouts.auth', [
                 'title' => 'Register Extra'
             ]);
     }

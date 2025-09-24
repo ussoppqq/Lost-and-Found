@@ -10,10 +10,10 @@
                 <a href="/">
                     <img src="{{ asset('images/footer-logo.png') }}" class="mx-auto h-12 mb-4 hover:opacity-80 transition">
                 </a>
-                <h2 class="text-xl tracking-wide font-semibold text-gray-800">WELCOME TO LOGIN</h2>
+                <h2 class="text-xl tracking-wide">WELCOME TO LOGIN</h2>
             </div>
 
-            <div class="border-gray-300 rounded-lg p-6 bg-white shadow-sm">
+            <div>
                 <form wire:submit.prevent="login">
                     {{-- Email --}}
                     <div class="mb-4">
