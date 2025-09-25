@@ -39,6 +39,8 @@ class FonnteService
                 'body' => $result
             ]);
 
+            Log::info('Fonnte Raw Response', ['response' => $response]);
+
             // Cek jika HTTP request gagal
             if (!$response->successful()) {
                 Log::error('HTTP Error: ' . $response->status());

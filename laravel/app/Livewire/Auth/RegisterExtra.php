@@ -5,6 +5,7 @@ namespace App\Livewire\Auth;
 use Livewire\Component;
 use App\Models\User;
 use App\Models\Role;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Services\FonnteService;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class RegisterExtra extends Component
 {
+    public $full_name;
     public $phone_number;
     public $email;
     public $password;
@@ -41,32 +43,73 @@ class RegisterExtra extends Component
             return;
         }
 
-        $otp = rand(100000, 999999);
+        $otp = random_int(100000, 999999);
 
         session([
             'otp_code' => $otp,
             'otp_phone' => $this->phone_number,
-            'otp_time' => time()
+            'otp_time' => time(),
         ]);
 
         try {
             $message = "Kode OTP kamu adalah: {$otp}\n\nJangan bagikan kode ini ke siapapun.\n\nKode akan kadaluarsa dalam 5 menit.";
             $response = FonnteService::sendMessage($this->phone_number, $message);
 
-            Log::info('Fonnte Response:', $response);
+            Log::info('Fonnte Response', ['response' => $response]);
 
-            if (isset($response['status']) && $response['status'] === true) {
+            // Perbaikan: Cek berbagai kemungkinan format response yang sukses
+            $isSuccess = false;
+            
+            if (is_array($response)) {
+                // Format 1: response dengan status boolean true
+                if (isset($response['status']) && $response['status'] === true) {
+                    $isSuccess = true;
+                }
+                // Format 2: response dengan status string "success" 
+                elseif (isset($response['status']) && strtolower($response['status']) === 'success') {
+                    $isSuccess = true;
+                }
+                // Format 3: response tanpa error atau dengan detail yang menunjukkan sukses
+                elseif (!isset($response['error']) && !isset($response['reason'])) {
+                    $isSuccess = true;
+                }
+                // Format 4: response dengan key lain yang menunjukkan sukses
+                elseif (isset($response['detail']) && stripos($response['detail'], 'success') !== false) {
+                    $isSuccess = true;
+                }
+            } 
+            // Jika response bukan array tapi berhasil (misalnya string "OK" atau response lain)
+            elseif (is_string($response) && (strtolower($response) === 'ok' || stripos($response, 'success') !== false)) {
+                $isSuccess = true;
+            }
+
+            if ($isSuccess) {
                 session()->flash('success', 'OTP berhasil dikirim ke WhatsApp ' . $this->phone_number);
                 $this->otpSent = true;
+                $this->resetErrorBag(['otp']);
+                
+                // Perbaikan: Gunakan dispatch untuk Livewire 3
                 $this->dispatch('otp-sent');
             } else {
-                $errorMsg = $response['reason'] ?? 'Unknown error';
-                Log::error("Gagal kirim OTP ke {$this->phone_number}: " . json_encode($response));
+                // Ambil pesan error dari berbagai kemungkinan key
+                $errorMsg = $response['reason'] ?? $response['error'] ?? $response['message'] ?? 'Unknown error';
                 $this->addError('otp', 'Gagal mengirim OTP: ' . $errorMsg);
+                $this->otpSent = false;
             }
+
         } catch (\Exception $e) {
-            Log::error("Error OTP: " . $e->getMessage());
-            $this->addError('otp', 'Terjadi error saat mengirim OTP: ' . $e->getMessage());
+            Log::error("Error OTP: " . $e->getMessage(), [
+                'exception' => $e,
+                'phone_number' => $this->phone_number,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Jika dalam debug mode, tampilkan error yang lebih detail
+            if (config('app.debug')) {
+                $this->addError('otp', 'Error OTP: ' . $e->getMessage());
+            } else {
+                $this->addError('otp', 'Terjadi error saat mengirim OTP. Silakan coba lagi.');
+            }
             $this->otpSent = false;
         }
     }
@@ -77,10 +120,11 @@ class RegisterExtra extends Component
     public function register()
     {
         $this->validate([
+            'full_name' => 'required|string|max:255',
             'phone_number' => 'required|string|regex:/^62[0-9]{9,13}$/|unique:users,phone_number',
             'email' => 'nullable|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
-            'otp' => 'required|digits:6'
+            'otp' => 'required|digits:6',
         ]);
 
         if (!session('otp_code')) {
@@ -106,28 +150,42 @@ class RegisterExtra extends Component
         }
 
         try {
-            // Ambil role_id untuk user
-            $userRole = Role::where('name', 'user')->firstOrFail();
+            // Cari role user (cari by role_code atau role_name, fleksibel)
+            $role = Role::where('role_code', 'USER')
+                ->orWhere('role_name', 'User')
+                ->first();
+
+            if (!$role) {
+                Log::error('Role "User" tidak ditemukan saat registrasi.');
+                $this->addError('email', 'Role "User" belum terdaftar. Hubungi administrator.');
+                return;
+            }
 
             $user = User::create([
+                'user_id' => (string) Str::uuid(),
+                'company_id' => null,                     // user biasa -> null
+                'role_id' => $role->role_id,
+                'full_name' => $this->full_name,
                 'phone_number' => $this->phone_number,
                 'email' => $this->email,
                 'password' => Hash::make($this->password),
                 'is_verified' => true,
-                'role_id' => $userRole->role_id,
-                'company_id' => null, // default null
             ]);
 
-            // Hapus OTP dari session
             session()->forget(['otp_code', 'otp_phone', 'otp_time']);
 
             Auth::login($user);
 
             session()->flash('success', 'Registrasi berhasil! Selamat datang.');
-            return redirect('/dashboard');
+            return redirect('/');
         } catch (\Exception $e) {
-            Log::error('Registration error: ' . $e->getMessage());
-            $this->addError('email', 'Terjadi kesalahan saat registrasi. Silakan coba lagi.');
+            Log::error('Registration error: ' . $e->getMessage(), ['exception' => $e]);
+            // kalau environment development, tampilkan pesan detil supaya mudah debug
+            if (config('app.debug')) {
+                $this->addError('email', 'Registration error: ' . $e->getMessage());
+            } else {
+                $this->addError('email', 'Terjadi kesalahan saat registrasi. Silakan coba lagi.');
+            }
         }
     }
 
