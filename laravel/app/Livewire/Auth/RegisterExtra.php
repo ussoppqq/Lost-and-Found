@@ -4,6 +4,7 @@ namespace App\Livewire\Auth;
 
 use Livewire\Component;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Services\FonnteService;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class RegisterExtra extends Component
 {
-    public $phone;
+    public $phone_number;
     public $email;
     public $password;
     public $password_confirmation;
@@ -28,15 +29,15 @@ class RegisterExtra extends Component
      */
     public function sendOtp()
     {
-        $this->resetErrorBag(['phone', 'otp']);
+        $this->resetErrorBag(['phone_number', 'otp']);
 
-        if (empty($this->phone)) {
-            $this->addError('phone', 'Nomor HP harus diisi sebelum mengirim OTP.');
+        if (empty($this->phone_number)) {
+            $this->addError('phone_number', 'Nomor HP harus diisi sebelum mengirim OTP.');
             return;
         }
 
-        if (!preg_match('/^62[0-9]{9,13}$/', $this->phone)) {
-            $this->addError('phone', 'Nomor HP harus diawali 62 dan minimal 10 digit.');
+        if (!preg_match('/^62[0-9]{9,13}$/', $this->phone_number)) {
+            $this->addError('phone_number', 'Nomor HP harus diawali 62 dan minimal 10 digit.');
             return;
         }
 
@@ -44,22 +45,23 @@ class RegisterExtra extends Component
 
         session([
             'otp_code' => $otp,
-            'otp_phone' => $this->phone,
+            'otp_phone' => $this->phone_number,
             'otp_time' => time()
         ]);
 
         try {
             $message = "Kode OTP kamu adalah: {$otp}\n\nJangan bagikan kode ini ke siapapun.\n\nKode akan kadaluarsa dalam 5 menit.";
-            $response = FonnteService::sendMessage($this->phone, $message);
+            $response = FonnteService::sendMessage($this->phone_number, $message);
 
             Log::info('Fonnte Response:', $response);
 
             if (isset($response['status']) && $response['status'] === true) {
-                session()->flash('success', 'OTP berhasil dikirim ke WhatsApp ' . $this->phone);
+                session()->flash('success', 'OTP berhasil dikirim ke WhatsApp ' . $this->phone_number);
+                $this->otpSent = true;
                 $this->dispatch('otp-sent');
             } else {
                 $errorMsg = $response['reason'] ?? 'Unknown error';
-                Log::error("Gagal kirim OTP ke {$this->phone}: " . json_encode($response));
+                Log::error("Gagal kirim OTP ke {$this->phone_number}: " . json_encode($response));
                 $this->addError('otp', 'Gagal mengirim OTP: ' . $errorMsg);
             }
         } catch (\Exception $e) {
@@ -75,8 +77,8 @@ class RegisterExtra extends Component
     public function register()
     {
         $this->validate([
-            'phone' => 'required|string|regex:/^62[0-9]{9,13}$/|unique:users,phone',
-            'email' => 'required|email|unique:users,email',
+            'phone_number' => 'required|string|regex:/^62[0-9]{9,13}$/|unique:users,phone_number',
+            'email' => 'nullable|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
             'otp' => 'required|digits:6'
         ]);
@@ -86,7 +88,7 @@ class RegisterExtra extends Component
             return;
         }
 
-        if (session('otp_phone') !== $this->phone) {
+        if (session('otp_phone') !== $this->phone_number) {
             $this->addError('otp', 'Nomor HP tidak sesuai dengan yang digunakan untuk OTP.');
             return;
         }
@@ -104,13 +106,19 @@ class RegisterExtra extends Component
         }
 
         try {
+            // Ambil role_id untuk user
+            $userRole = Role::where('name', 'user')->firstOrFail();
+
             $user = User::create([
-                'phone' => $this->phone,
+                'phone_number' => $this->phone_number,
                 'email' => $this->email,
                 'password' => Hash::make($this->password),
                 'is_verified' => true,
+                'role_id' => $userRole->role_id,
+                'company_id' => null, // default null
             ]);
 
+            // Hapus OTP dari session
             session()->forget(['otp_code', 'otp_phone', 'otp_time']);
 
             Auth::login($user);
