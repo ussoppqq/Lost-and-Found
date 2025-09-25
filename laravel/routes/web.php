@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Livewire\FoundForm;
-use App\Livewire\Forgotpassword;
+use App\Livewire\Auth\Forgotpassword;
 use App\Livewire\Auth\RegisterExtra;
 use App\Livewire\Auth\Login;
 use App\Livewire\WhatsappVerification;
