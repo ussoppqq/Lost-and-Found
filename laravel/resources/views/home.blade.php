@@ -1,11 +1,43 @@
 <x-layouts.app>
-    {{-- ========== HERO (edge-to-edge inside container) ========== --}}
+
+    {{-- Transparent navbar that turns solid on scroll --}}
+    <nav x-data="{ scrolled: false }"
+         x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 50 })"
+         :class="scrolled ? 'bg-white/90 backdrop-blur-md shadow-md' : 'bg-transparent'"
+         class="fixed w-full top-0 left-0 z-50 transition-colors duration-300">
+        <div class="container mx-auto flex items-center justify-between px-6 py-4">
+            <a href="/" class="text-lg font-bold transition-colors"
+               :class="scrolled ? 'text-gray-800' : 'text-white'">
+                KEBUN RAYA BOGOR
+            </a>
+            <ul class="flex gap-8 font-medium">
+                <li>
+                    <a href="{{ url('/maps') }}" class="hover:text-green-500 transition-colors"
+                       :class="scrolled ? 'text-gray-800' : 'text-white'">Map</a>
+                </li>
+                <li>
+                    <a href="{{ url('/found') }}" class="hover:text-green-500 transition-colors"
+                       :class="scrolled ? 'text-gray-800' : 'text-white'">Lost &amp; Found</a>
+                </li>
+                <li>
+                    @if (Route::has('login'))
+                        <a href="{{ route('login') }}" class="hover:text-green-500 transition-colors"
+                           :class="scrolled ? 'text-gray-800' : 'text-white'">Login</a>
+                    @else
+                        <a href="{{ url('/login') }}" class="hover:text-green-500 transition-colors"
+                           :class="scrolled ? 'text-gray-800' : 'text-white'">Login</a>
+                    @endif
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    {{-- ========== HERO ========== --}}
     <section class="-mx-4 md:-mx-8">
         <div class="relative">
-            <img
-                src="{{ asset('images/hero-bogor.jpg') }}"
-                alt="Kebun Raya Bogor"
-                class="w-full h-[50vh] md:h-[70vh] object-cover">
+            <img src="{{ asset('images/hero-bogor.jpg') }}"
+                 alt="Kebun Raya Bogor"
+                 class="w-full h-[50vh] md:h-[70vh] object-cover">
             <div class="absolute inset-0 bg-black/20"></div>
 
             {{-- Search overlay --}}
@@ -19,24 +51,6 @@
             </div>
         </div>
     </section>
-
-    {{-- quick links strip (optional) --}}
-    <div class="mt-6 flex items-center justify-between border-b pb-3">
-        <div class="flex items-center gap-2">
-            <img src="{{ asset('images/logo.png') }}" class="h-7" alt="Logo">
-            <span class="font-semibold tracking-wide">KEBUN RAYA BOGOR</span>
-        </div>
-        <div class="hidden md:flex items-center gap-8 text-xs tracking-widest">
-            <a href="{{ url('/maps') }}" class="hover:text-green-700">MAPS</a>
-            <a href="{{ url('/found') }}" class="hover:text-green-700">FOUND</a>
-            <a href="{{ url('/report') }}" class="hover:text-green-700">FIND</a>
-            @if (Route::has('login'))
-                <a href="{{ route('login') }}" class="hover:text-green-700">LOGIN</a>
-            @else
-                <a href="{{ url('/login') }}" class="hover:text-green-700">LOGIN</a>
-            @endif
-        </div>
-    </div>
 
     {{-- ========== LOST / FOUND CARDS ========== --}}
     <section class="py-12">

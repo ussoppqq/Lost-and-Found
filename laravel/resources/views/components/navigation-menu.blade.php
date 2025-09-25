@@ -1,16 +1,20 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Navbar</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
-        <x-nav-link href="/Map">Map </x-nav-link>
-        <x-nav-link href="/Lost&Found">Lost&Found</x-nav-link>
-        <x-nav-link href="/Login">Login</x-nav-link>
-
-      </ul>
+<nav x-data="{ scrolled: false }"
+     x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 50 })"
+     :class="scrolled ? 'bg-white/90 backdrop-blur-md shadow-md' : 'bg-transparent'"
+     class="fixed w-full top-0 left-0 z-50 transition-colors duration-300">
+    <div class="container mx-auto flex items-center justify-between px-6 py-4">
+        <a href="/" class="text-lg font-bold text-white" :class="scrolled ? 'text-gray-800' : 'text-white'">
+            KEBUN RAYA BOGOR
+        </a>
+        <ul class="flex gap-8 font-medium">
+            <li><a href="/maps" class="hover:text-green-500" :class="scrolled ? 'text-gray-800' : 'text-white'">Map</a></li>
+            <li><a href="/lost-form" class="hover:text-green-500" :class="scrolled ? 'text-gray-800' : 'text-white'">Lost & Found</a></li>
+            <li><a href="/login" class="hover:text-green-500" :class="scrolled ? 'text-gray-800' : 'text-white'">Login</a></li>
+        </ul>
     </div>
-  </div>
 </nav>
+<style>
+    nav {
+        backdrop-filter: blur(10px);
+    }
+</style>
