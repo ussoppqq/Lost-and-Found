@@ -22,3 +22,5 @@ Route::get('/forgotpassword', Forgotpassword::class)->name('forgotpassword');
 
 Route::get('/whatsapp-verification', WhatsappVerification::class)
     ->name('whatsapp-verification');
+
+Route::get('/lost-form', App\Livewire\LostForm::class)->name('lost-form');

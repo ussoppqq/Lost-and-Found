@@ -8,6 +8,9 @@ class LostForm extends Component
 {
     public function render()
     {
-        return view('livewire.lost-form');
+        return view('livewire.lost-form')
+            ->layout('components.layouts.app', [
+            'title' => 'Lost Form'
+        ]);
     }
 }

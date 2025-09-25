@@ -28,12 +28,11 @@ class FonnteService
                 ->post('https://api.fonnte.com/send', [
                     'target' => $target,
                     'message' => $message,
-                    'countryCode' => '62', // Tambahkan country code
+                    'countryCode' => '62',
                 ]);
 
             $result = $response->json();
             
-            // Log response untuk debugging
             Log::info('Fonnte API Response: ', [
                 'status_code' => $response->status(),
                 'body' => $result
@@ -41,7 +40,6 @@ class FonnteService
 
             Log::info('Fonnte Raw Response', ['response' => $response]);
 
-            // Cek jika HTTP request gagal
             if (!$response->successful()) {
                 Log::error('HTTP Error: ' . $response->status());
                 return [
