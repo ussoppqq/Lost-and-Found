@@ -10,7 +10,8 @@
             <div class="w-3/4 max-w-md">
                 <div class="text-center mb-6">
                     <a href="/">
-                        <img src="{{ asset('storage/images/footer-logo.png') }}" class="mx-auto h-12 mb-4 hover:opacity-80 transition">
+                        <img src="{{ asset('storage/images/footer-logo.png') }}"
+                            class="mx-auto h-12 mb-4 hover:opacity-80 transition">
                     </a>
                     <h2 class="text-xl tracking-wide">COMPLETE YOUR ACCOUNT</h2>
                 </div>
@@ -57,11 +58,20 @@
                             {{-- Status OTP --}}
                             @if (session()->has('success'))
                                 <div class="mt-2 p-2 bg-green-100 border border-green-300 rounded text-sm text-green-700">
-                                    ✅ {{ session('success') }}
+                                    {{ session('success') }}
                                     <br>Kode berlaku selama 5 menit.
                                 </div>
                             @endif
                         </div>
+
+                        <!-- Full Name -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-1 text-gray-700">Full Name</label>
+                            <input type="text" wire:model="full_name"
+                                class="w-full border border-gray-300 rounded px-3 py-2" placeholder="Your full name">
+                            @error('full_name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
 
                         {{-- Email --}}
                         <div class="mb-4">
