@@ -6,10 +6,9 @@ use App\Livewire\Auth\Forgotpassword;
 use App\Livewire\Auth\RegisterExtra;
 use App\Livewire\Auth\Login;
 use App\Livewire\WhatsappVerification;
+use App\Livewire\Admin\Dashboard;
 
-Route::get('/', function () {
-    return view('home');
-});
+
 
 
 Route::get('register-extra', RegisterExtra::class)->name('register-extra');
@@ -22,3 +21,9 @@ Route::get('/forgotpassword', Forgotpassword::class)->name('forgotpassword');
 
 Route::get('/whatsapp-verification', WhatsappVerification::class)
     ->name('whatsapp-verification');
+
+Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)
+    ->middleware(['auth', 'role:ADMIN'])
+    ->name('admin.dashboard');
+
+

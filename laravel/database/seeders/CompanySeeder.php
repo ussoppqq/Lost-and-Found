@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 use App\Models\Company;
+use Illuminate\Support\Str;
 
 class CompanySeeder extends Seeder
 {
