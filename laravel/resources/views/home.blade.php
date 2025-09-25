@@ -1,59 +1,27 @@
 <x-layouts.app>
-
-    {{-- Transparent navbar that turns solid on scroll --}}
-    <nav x-data="{ scrolled: false }"
-         x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 50 })"
-         :class="scrolled ? 'bg-white/90 backdrop-blur-md shadow-md' : 'bg-transparent'"
-         class="fixed w-full top-0 left-0 z-50 transition-colors duration-300">
-        <div class="container mx-auto flex items-center justify-between px-6 py-4">
-            <a href="/" class="text-lg font-bold transition-colors"
-               :class="scrolled ? 'text-gray-800' : 'text-white'">
-                KEBUN RAYA BOGOR
-            </a>
-            <ul class="flex gap-8 font-medium">
-                <li>
-                    <a href="{{ url('/maps') }}" class="hover:text-green-500 transition-colors"
-                       :class="scrolled ? 'text-gray-800' : 'text-white'">Map</a>
-                </li>
-                <li>
-                    <a href="{{ url('/found') }}" class="hover:text-green-500 transition-colors"
-                       :class="scrolled ? 'text-gray-800' : 'text-white'">Lost &amp; Found</a>
-                </li>
-                <li>
-                    @if (Route::has('login'))
-                        <a href="{{ route('login') }}" class="hover:text-green-500 transition-colors"
-                           :class="scrolled ? 'text-gray-800' : 'text-white'">Login</a>
-                    @else
-                        <a href="{{ url('/login') }}" class="hover:text-green-500 transition-colors"
-                           :class="scrolled ? 'text-gray-800' : 'text-white'">Login</a>
-                    @endif
-                </li>
-            </ul>
-        </div>
-    </nav>
-
     {{-- ========== HERO ========== --}}
-    <section class="-mx-4 md:-mx-8">
-        <div class="relative">
-            <img src="{{ asset('images/hero-bogor.jpg') }}"
-                 alt="Kebun Raya Bogor"
-                 class="w-full h-[50vh] md:h-[70vh] object-cover">
+    <section class="relative w-full h-screen">
+        <div class="absolute inset-0">
+            <video src="{{ asset('storage/images/Video-Landing-Page-Unit-Bogor.mp4') }}" autoplay muted loop playsinline
+                class="absolute top-0 left-0 w-full h-full object-cover">
+            </video>
             <div class="absolute inset-0 bg-black/20"></div>
+        </div>
 
-            {{-- Search overlay --}}
-            <div class="absolute inset-0 flex items-center justify-center px-4">
-                <form action="{{ url('/search') }}" method="GET"
-                      class="w-full max-w-2xl flex bg-white/90 backdrop-blur rounded-full overflow-hidden shadow">
-                    <input type="text" name="q" placeholder="Search lost/found items…"
-                           class="flex-1 px-5 py-3 bg-transparent outline-none text-sm" />
-                    <button class="px-5 py-3 text-sm font-medium hover:bg-gray-100">Search</button>
-                </form>
-            </div>
+        {{-- Search overlay --}}
+        <div class="relative z-10 flex items-center justify-center h-full px-4">
+            <form action="{{ url('/search') }}" method="GET"
+                class="w-full max-w-2xl flex bg-white/90 backdrop-blur rounded-full overflow-hidden shadow">
+                <input type="text" name="q" placeholder="Search lost/found items…"
+                    class="flex-1 px-5 py-3 bg-transparent outline-none text-sm" />
+                <button class="px-5 py-3 text-sm font-medium hover:bg-gray-100">Search</button>
+            </form>
         </div>
     </section>
 
+
     {{-- ========== LOST / FOUND CARDS ========== --}}
-    <section class="py-12">
+    <section class="py-12 container mx-auto">
         <h2 class="text-center text-xl md:text-2xl tracking-[0.25em] mb-8">
             KEBUN RAYA BOGOR
         </h2>
@@ -61,10 +29,10 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 place-items-center">
             {{-- LOST --}}
             <a href="{{ url('/report') }}"
-               class="group block w-full max-w-sm rounded-2xl overflow-hidden border shadow-sm hover:shadow-md">
+                class="group block w-full max-w-sm rounded-2xl overflow-hidden border shadow-sm hover:shadow-md">
                 <div class="h-40 md:h-48 overflow-hidden">
                     <img src="{{ asset('images/lost-thumb.jpg') }}"
-                         class="w-full h-full object-cover group-hover:scale-105 transition" alt="">
+                        class="w-full h-full object-cover group-hover:scale-105 transition" alt="">
                 </div>
                 <div class="p-5 text-center">
                     <span class="inline-block text-lg tracking-widest">LOST</span>
@@ -73,10 +41,10 @@
 
             {{-- FOUND --}}
             <a href="{{ url('/found') }}"
-               class="group block w-full max-w-sm rounded-2xl overflow-hidden border shadow-sm hover:shadow-md">
+                class="group block w-full max-w-sm rounded-2xl overflow-hidden border shadow-sm hover:shadow-md">
                 <div class="h-40 md:h-48 overflow-hidden">
                     <img src="{{ asset('images/found-thumb.jpg') }}"
-                         class="w-full h-full object-cover group-hover:scale-105 transition" alt="">
+                        class="w-full h-full object-cover group-hover:scale-105 transition" alt="">
                 </div>
                 <div class="p-5 text-center">
                     <span class="inline-block text-lg tracking-widest">FOUND</span>
@@ -86,7 +54,7 @@
     </section>
 
     {{-- ========== ANNOUNCEMENT / CONTENT BLOCK ========== --}}
-    <section class="relative -mx-4 md:-mx-8">
+    <section class="relative -mx-4 md:-mx-8 container mx-auto">
         <div class="absolute inset-0 -z-10">
             <img src="{{ asset('images/bg-section.jpg') }}" class="w-full h-full object-cover" alt="">
         </div>
