@@ -29,7 +29,6 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    // 🔑 Auto generate UUID untuk user_id
     protected static function boot()
     {
         parent::boot();
@@ -41,13 +40,12 @@ class User extends Authenticatable
         });
     }
 
-    // 🔗 Relasi ke Company
+ 
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id', 'company_id');
     }
 
-    // 🔗 Relasi ke Role
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id', 'role_id');
