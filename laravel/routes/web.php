@@ -30,3 +30,5 @@ Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)
     ->name('admin.dashboard');
 
 
+Route::get('/lost-form', App\Livewire\LostForm::class)->name('lost-form');
+
