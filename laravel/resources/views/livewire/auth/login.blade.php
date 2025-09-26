@@ -1,13 +1,13 @@
 <div class="flex h-screen">
     <div class="w-1/2 h-screen hidden md:block">
-        <img src="{{ asset('storage/images/location-bogor.jpg') }}" class="w-full h-full object-cover">
+        <img src="{{ asset('storage/images/kebunraya.jpg') }}" class="w-full h-full object-cover">
     </div>
 
     <div class="w-full md:w-1/2 flex items-center justify-center bg-gray-50">
         <div class="w-3/4 max-w-md">
             <div class="text-center mb-6">
                 <a href="/">
-                    <img src="{{ asset('storage/images/logo/logo.png') }}" class="mx-auto h-12 mb-4 hover:opacity-80 transition">
+                    <img src="{{ asset('storage/images/footer-logo.png') }}" class="mx-auto h-12 mb-4 hover:opacity-80 transition">
                 </a>
                 <h2 class="text-xl tracking-wide">WELCOME TO LOGIN</h2>
             </div>
