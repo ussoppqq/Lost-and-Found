@@ -9,7 +9,9 @@ use App\Livewire\WhatsappVerification;
 use App\Livewire\Admin\Dashboard;
 
 
-
+Route::get('/', function () {
+    return view('home');
+});
 
 Route::get('register-extra', RegisterExtra::class)->name('register-extra');
 
@@ -21,3 +23,6 @@ Route::get('/forgotpassword', Forgotpassword::class)->name('forgotpassword');
 
 Route::get('/whatsapp-verification', WhatsappVerification::class)
     ->name('whatsapp-verification');
+
+Route::get('/lost-form', App\Livewire\LostForm::class)->name('lost-form');
+
