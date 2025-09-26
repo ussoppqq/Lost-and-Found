@@ -2,7 +2,7 @@
     x-data="{ loading: false }"
     class="relative min-h-[100svh] bg-gradient-to-b from-[#f5fff6] via-[#f7faf7] to-[#eef7ef] overflow-hidden">
 
-    {{-- Decorative floating leaves --}}
+    {{-- Decorative floating leaves (keep or remove) --}}
     <img src="{{ asset('images/florals/leaf-1.png') }}"
          onerror="this.replaceWith(document.getElementById('leaf-svg-1').content.cloneNode(true))"
          class="pointer-events-none select-none absolute -left-10 -top-10 w-40 opacity-40 animate-float-slow" alt="">
@@ -29,7 +29,7 @@
             Report Lost Item
         </h1>
         <p class="mt-2 text-center text-sm text-emerald-900/70">
-            Tell us what you lost with details and our team will help identify items faster
+            Tell us what you lost—details help our team identify items faster.
         </p>
 
         {{-- Glass card --}}
@@ -71,42 +71,6 @@
                     </div>
                 </div>
 
-                {{-- Color --}}
-                {{-- Color (select + custom when "Other") --}}
-<div class="grid md:grid-cols-2 gap-4">
-    <div>
-        <label class="block text-sm font-medium text-emerald-900/80">Color</label>
-        <select wire:model="color"
-                class="mt-2 w-full rounded-xl border-emerald-900/15 focus:border-emerald-400 focus:ring-emerald-400/30">
-            <option value="">-- Choose Color --</option>
-            <option>Black</option>
-            <option>White</option>
-            <option>Gray</option>
-            <option>Red</option>
-            <option>Orange</option>
-            <option>Yellow</option>
-            <option>Green</option>
-            <option>Blue</option>
-            <option>Purple</option>
-            <option>Brown</option>
-            <option>Pink</option>
-            <option>Silver</option>
-            <option>Gold</option>
-            <option>Other</option>
-        </select>
-        @error('color') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-    </div>
-
-    <div x-show="$wire.color === 'Other'" x-cloak>
-        <label class="block text-sm font-medium text-emerald-900/80">Custom Color</label>
-        <input type="text" wire:model.defer="color_other"
-               class="mt-2 w-full rounded-xl border-emerald-900/15 focus:border-emerald-400 focus:ring-emerald-400/30"
-               placeholder="e.g. Magenta, Navy, Mint">
-        @error('color_other') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-    </div>
-</div>
-
-
                 {{-- Description --}}
                 <div>
                     <label class="block text-sm font-medium text-emerald-900/80">Description / Characteristics</label>
@@ -116,60 +80,115 @@
                     @error('description') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
-                {{-- Where + Date --}}
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-emerald-900/80">Where It Was Lost</label>
-                        <input type="text" wire:model.defer="location"
-                               class="mt-2 w-full rounded-xl border-emerald-900/15 focus:border-emerald-400 focus:ring-emerald-400/30"
-                               placeholder="Near main gate, Garden area">
-                        @error('location') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-emerald-900/80">Date Lost</label>
-                        <input type="date" wire:model.defer="date_lost"
-                               class="mt-2 w-full rounded-xl border-emerald-900/15 focus:border-emerald-400 focus:ring-emerald-400/30">
-                        @error('date_lost') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                    </div>
+                {{-- Date Lost ONLY (removed: Where It Was Lost) --}}
+                <div>
+                    <label class="block text-sm font-medium text-emerald-900/80">Date Lost</label>
+                    <input type="date" wire:model.defer="date_lost"
+                           class="mt-2 w-full rounded-xl border-emerald-900/15 focus:border-emerald-400 focus:ring-emerald-400/30">
+                    @error('date_lost') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
-                {{-- Contact Details (NEW: Email, Phone, Your Location) --}}
+                {{-- Contact Details --}}
                 <div class="border-t border-emerald-900/10 pt-6">
                     <h3 class="text-base font-medium text-emerald-900/90 mb-4">Your Contact Details</h3>
 
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-emerald-900/80">Email</label>
-                            <input type="email" wire:model.defer="contact_email" required
+                            <input type="email" wire:model.defer="email"
                                    class="mt-2 w-full rounded-xl border-emerald-900/15 focus:border-emerald-400 focus:ring-emerald-400/30"
                                    placeholder="you@example.com">
-                            @error('contact_email') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            @error('email') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-emerald-900/80">Phone</label>
-                            <input type="tel" wire:model.defer="contact_phone" required
+                            <input type="tel" wire:model.defer="phone"
                                    class="mt-2 w-full rounded-xl border-emerald-900/15 focus:border-emerald-400 focus:ring-emerald-400/30"
                                    placeholder="+62 812-xxxx-xxxx">
-                            @error('contact_phone') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            @error('phone') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                         </div>
                     </div>
 
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-emerald-900/80">Your Location (optional)</label>
-                        <input type="text" wire:model.defer="contact_location"
+                        <input type="text" wire:model.defer="location"
                                class="mt-2 w-full rounded-xl border-emerald-900/15 focus:border-emerald-400 focus:ring-emerald-400/30"
                                placeholder="City / Area (for follow-up)">
-                        @error('contact_location') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        @error('location') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
-                {{-- Upload --}}
+                {{-- Upload (NEW drag & drop with preview) --}}
+                <div
+                    x-data="{
+                        isDropping:false,
+                        openFile(){ $refs.file.click() }
+                    }"
+                    @dragover.prevent="isDropping = true"
+                    @dragleave.prevent="isDropping = false"
+                    @drop.prevent="isDropping = false"
+                >
+                    <label class="block text-sm font-medium text-emerald-900/80">Add Picture (optional)</label>
+
+                    <div
+                        :class="isDropping ? 'ring-2 ring-emerald-400 bg-emerald-50/60' : 'ring-1 ring-emerald-900/10'"
+                        class="mt-2 rounded-2xl border border-dashed bg-white/70 backdrop-blur p-6 text-center transition">
+
+                        {{-- Hidden file input --}}
+                        <input type="file" accept="image/*" class="hidden" x-ref="file" wire:model="photo">
+
+                        {{-- Empty state --}}
+                        @unless ($photo)
+                            <div class="flex flex-col items-center gap-3">
+                                <svg class="h-10 w-10 text-emerald-500/70" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 5l4 4h-3v4h-2V9H8l4-4z"></path>
+                                    <path d="M4 15h16v2H4z"></path>
+                                </svg>
+                                <p class="text-sm text-emerald-900/70">
+                                    Drag & drop an image here, or
+                                    <button type="button" @click="openFile()" class="underline hover:text-emerald-700">
+                                        browse
+                                    </button>
+                                    (JPG/PNG, max 3MB)
+                                </p>
+                                <div wire:loading wire:target="photo" class="text-xs text-emerald-600">Uploading…</div>
+                            </div>
+                        @endunless
+
+                        {{-- Preview --}}
+                        @if ($photo)
+                            <div class="flex flex-col items-center gap-4">
+                                <img src="{{ $photo->temporaryUrl() }}" alt="Preview"
+                                     class="max-h-56 rounded-xl shadow-md object-contain">
+                                <div class="flex items-center gap-3">
+                                    <button type="button" @click="openFile()"
+                                            class="px-3 py-1.5 text-sm rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                                        Change
+                                    </button>
+                                    <button type="button" wire:click="$set('photo', null)"
+                                            class="px-3 py-1.5 text-sm rounded-lg bg-white border hover:bg-gray-50">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                    @error('photo') <p class="mt-2 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Sensitivity --}}
                 <div>
-                    <label class="block text-sm font-medium text-emerald-900/80">Photo (optional)</label>
-                    <input type="file" wire:model="photo"
-                           class="mt-2 block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:px-4 file:py-2 file:text-white hover:file:bg-emerald-700">
-                    @error('photo') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    <label class="block text-sm font-medium text-emerald-900/80">Sensitivity Level</label>
+                    <div class="mt-2 flex gap-3 flex-wrap">
+                        @foreach (['NORMAL','RESTRICTED'] as $level)
+                            <label class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-900/15 bg-white hover:border-emerald-400 cursor-pointer">
+                                <input type="radio" class="text-emerald-600" wire:model.defer="sensitivity_level" value="{{ $level }}">
+                                <span class="text-sm">{{ $level }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('sensitivity_level') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 {{-- Submit --}}
@@ -195,12 +214,11 @@
         </div>
     </div>
 
-    {{-- Local styles for floating animations --}}
     <style>
-        @keyframes float-slow { 0% { transform: translateY(0) rotate(0deg) } 50%{ transform: translateY(-10px) rotate(2deg) } 100%{ transform: translateY(0) rotate(0deg) } }
-        @keyframes float-slower { 0% { transform: translateY(0) rotate(0deg) } 50%{ transform: translateY(8px) rotate(-2deg) } 100%{ transform: translateY(0) rotate(0deg) } }
-        .animate-float-slow{ animation: float-slow 8s ease-in-out infinite }
-        .animate-float-slower{ animation: float-slower 12s ease-in-out infinite }
-        [x-cloak]{ display:none !important; }
+        @keyframes float-slow{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(2deg)}100%{transform:translateY(0) rotate(0)}}
+        @keyframes float-slower{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(8px) rotate(-2deg)}100%{transform:translateY(0) rotate(0)}}
+        .animate-float-slow{animation:float-slow 8s ease-in-out infinite}
+        .animate-float-slower{animation:float-slower 12s ease-in-out infinite}
+        [x-cloak]{display:none!important}
     </style>
 </div>
