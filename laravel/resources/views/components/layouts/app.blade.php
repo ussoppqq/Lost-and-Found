@@ -5,8 +5,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Lost and Found' }}</title>
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $title ?? 'Lost and Found' }}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+    /* All page body text uses Crimson Text semi-bold */
+    body {
+        font-family: 'Crimson Text', serif;
+        font-weight: 600;
+    }
+
+    /* All headings use DM Serif Display bold */
+    h1, h2, h3, h4, h5, h6,
+    .font-dmserif-title {
+        font-family: 'DM Serif Display', serif;
+        font-weight: 700;
+    }
+
+    /* Optional: form labels are also treated as headings */
+    label {
+        font-family: 'DM Serif Display', serif;
+        font-weight: 700;
+    }
+</style>
+
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+</head>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+    
+
 </head>
 
 <body class="bg-gray-50 text-gray-900">
@@ -146,23 +182,7 @@
                     </ul>
                 </div>
 
-                {{-- Contact Info --}}
-                <div class="lg:col-span-1">
-                    <h4 class="text-lg font-semibold text-slate-800 mb-4">Kontak Kami</h4>
-                    <ul class="text-sm text-slate-600 space-y-4">
-                        <li class="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                class="h-4 w-4 mr-2 mt-0.5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <div>
-                                <span class="font-medium text-slate-700">Alamat:</span><br>
-                                Jl. Ir. H. Juanda No.13, Bogor, Jawa Barat 16122
-                            </div>
+                
                         </li>
                         <li class="flex items-start">
                             <svg xmlns="http://www.w3.org/2000/svg"
