@@ -24,10 +24,7 @@ use App\Livewire\Admin\Users\Index as UsersIndex;
 Route::get('/', function () {
     return view('home');
 })->name('home');
-})->name('home');
 
-// Auth Routes
-Route::get('/login', Login::class)->name('login');
 // Auth Routes
 Route::get('/login', Login::class)->name('login');
 Route::get('register-extra', RegisterExtra::class)->name('register-extra');
@@ -38,10 +35,6 @@ Route::get('/whatsapp-verification', WhatsappVerification::class)->name('whatsap
 Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)
     ->middleware(['auth'])->name('dashboard');
 
-
-Route::get('/lost-form', App\Livewire\LostForm::class)->name('lost-form');
-
-
 Route::get('/moderator', \App\Livewire\Moderator\Dashboard::class)
     ->middleware(['auth'])
     ->name('moderator');
@@ -49,7 +42,6 @@ Route::get('/moderator', \App\Livewire\Moderator\Dashboard::class)
 // Public Forms
 Route::get('/found-form', FoundForm::class)->name('found-form');
 Route::get('/lost-form', LostForm::class)->name('lost-form');
-
 
 /*
 |--------------------------------------------------------------------------
