@@ -35,6 +35,6 @@ Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)
 Route::get('/lost-form', App\Livewire\LostForm::class)->name('lost-form');
 
 
-Route::get('/moderator/dashboard', ModeratorDashboard::class)
+Route::get('/moderator', \App\Livewire\Moderator\Dashboard::class)
     ->middleware(['auth'])
     ->name('moderator');
