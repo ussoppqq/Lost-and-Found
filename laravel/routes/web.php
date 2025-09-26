@@ -7,12 +7,13 @@ use App\Livewire\Auth\RegisterExtra;
 use App\Livewire\Auth\Login;
 use App\Livewire\WhatsappVerification;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Moderator\Dashboard as ModeratorDashboard;
 
 
 
 Route::get('/', function () {
     return view('home');
-});
+})->name('home');
 
 Route::get('register-extra', RegisterExtra::class)->name('register-extra');
 
@@ -20,15 +21,20 @@ Route::get('found-form', FoundForm::class)->name('found-form');
 
 Route::get('/login', Login::class)->name('login');
 
+
 Route::get('/forgotpassword', Forgotpassword::class)->name('forgotpassword');
 
 Route::get('/whatsapp-verification', WhatsappVerification::class)
     ->name('whatsapp-verification');
 
+
 Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)
-    ->middleware(['auth', 'role:ADMIN'])
-    ->name('admin.dashboard');
+    ->middleware(['auth'])->name('dashboard');
 
 
 Route::get('/lost-form', App\Livewire\LostForm::class)->name('lost-form');
 
+
+Route::get('/moderator/dashboard', ModeratorDashboard::class)
+    ->middleware(['auth'])
+    ->name('moderator');
