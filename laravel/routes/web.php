@@ -24,7 +24,7 @@ use App\Livewire\Admin\Users\Index as UsersIndex;
 Route::get('/', function () {
     return view('home');
 })->name('home');
-})->name('home');
+
 
 // Auth Routes
 Route::get('/login', Login::class)->name('login');
