@@ -1,234 +1,271 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" x-data="{ open: false }" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Lost and Found' }}</title>
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Lost and Found' }}</title>
 
+    {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<style>
-    /* All page body text uses Crimson Text semi-bold */
-    body {
-        font-family: 'Crimson Text', serif;
-        font-weight: 600;
-    }
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Crimson+Text:wght@400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 
-    /* All headings use DM Serif Display bold */
-    h1, h2, h3, h4, h5, h6,
-    .font-dmserif-title {
-        font-family: 'DM Serif Display', serif;
-        font-weight: 700;
-    }
-
-    /* Optional: form labels are also treated as headings */
-    label {
-        font-family: 'DM Serif Display', serif;
-        font-weight: 700;
-    }
-</style>
-
+    <style>
+        body {
+            font-family: 'Crimson Text', serif;
+            font-weight: 600;
+        }
+        h1, h2, h3, h4, h5, h6, .font-dmserif-title, label {
+            font-family: 'DM Serif Display', serif;
+            font-weight: 700;
+        }
+        .font-openSans {
+            font-family: 'Open Sans', sans-serif;
+        }
+    </style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
-</head>
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @livewireStyles
-    
-
 </head>
 
 <body class="bg-gray-50 text-gray-900">
 
-    {{-- Transparent navbar that turns solid on scroll --}}
-    <nav x-data="{ scrolled: false }"
-        x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 50 })"
-        :class="scrolled ? 'bg-white/90 backdrop-blur-md shadow-md' : 'bg-transparent'"
-        class="fixed w-full top-0 left-0 z-50 transition-colors duration-300">
-        <div class="container mx-auto flex items-center justify-between px-6 py-4">
-            <a href="/" class="text-lg font-bold transition-colors" :class="scrolled ? 'text-gray-800' : 'text-white'">
-                KEBUN RAYA BOGOR
-            </a>
-            <ul class="flex gap-8 font-medium">
-                <li>
-                    <a href="{{ url('/maps') }}" class="hover:text-green-500 transition-colors"
-                        :class="scrolled ? 'text-gray-800' : 'text-white'">Map</a>
-                </li>
-                <li>
-                    <a href="{{ url('/found') }}" class="hover:text-green-500 transition-colors"
-                        :class="scrolled ? 'text-gray-800' : 'text-white'">Lost &amp; Found</a>
-                </li>
-                <li>
-                    @if (Route::has('login'))
-                        <a href="{{ route('login') }}" class="hover:text-green-500 transition-colors"
-                            :class="scrolled ? 'text-gray-800' : 'text-white'">Login</a>
+    {{-- NAVBAR with scroll effect --}}
+    <nav 
+        x-data="{ scrolled: false }" 
+        x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > window.innerHeight * 0.7 })"
+        :class="scrolled ? 'bg-white shadow-lg' : 'bg-transparent'"
+        class="fixed top-0 inset-x-0 z-50 transition-all duration-300"
+    >
+        <div class="container mx-auto flex items-center justify-between px-4 md:px-8 h-16 lg:h-20">
+            {{-- Logo --}}
+           {{-- Logo Switch on Scroll --}}
+<a href="{{ url('/') }}" class="flex items-center space-x-3 relative">
+    {{-- Logo putih (saat transparan) --}}
+    <img 
+        src="{{ asset('storage/images/logo/logowhite.png') }}" 
+        alt="Logo White" 
+        x-show="!scrolled"
+        class="h-10 md:h-12 lg:h-14 w-auto transition-opacity duration-300"
+    >
+
+    {{-- Logo hitam (saat scrolled) --}}
+    <img 
+        src="{{ asset('storage/images/logo/logodark.png') }}" 
+        alt="Logo Dark" 
+        x-show="scrolled"
+        class="h-10 md:h-12 lg:h-14 w-auto transition-opacity duration-300"
+    >
+
+
+</a>
+
+            {{-- Menu Desktop --}}
+            <div class="hidden md:flex items-center space-x-6 lg:space-x-8">
+                <a 
+                    href="{{ route('lost-form') }}" 
+                    :class="scrolled ? 'text-gray-700 hover:text-green-700' : 'text-white hover:text-green-200 drop-shadow'" 
+                    class="font-medium text-sm lg:text-base transition-colors duration-300"
+                >
+                    Lost & Found
+                </a>
+                <a 
+                    href="{{ url('/map') }}" 
+                    :class="scrolled ? 'text-gray-700 hover:text-green-700' : 'text-white hover:text-green-200 drop-shadow'" 
+                    class="font-medium text-sm lg:text-base transition-colors duration-300"
+                >
+                    Map
+                </a>
+
+                @auth
+                    {{-- Avatar Dropdown --}}
+                    <div class="relative" x-data="{ dropdown: false }">
+                        <button @click="dropdown = !dropdown" class="flex items-center focus:outline-none">
+                            <img src="{{ asset('images/avatar.png') }}" alt="Avatar"
+                                class="h-9 w-9 lg:h-10 lg:w-10 rounded-full border-2 border-white shadow-lg">
+                        </button>
+                        <div x-show="dropdown" @click.away="dropdown = false" x-transition
+                            class="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-xl py-2 border">
+                            <a href="{{ url('/profile') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg mx-2">Profile</a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit"
+                                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg mx-2">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}"
+                        :class="scrolled ? 'bg-gray-800 text-white hover:bg-gray-900' : 'bg-white text-gray-800 hover:bg-gray-100'"
+                        class="px-5 py-2 lg:px-6 lg:py-3 rounded-full transition-all duration-300 shadow-lg font-medium text-sm lg:text-base border border-transparent">
+                        Login
+                    </a>
+                @endauth
+            </div>
+
+            {{-- Hamburger Mobile --}}
+            <div class="md:hidden">
+                <button @click="open = true" 
+                        :class="scrolled ? 'text-gray-700' : 'text-white drop-shadow'"
+                        class="focus:outline-none transition-colors duration-300">
+                    <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        {{-- Sidebar Mobile --}}
+        <div x-show="open" class="fixed inset-0 z-40 flex md:hidden" x-transition>
+            
+            <div class="ml-auto w-72 bg-white h-full p-6 space-y-6 shadow-2xl overflow-y-auto">
+                <div class="flex items-center justify-between border-b pb-4">
+                    <img src="{{ asset('storage/images/logo/logodark.png') }}" alt="Logo" class="h-10 w-auto">
+                    <button @click="open = false" class="text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <a href="{{ route('lost-form') }}" class="block py-3 text-gray-700 hover:text-green-700 font-medium border-b border-gray-100">Lost & Found</a>
+                    <a href="{{ url('/map') }}" class="block py-3 text-gray-700 hover:text-green-700 font-medium border-b border-gray-100">Map</a>
+
+                    @auth
+                        <a href="{{ url('/profile') }}" class="block py-3 text-gray-700 hover:text-green-700 font-medium border-b border-gray-100">Profile</a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
+                                class="w-full text-left py-3 text-gray-700 hover:text-green-700 font-medium">Logout</button>
+                        </form>
                     @else
-                        <a href="{{ url('/login') }}" class="hover:text-green-500 transition-colors"
-                            :class="scrolled ? 'text-gray-800' : 'text-white'">Login</a>
-                    @endif
-                </li>
-            </ul>
+                        <a href="{{ route('login') }}"
+                            class="block mt-6 px-6 py-3 bg-green-600 text-white rounded-xl text-center hover:bg-green-700 transition font-medium">Login</a>
+                    @endauth
+                </div>
+            </div>
         </div>
     </nav>
 
-    {{-- Content --}}
-    <main class="">
+    {{-- CONTENT --}}
+    <main>
         {{ $slot }}
     </main>
 
-    {{-- === Footer === --}}
-    <footer class="bg-white border-t border-slate-200">
-        <div class="mx-auto max-w-7xl px-6 sm:px-8">
-            {{-- Top area --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 py-12">
+    {{-- NEW FOOTER DESIGN --}}
+    <footer class="bg-gray-50 border-t border-gray-200">
+        <div class="container mx-auto px-4 md:px-8 py-12 lg:py-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
 
-                {{-- Logo + Socials --}}
-                <div class="lg:col-span-1">
-                    <img src="{{ asset('storage/images/footer-logo.png') }}" alt="Kebun Raya Bogor"
-                        class="h-20 w-auto mb-6">
+                {{-- Logo & Description --}}
+                <div class="lg:col-span-2">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <img src="{{ asset('storage/images/logo/logodark.png') }}" 
+                             alt="Kebun Raya Bogor" 
+                             class="h-12 lg:h-16 w-auto">
+                        <div>
+                            <h3 class="text-xl lg:text-2xl font-bold text-gray-800">KEBUN RAYA</h3>
+                            <p class="text-lg lg:text-xl font-semibold text-green-600">BOGOR</p>
+                        </div>
+                    </div>
+                    
+                    <p class="text-gray-600 leading-relaxed mb-8 text-sm lg:text-base max-w-md">
+                        Building amazing digital experiences that connect people and transform businesses 
+                        through innovative technology solutions.
+                    </p>
 
-                    {{-- Social icons --}}
-                    <div class="flex items-center gap-3">
-                        {{-- Facebook --}}
-                        <a href="#" aria-label="Facebook"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-white hover:bg-slate-700 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"
-                                fill="currentColor">
-                                <path
-                                    d="M22 12a10 10 0 1 0-11.6 9.87v-6.99H7.9V12h2.5V9.8c0-2.46 1.47-3.82 3.72-3.82 1.08 0 2.22.19 2.22.19v2.44h-1.25c-1.23 0-1.61.76-1.61 1.54V12h2.74l-.44 2.88h-2.3v6.99A10 10 0 0 0 22 12z" />
+                    {{-- Social Media Icons --}}
+                    <div class="flex space-x-3">
+                        <a href="#" class="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center rounded-full bg-gray-800 text-white hover:bg-green-600 transition-colors duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M20 10C20 4.477 15.523 0 10 0S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z"/>
                             </svg>
                         </a>
-                        {{-- Twitter --}}
-                        <a href="#" aria-label="Twitter"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-white hover:bg-slate-700 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"
-                                fill="currentColor">
-                                <path
-                                    d="M17.53 3h3.02l-6.6 7.55L22 21h-6.52l-4.56-5.9L5.7 21H2.67l7.1-8.13L2 3h6.64l4.13 5.5L17.53 3zm-1.14 16h1.67L7.7 4.99H5.96L16.39 19z" />
+                        <a href="#" class="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center rounded-full bg-gray-800 text-white hover:bg-green-600 transition-colors duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84"/>
                             </svg>
                         </a>
-                        {{-- Instagram --}}
-                        <a href="#" aria-label="Instagram"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-white hover:bg-slate-700 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"
-                                fill="currentColor">
-                                <path
-                                    d="M12 7.2A4.8 4.8 0 1 0 12 16.8 4.8 4.8 0 0 0 12 7.2zm0 7.9a3.1 3.1 0 1 1 0-6.2 3.1 3.1 0 0 1 0 6.2z" />
-                                <path
-                                    d="M17.3 2H6.7A4.7 4.7 0 0 0 2 6.7v10.6A4.7 4.7 0 0 0 6.7 22h10.6A4.7 4.7 0 0 0 22 17.3V6.7A4.7 4.7 0 0 0 17.3 2zM20.3 17.3c0 1.66-1.34 3-3 3H6.7c-1.66 0-3-1.34-3-3V6.7c0-1.66 1.34-3 3-3h10.6c1.66 0 3 1.34 3 3v10.6z" />
-                                <circle cx="17.7" cy="6.3" r="1.2" />
+                        <a href="#" class="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center rounded-full bg-gray-800 text-white hover:bg-green-600 transition-colors duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0 1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z"/>
                             </svg>
                         </a>
-                        {{-- LinkedIn --}}
-                        <a href="#" aria-label="LinkedIn"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-white hover:bg-slate-700 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"
-                                fill="currentColor">
-                                <path
-                                    d="M6.94 8.88H4.19V20h2.75V8.88zM5.56 7.55a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2zM20 20h-2.74v-5.62c0-1.34-.03-3.07-1.87-3.07-1.87 0-2.16 1.46-2.16 2.97V20H10.5V8.88h2.63v1.51h.04c.37-.7 1.29-1.44 2.66-1.44 2.85 0 3.37 1.88 3.37 4.33V20z" />
+                        <a href="#" class="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center rounded-full bg-gray-800 text-white hover:bg-green-600 transition-colors duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"/>
                             </svg>
                         </a>
                     </div>
                 </div>
 
-                {{-- Tagline + Description --}}
-                <div class="lg:col-span-1">
-                    <h4 class="text-lg font-semibold text-slate-800 mb-4">Kebun Raya Bogor</h4>
-                    <p class="text-sm text-slate-600 leading-relaxed">
-                        Pusat konservasi, edukasi, dan wisata alam di jantung Kota Bogor. Menjadi destinasi unggulan
-                        untuk mempelajari keanekaragaman hayati Indonesia.
-                    </p>
-                </div>
-
                 {{-- Quick Links --}}
-                <div class="lg:col-span-1">
-                    <h4 class="text-lg font-semibold text-slate-800 mb-4">Menu</h4>
-                    <ul class="space-y-3 text-sm text-slate-600">
-                        <li>
-                            <a href="{{ url('/') }}"
-                                class="hover:text-green-600 transition duration-200 flex items-center">
-                                <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
-                                Beranda
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('/found') }}"
-                                class="hover:text-green-600 transition duration-200 flex items-center">
-                                <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
-                                Lost &amp; Found
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('/maps') }}"
-                                class="hover:text-green-600 transition duration-200 flex items-center">
-                                <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
-                                Peta Lokasi
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('/contact') }}"
-                                class="hover:text-green-600 transition duration-200 flex items-center">
-                                <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span>
-                                Kontak
-                            </a>
-                        </li>
-                    </ul>
+                <div>
+                    <h4 class="text-gray-800 font-semibold mb-6 text-lg">Quick Links</h4>
+                    <nav class="space-y-3">
+                        <a href="#" class="block text-gray-600 hover:text-green-600 transition-colors duration-200 text-sm lg:text-base">About Us</a>
+                        <a href="#" class="block text-gray-600 hover:text-green-600 transition-colors duration-200 text-sm lg:text-base">Services</a>
+                        <a href="#" class="block text-gray-600 hover:text-green-600 transition-colors duration-200 text-sm lg:text-base">Portfolio</a>
+                        <a href="#" class="block text-gray-600 hover:text-green-600 transition-colors duration-200 text-sm lg:text-base">Blog</a>
+                        <a href="#" class="block text-gray-600 hover:text-green-600 transition-colors duration-200 text-sm lg:text-base">Contact</a>
+                    </nav>
                 </div>
 
-                
-                        </li>
-                        <li class="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                class="h-4 w-4 mr-2 mt-0.5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                {{-- Contact Info --}}
+                <div>
+                    <h4 class="text-gray-800 font-semibold mb-6 text-lg">Contact</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>
-                            <div>
-                                <span class="font-medium text-slate-700">Telepon:</span><br>
-                                <a href="tel:(0251)8311362" class="hover:text-green-600 transition">(0251) 8311362</a>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                class="h-4 w-4 mr-2 mt-0.5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            <a href="mailto:hello@yourbrand.com" class="text-gray-600 hover:text-green-600 transition-colors text-sm lg:text-base">
+                                hello@yourbrand.com
+                            </a>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                             </svg>
-                            <div>
-                                <span class="font-medium text-slate-700">Email:</span><br>
-                                <a href="mailto:info@kebunraya.id"
-                                    class="hover:text-green-600 transition">info@kebunraya.id</a>
-                            </div>
-                        </li>
-                    </ul>
+                            <span class="text-gray-600 text-sm lg:text-base">+1 (555) 123-4567</span>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <span class="text-gray-600 text-sm lg:text-base leading-relaxed">123 Business St, City, State 12345</span>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            {{-- Bottom area --}}
-            <div
-                class="border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between py-6 text-xs text-slate-500 gap-4">
-                <p>&copy; 2024 Kebun Raya Bogor. All rights reserved.</p>
-                <ul class="flex items-center gap-6">
-                    <li><a href="#" class="hover:text-slate-700 transition">Cookie Policy</a></li>
-                    <li><a href="#" class="hover:text-slate-700 transition">Privacy Policy</a></li>
-                    <li><a href="#" class="hover:text-slate-700 transition">Terms of Service</a></li>
-                </ul>
+        {{-- Footer Bottom --}}
+        <div class="border-t border-gray-200 bg-white">
+            <div class="container mx-auto px-4 md:px-8 py-6">
+                <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+                    <p class="text-gray-500 text-xs lg:text-sm text-center md:text-left">
+                        © 2024 YourBrand. All rights reserved.
+                    </p>
+                    <div class="flex items-center space-x-6 text-xs lg:text-sm">
+                        <a href="#" class="text-gray-500 hover:text-green-600 transition-colors">Cookie Policy</a>
+                        <a href="#" class="text-gray-500 hover:text-green-600 transition-colors">Privacy Policy</a>
+                        <a href="#" class="text-gray-500 hover:text-green-600 transition-colors">Terms of Service</a>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
 
     @livewireScripts
-    @stack('scripts')
     <script defer src="https://unpkg.com/alpinejs"></script>
 </body>
-
 </html>

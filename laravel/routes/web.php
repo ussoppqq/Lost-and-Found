@@ -38,3 +38,10 @@ Route::get('/lost-form', App\Livewire\LostForm::class)->name('lost-form');
 Route::get('/moderator', \App\Livewire\Moderator\Dashboard::class)
     ->middleware(['auth'])
     ->name('moderator');
+
+Route::post('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect()->route('home');
+})->name('logout');
