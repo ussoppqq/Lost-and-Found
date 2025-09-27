@@ -40,6 +40,21 @@ Route::get('/moderator', \App\Livewire\Moderator\Dashboard::class)
     ->middleware(['auth'])
     ->name('moderator');
 
+Route::middleware(['auth'])->group(function () {
+    // User profile routes (simple profile view)
+    Route::get('/profile', function () {
+        return view('profile'); // Atau redirect ke dashboard
+    })->name('profile.show');
+    
+    // Logout route
+    Route::post('/logout', function () {
+        auth()->logout();
+        session()->invalidate();
+        session()->regenerateToken();
+        return redirect('/');
+    })->name('logout');
+});
+
 // Public Forms
 Route::get('/found-form', FoundForm::class)->name('found-form');
 Route::get('/lost-form', LostForm::class)->name('lost-form');
@@ -60,7 +75,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/lost-found', LostFoundIndex::class)->name('lost-found');
     
     // Users Management  
-    // Route::get('/users', UsersIndex::class)->name('users');
+    Route::get('/users', UsersIndex::class)->name('users');
     
     // Settings (untuk pengembangan selanjutnya)
     // Route::get('/settings', Settings::class)->name('settings');

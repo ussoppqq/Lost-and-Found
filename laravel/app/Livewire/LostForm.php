@@ -20,8 +20,8 @@ class LostForm extends Component
 
     public string $description = '';
     public ?string $location = null;
-    public ?string $date_lost = null;           // YYYY-MM-DD
-    public ?string $sensitivity_level = null;   // NORMAL | RESTRICTED
+    public ?string $date_lost = null;           
+    public ?string $sensitivity_level = null;   
 
     // Contact fields
     public ?string $email = null;
