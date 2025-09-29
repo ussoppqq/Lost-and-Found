@@ -168,10 +168,7 @@
                         <img src="{{ asset('storage/images/logo/logodark.png') }}" 
                              alt="Kebun Raya Bogor" 
                              class="h-12 lg:h-16 w-auto">
-                        <div>
-                            <h3 class="text-xl lg:text-2xl font-bold text-gray-800">KEBUN RAYA</h3>
-                            <p class="text-lg lg:text-xl font-semibold text-green-600">BOGOR</p>
-                        </div>
+                       
                     </div>
                     
                     <p class="text-gray-600 leading-relaxed mb-8 text-sm lg:text-base max-w-md">
