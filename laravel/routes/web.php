@@ -83,3 +83,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 });
 
 Route::redirect('/admin', '/admin/dashboard');
+
+Route::get('/profile', \App\Livewire\Profile::class)
+    ->middleware(['auth'])->name('profile');
