@@ -1,97 +1,188 @@
-<div class="container mx-auto py-10">
-    <div class="bg-white rounded-lg shadow-lg p-8 max-w-2xl mx-auto">
-        <h1 class="text-xl font-bold mb-6">Submit Found Item Report</h1>
+<div x-data="{ loading: false }"
+     class="min-h-[100svh] bg-white flex items-center justify-center py-12 px-4">
 
-        {{-- Success Message --}}
-        @if (session()->has('success'))
-            <div class="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-                {{ session('success') }}
-            </div>
-        @endif
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl border border-gray-300 p-8 md:p-12">
 
-        <form wire:submit.prevent="submit" class="space-y-5" enctype="multipart/form-data">
-            {{-- Name --}}
+        {{-- Heading --}}
+        <h1 class="text-center text-3xl md:text-4xl font-bold text-gray-900">
+            Report Lost Item
+        </h1>
+        <p class="mt-2 text-center text-gray-600">
+            Tell us what you lost—details help our team identify items faster.
+        </p>
+
+        {{-- Form card --}}
+        <form wire:submit.prevent="submit" @submit="loading = true" class="mt-8 space-y-8">
+
+            {{-- Item Name --}}
             <div>
-                <label class="block font-semibold mb-1">Name *</label>
-                <input type="text" wire:model="name" class="w-full border rounded px-3 py-2">
-                @error('name') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                <label class="block text-sm font-semibold text-gray-900">Item Name *</label>
+                <input type="text" wire:model.defer="item_name" required
+                       class="mt-2 w-full rounded-xl border-gray-300 focus:border-gray-500 focus:ring-gray-400/30 placeholder:text-gray-500"
+                       placeholder="e.g. Black Wallet">
+                @error('item_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            {{-- Phone / Email --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{-- Category + Custom --}}
+            <div class="grid md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block font-semibold mb-1">Phone</label>
-                    <input type="text" wire:model="phone" class="w-full border rounded px-3 py-2">
-                    @error('phone') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                    <label class="block text-sm font-semibold text-gray-900">Category *</label>
+                    <select wire:model="category"
+                            class="mt-2 w-full rounded-xl border-gray-300 focus:border-gray-500 focus:ring-gray-400/30">
+                        <option value="">-- Choose Category --</option>
+                        <option>Phone</option>
+                        <option>Wallet</option>
+                        <option>Bag</option>
+                        <option>Clothing</option>
+                        <option>Jewelry</option>
+                        <option>Document</option>
+                        <option>Other</option>
+                    </select>
+                    @error('category') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
-                <div>
-                    <label class="block font-semibold mb-1">Email</label>
-                    <input type="email" wire:model="email" class="w-full border rounded px-3 py-2">
-                    @error('email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                </div>
-            </div>
 
-            {{-- Location --}}
-            <div>
-                <label class="block font-semibold mb-1">Location</label>
-                <input type="text" wire:model="location" class="w-full border rounded px-3 py-2">
-                @error('location') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                <div x-show="$wire.category === 'Other'" x-cloak>
+                    <label class="block text-sm font-semibold text-gray-900">Custom Category</label>
+                    <input type="text" wire:model.defer="category_other"
+                           class="mt-2 w-full rounded-xl border-gray-300 focus:border-gray-500 focus:ring-gray-400/30"
+                           placeholder="Type your category">
+                    @error('category_other') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
             </div>
 
             {{-- Description --}}
             <div>
-                <label class="block font-semibold mb-1">Description *</label>
-                <textarea wire:model="description" class="w-full border rounded px-3 py-2" rows="4"></textarea>
-                @error('description') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                <label class="block text-sm font-semibold text-gray-900">Description / Characteristics *</label>
+                <textarea rows="4" wire:model.defer="description" required
+                          class="mt-2 w-full rounded-xl border-gray-300 focus:border-gray-500 focus:ring-gray-400/30 placeholder:text-gray-500"
+                          placeholder="Brand, special marks, accessories, etc."></textarea>
+                @error('description') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            {{-- Photo --}}
+            {{-- Date Lost --}}
             <div>
-    <label class="block font-semibold mb-1">Add Picture <span class="text-gray-500 text-sm">(Optional)</span></label>
+                <label class="block text-sm font-semibold text-gray-900">Date Lost</label>
+                <input type="date" wire:model.defer="date_lost"
+                       class="mt-2 w-full rounded-xl border-gray-300 focus:border-gray-500 focus:ring-gray-400/30">
+                @error('date_lost') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
 
-    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-green-500 transition"
-         x-data="{ isDropping: false }"
-         x-bind:class="{ 'bg-green-50': isDropping }"
-         @dragover.prevent="isDropping = true"
-         @dragleave.prevent="isDropping = false"
-         @drop.prevent="isDropping = false">
+            {{-- Contact Details --}}
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-base font-semibold text-gray-900 mb-4">Your Contact Details</h3>
 
-        {{-- Ikon upload --}}
-        <div class="flex flex-col items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M4 12l1.293-1.293a1 1 0 011.414 0L12 16l5.293-5.293a1 1 0 011.414 0L20 12m-8-8v12" />
-            </svg>
-            <p class="text-gray-600">Click to upload or drag and drop</p>
-            <p class="text-sm text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-900">Email</label>
+                        <input type="email" wire:model.defer="email"
+                               class="mt-2 w-full rounded-xl border-gray-300 focus:border-gray-500 focus:ring-gray-400/30"
+                               placeholder="you@example.com">
+                        @error('email') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
 
-            {{-- Input file --}}
-            <input type="file" wire:model="photo" accept="image/*" class="hidden" id="upload-photo">
-            <label for="upload-photo"
-                   class="mt-2 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer hover:bg-blue-600 transition">
-                Choose File
-            </label>
-        </div>
-    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-900">Phone</label>
+                        <input type="tel" wire:model.defer="phone"
+                               class="mt-2 w-full rounded-xl border-gray-300 focus:border-gray-500 focus:ring-gray-400/30"
+                               placeholder="+62 812-xxxx-xxxx">
+                        @error('phone') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
 
-    {{-- Preview --}}
-    @if ($photo)
-        <div class="mt-4">
-            <img src="{{ $photo->temporaryUrl() }}" class="h-40 object-cover rounded-lg mx-auto shadow">
-        </div>
-    @endif
+                <div class="mt-4">
+                    <label class="block text-sm font-semibold text-gray-900">Your Location (optional)</label>
+                    <input type="text" wire:model.defer="location"
+                           class="mt-2 w-full rounded-xl border-gray-300 focus:border-gray-500 focus:ring-gray-400/30"
+                           placeholder="City / Area (for follow-up)">
+                    @error('location') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+            </div>
 
-    {{-- Error --}}
-    @error('photo') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            {{-- Upload (drag & drop with preview) --}}
+            <div x-data="{ isDropping:false, openFile(){ $refs.file.click() } }"
+                 @dragover.prevent="isDropping = true"
+                 @dragleave.prevent="isDropping = false"
+                 @drop.prevent="isDropping = false">
+                <label class="block text-sm font-semibold text-gray-900">
+                    Add Picture <span class="text-gray-500">(optional)</span>
+                </label>
 
-    <p class="mt-2 text-sm text-gray-500">Adding a photo helps identify the item</p>
-</div>
+                <div :class="isDropping ? 'ring-2 ring-gray-400 bg-gray-50' : 'ring-1 ring-gray-300'"
+                     class="mt-2 rounded-2xl border border-dashed bg-white p-6 text-center transition">
+                    {{-- hidden input --}}
+                    <input type="file" accept="image/*" class="hidden" x-ref="file" wire:model="photo">
 
+                    {{-- Empty state --}}
+                    @unless ($photo)
+                        <div class="flex flex-col items-center gap-3">
+                            <svg class="h-10 w-10 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 5l4 4h-3v4h-2V9H8l4-4z"></path>
+                                <path d="M4 15h16v2H4z"></path>
+                            </svg>
+                            <p class="text-sm text-gray-700">
+                                Drag & drop an image here, or
+                                <button type="button" @click="openFile()" class="underline hover:text-gray-900">
+                                    browse
+                                </button>
+                                (JPG/PNG, max 3MB)
+                            </p>
+                            <div wire:loading wire:target="photo" class="text-xs text-gray-600">Uploading…</div>
+                        </div>
+                    @endunless
+
+                    {{-- Preview --}}
+                    @if ($photo)
+                        <div class="flex flex-col items-center gap-4">
+                            <img src="{{ $photo->temporaryUrl() }}" alt="Preview"
+                                 class="max-h-56 rounded-xl shadow-md object-contain">
+                            <div class="flex gap-3">
+                                <button type="button" @click="openFile()"
+                                        class="px-3 py-1.5 text-sm rounded-lg bg-black text-white hover:bg-gray-900">
+                                    Change
+                                </button>
+                                <button type="button" wire:click="$set('photo', null)"
+                                        class="px-3 py-1.5 text-sm rounded-lg bg-white border border-gray-300 hover:bg-gray-50">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                @error('photo') <p class="mt-2 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            {{-- Sensitivity --}}
+            <div>
+                <label class="block text-sm font-semibold text-gray-900">Sensitivity Level</label>
+                <div class="mt-2 flex gap-3 flex-wrap">
+                    @foreach (['NORMAL','RESTRICTED'] as $level)
+                        <label class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50 cursor-pointer">
+                            <input type="radio" class="text-black" wire:model.defer="sensitivity_level" value="{{ $level }}">
+                            <span class="text-sm text-gray-800">{{ $level }}</span>
+                        </label>
+                    @endforeach
+                </div>
+                @error('sensitivity_level') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
 
             {{-- Submit --}}
-            <button type="submit" 
-                class="w-full bg-black text-white py-2 rounded hover:bg-gray-900">
-                Submit Found Item Report
-            </button>
+            <div>
+                <button type="submit" :disabled="loading"
+                        class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-black px-6 py-3 font-semibold text-white shadow-md hover:bg-gray-900 active:scale-95 disabled:opacity-60 transition">
+                    <svg x-show="loading" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" d="M4 12a8 8 0 0 1 8-8" stroke="currentColor" stroke-width="4"/>
+                    </svg>
+                    <span x-text="loading ? 'Submitting…' : 'Submit Lost Item Report'"></span>
+                </button>
+            </div>
+
+            {{-- Success toast --}}
+            @if (session('status'))
+                <div class="rounded-lg bg-gray-100 border border-gray-300 text-gray-900 px-4 py-3">
+                    {{ session('status') }}
+                </div>
+            @endif
         </form>
     </div>
 </div>
