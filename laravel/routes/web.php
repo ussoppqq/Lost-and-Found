@@ -6,15 +6,11 @@ use App\Livewire\LostForm;
 use App\Livewire\Auth\Forgotpassword;
 use App\Livewire\Auth\RegisterExtra;
 use App\Livewire\Auth\Login;
-use App\Livewire\WhatsappVerification;     
-
-
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\LostAndFound\Index as LostFoundIndex;
 use App\Livewire\Admin\Users\Index as UsersIndex;
 use App\Livewire\Admin\Items\Index as ItemsIndex;
 use App\Livewire\Admin\Categories\Index as CategoriesIndex;
-
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -26,12 +22,14 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+Route::get('/categories', function () {
+    return view('categories');
+})->name('categories');
 
 // Auth Routes
 Route::get('/login', Login::class)->name('login');
 Route::get('register-extra', RegisterExtra::class)->name('register-extra');
 Route::get('/forgotpassword', Forgotpassword::class)->name('forgotpassword');
-Route::get('/whatsapp-verification', WhatsappVerification::class)->name('whatsapp-verification');
 
 
 Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)
