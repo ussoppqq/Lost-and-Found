@@ -205,7 +205,7 @@
                                 @endif
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">
-                                        {{ $report->item_name ?? 'Unnamed Item' }}
+                                        {{ $report->item->item_name ?? 'Unnamed Item' }}
                                     </div>
                                     <div class="text-sm text-gray-500">{{ Str::limit($report->report_description, 40) }}</div>
                                 </div>
