@@ -14,22 +14,25 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
     $table->uuid('item_id')->primary();
     $table->uuid('company_id');
-    $table->uuid('post_id')->nullable();
+    $table->uuid('post_id')->nullable();       
     $table->uuid('category_id')->nullable();
     $table->string('item_name');
     $table->string('brand')->nullable();
     $table->string('color')->nullable();
     $table->text('item_description')->nullable();
-    $table->string('storage')->nullable();
-    $table->enum('item_status', ['REGISTERED','STORED','CLAIMED','DISPOSED','RETURNED']);
-    $table->dateTime('retention_until')->nullable();
-    $table->enum('sensitivity_level', ['NORMAL','RESTRICTED']);
+    $table->string('storage')->nullable();     
+    $table->enum('item_status', ['REGISTERED','STORED','CLAIMED','DISPOSED','RETURNED'])
+          ->default('REGISTERED');
+    $table->dateTime('retention_until')->nullable();  
+    $table->enum('sensitivity_level', ['NORMAL','RESTRICTED'])->default('NORMAL');
     $table->timestamps();
 
+    // foreign keys
     $table->foreign('company_id')->references('company_id')->on('companies');
     $table->foreign('post_id')->references('post_id')->on('posts');
     $table->foreign('category_id')->references('category_id')->on('categories');
 });
+
 
     }
 

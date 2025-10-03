@@ -13,7 +13,7 @@ class Category extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    public $timestamps = false; // karena migration tidak pakai timestamps
+    public $timestamps = false; 
 
     protected $fillable = ['company_id', 'category_name', 'subcategory_name', 'retention_days', 'is_restricted'];
 

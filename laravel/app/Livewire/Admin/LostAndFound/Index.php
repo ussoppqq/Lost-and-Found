@@ -7,7 +7,9 @@ use Livewire\WithPagination;
 use App\Models\Report;
 use App\Models\Item;
 use App\Models\Category;
-use App\Models\Location;
+use App\Models\Post;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class Index extends Component
 {
@@ -17,7 +19,8 @@ class Index extends Component
     public $search = '';
     public $reportTypeFilter = 'all';
     public $reportStatusFilter = 'all';
-    public $itemStatusFilter = 'all';
+    public $dateFrom = '';
+    public $dateTo = '';
     
     // Sorting
     public $sortBy = 'report_datetime';
@@ -26,8 +29,14 @@ class Index extends Component
     // Modal states
     public $showDeleteModal = false;
     public $selectedReportId = null;
+    
+    // Listeners for modal events
+    protected $listeners = [
+        'item-created' => '$refresh',
+        'item-updated' => '$refresh',
+    ];
 
-    protected $queryString = ['search', 'reportTypeFilter', 'reportStatusFilter', 'itemStatusFilter'];
+    protected $queryString = ['search', 'reportTypeFilter', 'reportStatusFilter', 'dateFrom', 'dateTo'];
 
     public function updatingSearch()
     {
@@ -44,8 +53,19 @@ class Index extends Component
         $this->resetPage();
     }
 
-    public function updatedItemStatusFilter()
+    public function updatedDateFrom()
     {
+        $this->resetPage();
+    }
+
+    public function updatedDateTo()
+    {
+        $this->resetPage();
+    }
+
+    public function clearFilters()
+    {
+        $this->reset(['search', 'reportTypeFilter', 'reportStatusFilter', 'dateFrom', 'dateTo']);
         $this->resetPage();
     }
 
@@ -69,6 +89,24 @@ class Index extends Component
         session()->flash('success', 'Report status updated successfully!');
     }
 
+    // Buka modal untuk walk-in item (standalone - langsung buat report + item)
+    public function openCreateItemModal()
+    {
+        $this->dispatch('open-create-item-modal-standalone');
+    }
+
+    // Buka modal untuk create item dari report yang sudah ada (report tanpa item)
+    public function createItemFromReport($reportId)
+    {
+        $this->dispatch('open-create-item-modal', reportId: $reportId);
+    }
+
+    // Trigger untuk membuka modal Edit Item
+    public function openEditItemModal($itemId)
+    {
+        $this->dispatch('open-edit-item-modal', itemId: $itemId);
+    }
+
     public function deleteReport($reportId)
     {
         $this->selectedReportId = $reportId;
@@ -78,7 +116,14 @@ class Index extends Component
     public function confirmDelete()
     {
         if ($this->selectedReportId) {
-            Report::findOrFail($this->selectedReportId)->delete();
+            $report = Report::findOrFail($this->selectedReportId);
+            
+            // Jika ada item terkait, hapus juga
+            if ($report->item_id) {
+                Item::where('item_id', $report->item_id)->delete();
+            }
+            
+            $report->delete();
             
             session()->flash('success', 'Report deleted successfully!');
             $this->showDeleteModal = false;
@@ -95,18 +140,22 @@ class Index extends Component
 
     public function render()
     {
+        $companyId = auth()->user()->company_id;
+
         // Get statistics for cards
-        $totalReports = Report::count();
-        $lostReports = Report::where('report_type', 'LOST')->count();
-        $foundReports = Report::where('report_type', 'FOUND')->count();
-        $matchedReports = Report::where('report_status', 'MATCHED')->count();
+        $totalReports = Report::where('company_id', $companyId)->count();
+        $lostReports = Report::where('company_id', $companyId)->where('report_type', 'LOST')->count();
+        $foundReports = Report::where('company_id', $companyId)->where('report_type', 'FOUND')->count();
+        $matchedReports = Report::where('company_id', $companyId)->where('report_status', 'MATCHED')->count();
 
         // Build query for reports
         $query = Report::with(['user', 'item.category', 'company'])
+            ->where('company_id', $companyId)
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query->where('report_description', 'like', '%' . $this->search . '%')
                           ->orWhere('report_location', 'like', '%' . $this->search . '%')
+                          ->orWhere('item_name', 'like', '%' . $this->search . '%')
                           ->orWhereHas('user', function ($userQuery) {
                               $userQuery->where('full_name', 'like', '%' . $this->search . '%');
                           })
@@ -121,10 +170,11 @@ class Index extends Component
             ->when($this->reportStatusFilter !== 'all', function ($q) {
                 $q->where('report_status', $this->reportStatusFilter);
             })
-            ->when($this->itemStatusFilter !== 'all', function ($q) {
-                $q->whereHas('item', function ($itemQuery) {
-                    $itemQuery->where('item_status', $this->itemStatusFilter);
-                });
+            ->when($this->dateFrom, function ($q) {
+                $q->whereDate('report_datetime', '>=', $this->dateFrom);
+            })
+            ->when($this->dateTo, function ($q) {
+                $q->whereDate('report_datetime', '<=', $this->dateTo);
             })
             ->orderBy($this->sortBy, $this->sortDirection);
 
@@ -136,6 +186,11 @@ class Index extends Component
             'lostReports' => $lostReports,
             'foundReports' => $foundReports,
             'matchedReports' => $matchedReports,
+            'dateFrom' => $this->dateFrom,
+            'dateTo' => $this->dateTo,
+            'search' => $this->search,
+            'reportTypeFilter' => $this->reportTypeFilter,
+            'reportStatusFilter' => $this->reportStatusFilter,
         ])->layout('components.layouts.admin', [
             'title' => 'Lost & Found Management',
             'pageTitle' => 'Lost & Found Management',
