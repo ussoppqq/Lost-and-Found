@@ -14,8 +14,20 @@ class Report extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'company_id', 'user_id', 'item_id', 'report_type',
-        'report_description', 'report_datetime', 'report_location', 'report_status'
+        'report_id',          
+        'company_id',
+        'user_id',
+        'item_id',
+        'report_type',
+        // 'item_name',          
+        'report_description',
+        'report_datetime',
+        'report_location',
+        'report_status',
+        'photo_url',          
+        'reporter_name',      
+        'reporter_phone',     
+        'reporter_email', 
     ];
 
     public function company()
@@ -31,5 +43,10 @@ class Report extends Model
     public function item()
     {
         return $this->belongsTo(Item::class, 'item_id', 'item_id');
+    }
+
+    public function claims()
+    {
+        return $this->hasMany(Claim::class, 'report_id', 'report_id');
     }
 }
