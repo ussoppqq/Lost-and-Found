@@ -6,8 +6,6 @@ use App\Livewire\LostForm;
 use App\Livewire\Auth\Forgotpassword;
 use App\Livewire\Auth\RegisterExtra;
 use App\Livewire\Auth\Login;
-use App\Livewire\WhatsappVerification;     
-
 
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\LostAndFound\Index as LostFoundIndex;
