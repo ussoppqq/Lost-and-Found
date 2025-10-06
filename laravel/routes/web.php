@@ -7,13 +7,11 @@ use App\Livewire\Auth\Forgotpassword;
 use App\Livewire\Auth\RegisterExtra;
 use App\Livewire\Auth\Login;
 
-
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\LostAndFound\Index as LostFoundIndex;
 use App\Livewire\Admin\Users\Index as UsersIndex;
 use App\Livewire\Admin\Items\Index as ItemsIndex;
 use App\Livewire\Admin\Categories\Index as CategoriesIndex;
-
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -25,6 +23,9 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+Route::get('/categories', function () {
+    return view('categories');
+})->name('categories');
 
 // Auth Routes
 Route::get('/login', Login::class)->name('login');
