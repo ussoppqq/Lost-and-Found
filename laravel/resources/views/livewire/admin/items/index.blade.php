@@ -263,29 +263,41 @@
 
     <!-- Delete Confirmation Modal -->
     @if($showDeleteModal && $itemToDelete)
-        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                <!-- Modal Header -->
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Confirm Delete</h3>
-                
-                <!-- Modal Body -->
-                <p class="text-sm text-gray-600 mb-6">
+    <!-- Backdrop dengan blur effect -->
+    <div class="fixed inset-0 bg-black bg-opacity-60 transition-opacity z-40 backdrop-blur-sm"></div>
+
+    <!-- Modal Container -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md my-8 transform transition-all">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h3 class="ml-3 text-lg font-medium leading-6 text-gray-900">Confirm Delete</h3>
+                </div>
+
+                <p class="text-sm text-gray-500 mb-4">
                     Are you sure you want to delete "<strong>{{ $itemToDelete->item_name }}</strong>"? 
                     This action cannot be undone.
                 </p>
-                
-                <!-- Modal Actions -->
-                <div class="flex justify-end space-x-2">
-                    <button wire:click="closeDeleteModal"
-                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" wire:click="closeDeleteModal"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
                         Cancel
                     </button>
-                    <button wire:click="deleteItem" 
-                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                        Delete
+                    <button type="button" wire:click="deleteItem" wire:loading.attr="disabled"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition">
+                        <span wire:loading.remove wire:target="deleteItem">Delete</span>
+                        <span wire:loading wire:target="deleteItem">Deleting...</span>
                     </button>
                 </div>
             </div>
         </div>
-    @endif
+    </div>
+@endif
 </div>
