@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class Index extends Component
 {
@@ -21,15 +22,15 @@ class Index extends Component
     public $reportStatusFilter = 'all';
     public $dateFrom = '';
     public $dateTo = '';
-    
+
     // Sorting
     public $sortBy = 'report_datetime';
     public $sortDirection = 'desc';
-    
+
     // Modal states
     public $showDeleteModal = false;
     public $selectedReportId = null;
-    
+
     // Listeners for modal events
     protected $listeners = [
         'item-created' => '$refresh',
@@ -76,7 +77,7 @@ class Index extends Component
         } else {
             $this->sortDirection = 'asc';
         }
-        
+
         $this->sortBy = $field;
         $this->resetPage();
     }
@@ -104,7 +105,7 @@ class Index extends Component
     // Trigger untuk membuka modal Edit Item
     public function openEditItemModal($itemId)
     {
-        $this->dispatch('open-edit-item-modal', itemId: $itemId);
+        $this->dispatch('open-edit-item-modal', itemId: $itemId)->to(EditItem::class);
     }
 
     public function deleteReport($reportId)
@@ -116,16 +117,39 @@ class Index extends Component
     public function confirmDelete()
     {
         if ($this->selectedReportId) {
-            $report = Report::findOrFail($this->selectedReportId);
-            
-            // Jika ada item terkait, hapus juga
-            if ($report->item_id) {
-                Item::where('item_id', $report->item_id)->delete();
+            try {
+                DB::beginTransaction();
+
+                $report = Report::findOrFail($this->selectedReportId);
+
+                // PENTING: Hapus Report DULU, baru Item
+                $itemId = $report->item_id; // Simpan item_id dulu
+
+                // 1. Hapus Report dulu (yang punya foreign key ke Item)
+                $report->delete();
+
+                // 2. Baru hapus Item (jika ada)
+                if ($itemId) {
+                    $item = Item::find($itemId);
+                    if ($item) {
+                        // Hapus photos dulu
+                        foreach ($item->photos as $photo) {
+                            Storage::disk('public')->delete($photo->photo_url);
+                            $photo->delete();
+                        }
+                        // Hapus item
+                        $item->delete();
+                    }
+                }
+
+                DB::commit();
+
+                session()->flash('success', 'Report and item deleted successfully!');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                session()->flash('error', 'Failed to delete: ' . $e->getMessage());
             }
-            
-            $report->delete();
-            
-            session()->flash('success', 'Report deleted successfully!');
+
             $this->showDeleteModal = false;
             $this->selectedReportId = null;
             $this->resetPage();
@@ -154,14 +178,14 @@ class Index extends Component
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query->where('report_description', 'like', '%' . $this->search . '%')
-                          ->orWhere('report_location', 'like', '%' . $this->search . '%')
-                          ->orWhere('item_name', 'like', '%' . $this->search . '%')
-                          ->orWhereHas('user', function ($userQuery) {
-                              $userQuery->where('full_name', 'like', '%' . $this->search . '%');
-                          })
-                          ->orWhereHas('item', function ($itemQuery) {
-                              $itemQuery->where('item_name', 'like', '%' . $this->search . '%');
-                          });
+                        ->orWhere('report_location', 'like', '%' . $this->search . '%')
+                        ->orWhere('item_name', 'like', '%' . $this->search . '%')
+                        ->orWhereHas('user', function ($userQuery) {
+                            $userQuery->where('full_name', 'like', '%' . $this->search . '%');
+                        })
+                        ->orWhereHas('item', function ($itemQuery) {
+                            $itemQuery->where('item_name', 'like', '%' . $this->search . '%');
+                        });
                 });
             })
             ->when($this->reportTypeFilter !== 'all', function ($q) {
@@ -192,9 +216,9 @@ class Index extends Component
             'reportTypeFilter' => $this->reportTypeFilter,
             'reportStatusFilter' => $this->reportStatusFilter,
         ])->layout('components.layouts.admin', [
-            'title' => 'Lost & Found Management',
-            'pageTitle' => 'Lost & Found Management',
-            'pageDescription' => 'Manage lost and found reports in Kebun Raya'
-        ]);
+                    'title' => 'Lost & Found Management',
+                    'pageTitle' => 'Lost & Found Management',
+                    'pageDescription' => 'Manage lost and found reports in Kebun Raya'
+                ]);
     }
 }

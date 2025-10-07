@@ -18,9 +18,9 @@ class ItemSeeder extends Seeder
         $post1 = Post::where('post_name', 'Main Gate Post')->first();
         $post2 = Post::where('post_name', 'Information Center')->first();
 
-        $category1 = Category::where('category_name', 'Electronics')->first();
-        $category2 = Category::where('category_name', 'Personal Items')->first();
-        $category3 = Category::where('category_name', 'Clothing')->first();
+        $category1 = Category::where('category_name', 'Phone')->first();
+        $category2 = Category::where('category_name', 'Wallet')->first();
+        $category3 = Category::where('category_name', 'Bag')->first();
 
         // Ambil report yang dibuat di ReportSeeder
         $report1 = Report::where('report_description', 'like', '%HP Samsung%')->first();

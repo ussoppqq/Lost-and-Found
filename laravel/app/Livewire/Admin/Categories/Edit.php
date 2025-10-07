@@ -7,11 +7,13 @@ use App\Models\Category;
 
 class Edit extends Component
 {
-    public Category $category;
+    public $showModal = false;
+    public $categoryId;
+    public $category;
     
-    public $name;
-    public $description;
-    public $icon;
+    public $category_name;
+    public $category_icon;
+    public $retention_days;
 
     public $availableIcons = [
         '👜', '💼', '🎒', '📱', '💻', '⌚', '🔑', '👓', 
@@ -19,21 +21,35 @@ class Edit extends Component
         '🎮', '📚', '⚽', '🎸'
     ];
 
+    protected $listeners = [
+        'open-edit-category-modal' => 'openModal',
+    ];
+
     protected function rules()
     {
         return [
-            'name' => 'required|string|max:255|unique:categories,name,' . $this->category->id,
-            'description' => 'nullable|string|max:500',
-            'icon' => 'required|string|max:10',
+            'category_name' => 'required|string|max:255',
+            'category_icon' => 'required|string|max:10',
+            'retention_days' => 'required|integer|min:1|max:365',
         ];
     }
 
-    public function mount($id)
+    public function openModal($categoryId)
     {
-        $this->category = Category::findOrFail($id);
-        $this->name = $this->category->name;
-        $this->description = $this->category->description;
-        $this->icon = $this->category->icon ?? '📦';
+        $this->categoryId = $categoryId;
+        $this->category = Category::findOrFail($categoryId);
+        
+        $this->category_name = $this->category->category_name;
+        $this->category_icon = $this->category->category_icon ?? '📦';
+        $this->retention_days = $this->category->retention_days ?? 30;
+        
+        $this->showModal = true;
+    }
+
+    public function closeModal()
+    {
+        $this->showModal = false;
+        $this->resetErrorBag();
     }
 
     public function update()
@@ -42,16 +58,14 @@ class Edit extends Component
 
         $this->category->update($validated);
 
-        session()->flash('message', 'Category berhasil diupdate.');
-
-        return redirect()->route('admin.categories');
+        session()->flash('message', 'Category updated successfully.');
+        
+        $this->closeModal();
+        $this->dispatch('category-updated');
     }
 
     public function render()
     {
-        return view('livewire.admin.categories.edit')->layout('layouts.admin', [
-            'pageTitle' => 'Edit Category',
-            'pageDescription' => 'Update category information'
-        ]);
+        return view('livewire.admin.categories.edit');
     }
 }

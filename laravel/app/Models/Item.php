@@ -19,6 +19,10 @@ class Item extends Model
         'item_status', 'retention_until', 'sensitivity_level'
     ];
 
+    protected $casts = [
+        'retention_until' => 'datetime',
+    ];
+
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id', 'company_id');
