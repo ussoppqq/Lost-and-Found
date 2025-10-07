@@ -3,7 +3,6 @@
 <div x-data="{ loading: false }"
      class="min-h-[100svh] bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
 
-    <!-- Main Container Card -->
     <div class="w-full max-w-5xl">
         
         <!-- Header Section -->
@@ -21,17 +20,14 @@
             </p>
         </div>
 
-        <!-- Form Container with Creative Background -->
+        <!-- Form Container -->
         <div class="relative">
-            <!-- Decorative Background Elements -->
             <div class="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-gray-400/20 to-gray-500/10 rounded-full blur-2xl"></div>
             <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-gradient-to-br from-gray-500/20 to-gray-600/10 rounded-full blur-2xl"></div>
             
-            <!-- Main Form Card -->
             <div class="relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-gray-200/50 overflow-hidden">
                 <form wire:submit.prevent="submit" @submit="loading = true" class="p-6 sm:p-8 lg:p-10">
                     
-                    <!-- Two Column Layout for Desktop -->
                     <div class="grid lg:grid-cols-2 gap-6 lg:gap-8">
                         
                         <!-- LEFT CARD: Item Details -->
@@ -71,9 +67,6 @@
                                     </select>
                                     @error('category') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                                 </div>
-
-                                <!-- Custom Category (if Other selected) -->
-                                <div x-show="false" x-cloak></div>
 
                                 <!-- Description -->
                                 <div>
@@ -129,24 +122,38 @@
                                                    placeholder="+62 812-xxxx-xxxx">
                                         </div>
                                         <p class="mt-1.5 text-xs text-gray-500">
-                                            {{-- Nama akan diambil otomatis dari tabel users jika nomor HP sudah terdaftar --}}
                                             Your name will be auto-filled if this number is registered
                                         </p>
                                         @error('phone') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                                     </div>
 
-                                    <!-- Name (if exists in database) -->
-                                    <div x-show="$wire.user_name" x-cloak x-transition>
-                                        <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                            Your Name
-                                        </label>
-                                        <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
-                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                            <span class="text-sm font-medium text-gray-900" x-text="$wire.user_name"></span>
+                                    <!-- Name - Auto-filled (if exists) -->
+                                    @if($user_name && !$show_name_input)
+                                        <div x-transition>
+                                            <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                                Your Name
+                                            </label>
+                                            <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
+                                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <span class="text-sm font-medium text-gray-900">{{ $user_name }}</span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
+
+                                    <!-- Name Input (if new user) -->
+                                    @if($show_name_input)
+                                        <div x-transition>
+                                            <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                                Your Name <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text" wire:model.defer="user_name" required
+                                                   class="w-full rounded-xl border-gray-300 focus:border-orange-600 focus:ring-orange-600/20 placeholder:text-gray-400 transition"
+                                                   placeholder="Enter your full name">
+                                            @error('user_name') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
+                                        </div>
+                                    @endif
 
                                     <!-- Location -->
                                     <div>
@@ -190,7 +197,7 @@
                                 <input type="file" accept="image/*" class="hidden" x-ref="file" wire:model="photo">
 
                                 <div :class="isDropping ? 'border-red-600 bg-red-50/50' : 'border-gray-300 bg-white'"
-                                     class="rounded-xl border-2 border-dashed p-6 text-center transition-all duration-200">rounded-xl border-2 border-dashed p-6 text-center transition-all duration-200">
+                                     class="rounded-xl border-2 border-dashed p-6 text-center transition-all duration-200">
                                     
                                     @unless ($photo)
                                         <div class="flex flex-col items-center gap-3">
@@ -264,6 +271,16 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             <p class="text-sm text-green-800 font-medium">{{ session('status') }}</p>
+                        </div>
+                    @endif
+
+                    <!-- Error Message -->
+                    @if (session('error'))
+                        <div class="mt-6 rounded-xl bg-red-50 border border-red-200 px-4 py-3 flex items-start gap-3">
+                            <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-sm text-red-800 font-medium">{{ session('error') }}</p>
                         </div>
                     @endif
 

@@ -1,23 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Livewire\FoundForm;
-use App\Livewire\LostForm;
-use App\Livewire\Auth\Forgotpassword;
-use App\Livewire\Auth\RegisterExtra;
-use App\Livewire\Auth\Login;
-
+use App\Livewire\Admin\Categories\Index as CategoriesIndex;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\Items\Index as ItemsIndex;
 use App\Livewire\Admin\LostAndFound\Index as LostFoundIndex;
 use App\Livewire\Admin\Users\Index as UsersIndex;
-use App\Livewire\Admin\Items\Index as ItemsIndex;
-use App\Livewire\Admin\Categories\Index as CategoriesIndex;
+use App\Livewire\Auth\Forgotpassword;
+use App\Livewire\Auth\Login;
+use App\Livewire\Auth\RegisterExtra;
+use App\Livewire\FoundForm;
+use App\Livewire\LostForm;
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Public Routes
 |--------------------------------------------------------------------------
 */
-
 
 Route::get('/', function () {
     return view('home');
@@ -32,7 +31,6 @@ Route::get('/login', Login::class)->name('login');
 Route::get('register-extra', RegisterExtra::class)->name('register-extra');
 Route::get('/forgotpassword', Forgotpassword::class)->name('forgotpassword');
 
-
 Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)
     ->middleware(['auth'])->name('dashboard');
 
@@ -43,14 +41,15 @@ Route::get('/moderator', \App\Livewire\Moderator\Dashboard::class)
 Route::middleware(['auth'])->group(function () {
     // User profile routes (simple profile view)
     Route::get('/profile', function () {
-        return view('profile'); 
+        return view('profile');
     })->name('profile.show');
-    
+
     // Logout route
     Route::post('/logout', function () {
         auth()->logout();
         session()->invalidate();
         session()->regenerateToken();
+
         return redirect('/');
     })->name('logout');
 });
@@ -66,25 +65,31 @@ Route::get('/lost-form', LostForm::class)->name('lost-form');
 */
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    
+
     // Dashboard Routes
     Route::get('/', Dashboard::class)->name('dashboard');
     Route::get('/dashboard', Dashboard::class)->name('dashboard.home');
-    
+
     // Lost & Found Management
     Route::get('/lost-found', LostFoundIndex::class)->name('lost-found');
 
-    Route::get('/items',  ItemsIndex::class)->name('items'); 
+    Route::get('/items', ItemsIndex::class)->name('items');
 
     Route::get('/categories', CategoriesIndex::class)->name('categories');
-    // Users Management  
+    // Users Management
     Route::get('/users', UsersIndex::class)->name('users');
-    
+
     // Settings (untuk pengembangan selanjutnya)
     // Route::get('/settings', Settings::class)->name('settings');
-    
+
 });
 
+Route::middleware(['auth', 'moderator'])->prefix('moderator')->name('moderator.')->group(function () {
+    Route::get('/', Dashboard::class)->name('dashboard');
+    Route::get('/categories', App\Livewire\Moderator\categories\Index::class)->name('categories');
+    Route::get('/categories/create', App\Livewire\Moderator\categories\Create::class)->name('categories.create');
+    Route::get('/categories/{id}/edit', App\Livewire\Moderator\categories\Edit::class)->name('categories.edit');
+});
 Route::redirect('/admin', '/admin/dashboard');
 
 Route::get('/profile', \App\Livewire\Profile::class)

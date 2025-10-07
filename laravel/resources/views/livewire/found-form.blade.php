@@ -3,7 +3,6 @@
 <div x-data="{ loading: false }"
      class="min-h-[100svh] bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
 
-    <!-- Main Container Card -->
     <div class="w-full max-w-5xl">
         
         <!-- Header Section -->
@@ -21,17 +20,14 @@
             </p>
         </div>
 
-        <!-- Form Container with Creative Background -->
+        <!-- Form Container -->
         <div class="relative">
-            <!-- Decorative Background Elements -->
             <div class="absolute -top-4 -left-4 w-24 h-24 bg-gradient-to-br from-green-400/20 to-emerald-500/10 rounded-full blur-2xl"></div>
             <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-gradient-to-br from-emerald-500/20 to-teal-600/10 rounded-full blur-2xl"></div>
             
-            <!-- Main Form Card -->
             <div class="relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-gray-200/50 overflow-hidden">
                 <form wire:submit.prevent="submit" @submit="loading = true" class="p-6 sm:p-8 lg:p-10">
                     
-                    <!-- Two Column Layout for Desktop -->
                     <div class="grid lg:grid-cols-2 gap-6 lg:gap-8">
                         
                         <!-- LEFT CARD: Item Details -->
@@ -65,7 +61,7 @@
                                     <select wire:model="category"
                                             class="w-full rounded-xl border-gray-300 focus:border-green-600 focus:ring-green-600/20 transition">
                                         <option value="">-- Choose Category --</option>
-                                        @foreach($categories as $cat)
+                                        @foreach($this->categories as $cat)
                                             <option value="{{ $cat->category_id }}">{{ $cat->category_name }}</option>
                                         @endforeach
                                     </select>
@@ -131,18 +127,33 @@
                                         @error('phone') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                                     </div>
 
-                                    <!-- Name (if exists in database) -->
-                                    <div x-show="$wire.user_name" x-cloak x-transition>
-                                        <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                            Your Name
-                                        </label>
-                                        <div class="flex items-center gap-2 px-4 py-3 bg-green-50 rounded-xl border border-green-200">
-                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                            <span class="text-sm font-medium text-gray-900" x-text="$wire.user_name"></span>
+                                    <!-- Name - Auto-filled (if exists) -->
+                                    @if($user_name && !$show_name_input)
+                                        <div x-transition>
+                                            <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                                Your Name
+                                            </label>
+                                            <div class="flex items-center gap-2 px-4 py-3 bg-green-50 rounded-xl border border-green-200">
+                                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <span class="text-sm font-medium text-gray-900">{{ $user_name }}</span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
+
+                                    <!-- Name Input (if new user) -->
+                                    @if($show_name_input)
+                                        <div x-transition>
+                                            <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                                Your Name <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text" wire:model.defer="user_name" required
+                                                   class="w-full rounded-xl border-gray-300 focus:border-emerald-600 focus:ring-emerald-600/20 placeholder:text-gray-400 transition"
+                                                   placeholder="Enter your full name">
+                                            @error('user_name') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
+                                        </div>
+                                    @endif
 
                                     <!-- Location -->
                                     <div>
