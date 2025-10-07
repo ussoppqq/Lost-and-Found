@@ -29,7 +29,7 @@ class Login extends Component
 
         // Moderator → dashboard moderator
         if ($user->role && $user->role->role_code === 'MODERATOR') {
-            return redirect()->route('moderator');
+            return redirect()->route('dashboard');
         }
 
         // User biasa → home

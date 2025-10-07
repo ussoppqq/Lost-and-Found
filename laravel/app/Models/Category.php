@@ -15,7 +15,7 @@ class Category extends Model
 
     public $timestamps = false; 
 
-    protected $fillable = ['company_id', 'category_name', 'subcategory_name', 'retention_days', 'is_restricted'];
+    protected $fillable = ['category_id', 'company_id', 'category_name', 'retention_days', 'is_restricted'];
 
     public function company()
     {

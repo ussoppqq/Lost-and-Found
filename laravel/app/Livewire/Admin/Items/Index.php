@@ -17,6 +17,11 @@ class Index extends Component
     public $showDeleteModal = false;
     public $itemToDelete = null;
 
+    protected $listeners = [
+        'item-created' => '$refresh',
+        'item-updated' => '$refresh',
+    ];
+
     protected $queryString = [
         'search' => ['except' => ''],
         'categoryFilter' => ['except' => ''],
@@ -55,6 +60,12 @@ class Index extends Component
     public function deleteItem()
     {
         if ($this->itemToDelete) {
+            // Hapus photos dulu
+            foreach ($this->itemToDelete->photos as $photo) {
+                \Storage::disk('public')->delete($photo->photo_url);
+                $photo->delete();
+            }
+            
             $this->itemToDelete->delete();
             session()->flash('message', 'Item berhasil dihapus.');
             $this->showDeleteModal = false;
@@ -70,38 +81,44 @@ class Index extends Component
 
     public function render()
     {
+        $companyId = auth()->user()->company_id;
+
+        // Statistics
+        $stats = [
+            'total' => Item::where('company_id', $companyId)->count(),
+            'stored' => Item::where('company_id', $companyId)->where('item_status', 'STORED')->count(),
+            'claimed' => Item::where('company_id', $companyId)->where('item_status', 'CLAIMED')->count(),
+            'disposed' => Item::where('company_id', $companyId)->where('item_status', 'DISPOSED')->count(),
+        ];
+
+        // Build query
         $items = Item::query()
-            ->with(['category', 'report'])
+            ->with(['category', 'post', 'reports'])
+            ->where('company_id', $companyId)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('item_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('description', 'like', '%' . $this->search . '%')
-                      ->orWhere('storage_location', 'like', '%' . $this->search . '%');
+                      ->orWhere('item_description', 'like', '%' . $this->search . '%')
+                      ->orWhere('storage', 'like', '%' . $this->search . '%');
                 });
             })
             ->when($this->categoryFilter, function ($query) {
                 $query->where('category_id', $this->categoryFilter);
             })
             ->when($this->statusFilter, function ($query) {
-                $query->where('status', $this->statusFilter);
+                $query->where('item_status', strtoupper($this->statusFilter));
             })
-            ->latest()
+            ->latest('created_at')
             ->paginate(10);
 
-        $categories = Category::all();
-
-        $stats = [
-            'total' => Item::count(),
-            'stored' => Item::where('status', 'stored')->count(),
-            'claimed' => Item::where('status', 'claimed')->count(),
-            'disposed' => Item::where('status', 'disposed')->count(),
-        ];
+        $categories = Category::where('company_id', $companyId)->get();
 
         return view('livewire.admin.items.index', [
             'items' => $items,
             'categories' => $categories,
             'stats' => $stats,
-        ])->layout('layouts.admin', [
+        ])->layout('components.layouts.admin', [
+            'title' => 'Items Management',
             'pageTitle' => 'Items Management',
             'pageDescription' => 'Manage all physical items in storage'
         ]);

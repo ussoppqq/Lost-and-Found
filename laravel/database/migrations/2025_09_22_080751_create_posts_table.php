@@ -15,7 +15,7 @@ return new class extends Migration
     $table->uuid('category_id')->primary();
     $table->uuid('company_id');
     $table->string('category_name');
-    $table->string('subcategory_name')->nullable();
+    $table->string('category_icon')->nullable();
     $table->integer('retention_days');
     $table->boolean('is_restricted')->default(false);
 

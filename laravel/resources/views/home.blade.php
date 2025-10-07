@@ -1,6 +1,6 @@
 <x-layouts.app>
     
-    {{-- ========== HERO SECTION ========== --}}
+
     <section class="relative w-full h-screen overflow-hidden">
         <div class="absolute inset-0">
             <video 

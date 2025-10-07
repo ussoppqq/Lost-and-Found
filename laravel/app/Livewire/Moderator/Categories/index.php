@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Admin\Categories;
+namespace App\Livewire\Moderator\Categories;
 
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -13,11 +13,6 @@ class Index extends Component
     public $search = '';
     public $showDeleteModal = false;
     public $categoryToDelete = null;
-
-    protected $listeners = [
-        'category-created' => '$refresh',
-        'category-updated' => '$refresh',
-    ];
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -44,7 +39,7 @@ class Index extends Component
             }
 
             $this->categoryToDelete->delete();
-            session()->flash('message', 'Category deleted successfully.');
+            session()->flash('message', 'Category berhasil dihapus.');
             $this->closeDeleteModal();
         }
     }
@@ -57,24 +52,20 @@ class Index extends Component
 
     public function render()
     {
-        $companyId = auth()->user()->company_id;
-
         $categories = Category::query()
             ->withCount('items')
-            ->where('company_id', $companyId)
             ->when($this->search, function ($query) {
-                $query->where('category_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('category_description', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('description', 'like', '%' . $this->search . '%');
             })
-            ->orderBy('category_name', 'asc') // Ganti dari latest() ke orderBy
+            ->latest()
             ->paginate(12);
 
-        return view('livewire.admin.categories.index', [
+        return view('livewire.moderator.categories.index', [
             'categories' => $categories,
-        ])->layout('components.layouts.admin', [
-            'title' => 'Categories Management',
+        ])->layout('components.layouts.moderator', [
             'pageTitle' => 'Categories Management',
-            'pageDescription' => 'Manage all item categories'
+            'pageDescription' => 'Manage categories as a moderator',
         ]);
     }
 }
