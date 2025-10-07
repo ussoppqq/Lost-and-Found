@@ -15,18 +15,25 @@ class User extends Authenticatable
     protected $keyType = 'string';
 
     protected $fillable = [
+        'user_id',
         'company_id', 
         'role_id', 
         'full_name', 
         'email', 
         'phone_number', 
         'password', 
-        'is_verified'
+        'is_verified',
+        'phone_verified_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'is_verified' => 'boolean',
+        'phone_verified_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -40,7 +47,25 @@ class User extends Authenticatable
         });
     }
 
- 
+    /**
+     * Check if phone is verified
+     */
+    public function hasVerifiedPhone(): bool
+    {
+        return $this->is_verified && $this->phone_verified_at !== null;
+    }
+
+    /**
+     * Mark phone as verified
+     */
+    public function markPhoneAsVerified(): bool
+    {
+        return $this->update([
+            'is_verified' => true,
+            'phone_verified_at' => now(),
+        ]);
+    }
+
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id', 'company_id');

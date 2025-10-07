@@ -57,28 +57,22 @@ class RegisterExtra extends Component
 
             Log::info('Fonnte Response', ['response' => $response]);
 
-            // Perbaikan: Cek berbagai kemungkinan format response yang sukses
             $isSuccess = false;
             
             if (is_array($response)) {
-                // Format 1: response dengan status boolean true
                 if (isset($response['status']) && $response['status'] === true) {
                     $isSuccess = true;
                 }
-                // Format 2: response dengan status string "success" 
                 elseif (isset($response['status']) && strtolower($response['status']) === 'success') {
                     $isSuccess = true;
                 }
-                // Format 3: response tanpa error atau dengan detail yang menunjukkan sukses
                 elseif (!isset($response['error']) && !isset($response['reason'])) {
                     $isSuccess = true;
                 }
-                // Format 4: response dengan key lain yang menunjukkan sukses
                 elseif (isset($response['detail']) && stripos($response['detail'], 'success') !== false) {
                     $isSuccess = true;
                 }
             } 
-            // Jika response bukan array tapi berhasil (misalnya string "OK" atau response lain)
             elseif (is_string($response) && (strtolower($response) === 'ok' || stripos($response, 'success') !== false)) {
                 $isSuccess = true;
             }
@@ -87,11 +81,8 @@ class RegisterExtra extends Component
                 session()->flash('success', 'OTP berhasil dikirim ke WhatsApp ' . $this->phone_number);
                 $this->otpSent = true;
                 $this->resetErrorBag(['otp']);
-                
-                // Perbaikan: Gunakan dispatch untuk Livewire 3
                 $this->dispatch('otp-sent');
             } else {
-                // Ambil pesan error dari berbagai kemungkinan key
                 $errorMsg = $response['reason'] ?? $response['error'] ?? $response['message'] ?? 'Unknown error';
                 $this->addError('otp', 'Gagal mengirim OTP: ' . $errorMsg);
                 $this->otpSent = false;
@@ -104,7 +95,6 @@ class RegisterExtra extends Component
                 'trace' => $e->getTraceAsString()
             ]);
             
-            // Jika dalam debug mode, tampilkan error yang lebih detail
             if (config('app.debug')) {
                 $this->addError('otp', 'Error OTP: ' . $e->getMessage());
             } else {
@@ -150,7 +140,6 @@ class RegisterExtra extends Component
         }
 
         try {
-            // Cari role user (cari by role_code atau role_name, fleksibel)
             $role = Role::where('role_code', 'USER')
                 ->orWhere('role_name', 'User')
                 ->first();
@@ -163,13 +152,14 @@ class RegisterExtra extends Component
 
             $user = User::create([
                 'user_id' => (string) Str::uuid(),
-                'company_id' => null,                     // user biasa -> null
+                'company_id' => null,
                 'role_id' => $role->role_id,
                 'full_name' => $this->full_name,
                 'phone_number' => $this->phone_number,
                 'email' => $this->email,
                 'password' => Hash::make($this->password),
                 'is_verified' => true,
+                'phone_verified_at' => now(),
             ]);
 
             session()->forget(['otp_code', 'otp_phone', 'otp_time']);
@@ -180,7 +170,6 @@ class RegisterExtra extends Component
             return redirect('/');
         } catch (\Exception $e) {
             Log::error('Registration error: ' . $e->getMessage(), ['exception' => $e]);
-            // kalau environment development, tampilkan pesan detil supaya mudah debug
             if (config('app.debug')) {
                 $this->addError('email', 'Registration error: ' . $e->getMessage());
             } else {

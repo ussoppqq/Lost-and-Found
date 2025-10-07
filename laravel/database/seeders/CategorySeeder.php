@@ -3,50 +3,53 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 use App\Models\Category;
 use App\Models\Company;
+use Illuminate\Support\Str;
 
 class CategorySeeder extends Seeder
 {
     public function run(): void
     {
-        $company1 = Company::first();
+        $companies = Company::all();
+        
+        if ($companies->isEmpty()) {
+            $this->command->warn('No companies found. Please run CompanySeeder first.');
+            return;
+        }
 
-        Category::create([
-            'category_id' => Str::uuid(),
-            'company_id' => $company1->company_id,
-            'category_name' => 'Electronics',
-            'subcategory_name' => 'Mobile Phones',
-            'retention_days' => 90,
-            'is_restricted' => false,
-        ]);
+        $categories = [
+            ['name' => 'Wallet', 'icon' => '👜', 'retention' => 90],
+            ['name' => 'Phone', 'icon' => '📱', 'retention' => 90],
+            ['name' => 'Laptop', 'icon' => '💻', 'retention' => 120],
+            ['name' => 'Watch', 'icon' => '⌚', 'retention' => 90],
+            ['name' => 'Keys', 'icon' => '🔑', 'retention' => 60],
+            ['name' => 'Glasses', 'icon' => '👓', 'retention' => 60],
+            ['name' => 'Documents', 'icon' => '📄', 'retention' => 180, 'restricted' => true],
+            ['name' => 'Cards', 'icon' => '💳', 'retention' => 180, 'restricted' => true],
+            ['name' => 'Bag', 'icon' => '🎒', 'retention' => 90],
+            ['name' => 'Jewelry', 'icon' => '💍', 'retention' => 120],
+            ['name' => 'Headphones', 'icon' => '🎧', 'retention' => 60],
+            ['name' => 'Camera', 'icon' => '📷', 'retention' => 90],
+            ['name' => 'Luggage', 'icon' => '🧳', 'retention' => 120],
+            ['name' => 'Books', 'icon' => '📚', 'retention' => 60],
+            ['name' => 'Others', 'icon' => '📦', 'retention' => 30],
+        ];
 
-        Category::create([
-            'category_id' => Str::uuid(),
-            'company_id' => $company1->company_id,
-            'category_name' => 'Personal Items',
-            'subcategory_name' => 'Wallets',
-            'retention_days' => 60,
-            'is_restricted' => true,
-        ]);
-
-        Category::create([
-            'category_id' => Str::uuid(),
-            'company_id' => $company1->company_id,
-            'category_name' => 'Clothing',
-            'subcategory_name' => 'Bags',
-            'retention_days' => 30,
-            'is_restricted' => false,
-        ]);
-
-        Category::create([
-            'category_id' => Str::uuid(),
-            'company_id' => $company1->company_id,
-            'category_name' => 'Documents',
-            'subcategory_name' => 'ID Cards',
-            'retention_days' => 180,
-            'is_restricted' => true,
-        ]);
+        // Loop untuk setiap company
+        foreach ($companies as $company) {
+            // Loop untuk setiap category
+            foreach ($categories as $cat) {
+                Category::create([
+                    'category_id' => (string) Str::uuid(),
+                    'company_id' => $company->company_id,
+                    'category_name' => $cat['name'],
+                    'category_icon' => $cat['icon'],
+                    'retention_days' => $cat['retention'],
+                    'is_restricted' => $cat['restricted'] ?? false,
+                ]);
+            }
+            $this->command->info("Created categories for company: {$company->company_name}");
+        }
     }
 }
