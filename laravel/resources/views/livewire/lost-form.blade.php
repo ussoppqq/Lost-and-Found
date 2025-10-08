@@ -5,18 +5,18 @@
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-800 shadow-lg mb-4">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M5 13l4 4L19 7"/>
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
             </div>
             <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
-                Report Found Item
+                Report Lost Item
             </h1>
             <p class="mt-3 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-                Please fill out the form below with details about the item you found.
+                Please fill out the form below with details about your lost item.
             </p>
         </div>
 
-        <!-- Card -->
+        <!-- Form Card -->
         <div class="bg-gray-50 border border-gray-200 rounded-2xl shadow-inner p-8">
             <form wire:submit.prevent="submit">
                 <div class="grid lg:grid-cols-2 gap-8">
@@ -30,8 +30,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="text-xl font-semibold text-gray-900">Finder Information</h2>
-                                <p class="text-sm text-gray-500">Who found this item?</p>
+                                <h2 class="text-xl font-semibold text-gray-900">Your Information</h2>
+                                <p class="text-sm text-gray-500">Who lost the item?</p>
                             </div>
                         </div>
 
@@ -43,7 +43,6 @@
                                 </label>
 
                                 @if(auth()->check())
-                                    <!-- Logged in -->
                                     <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
                                         <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor"
                                              viewBox="0 0 24 24">
@@ -54,7 +53,6 @@
                                         <span class="ml-auto text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">Logged-in User</span>
                                     </div>
                                 @else
-                                    <!-- Manual input -->
                                     <input type="text"
                                            wire:model.live="phone"
                                            required
@@ -66,12 +64,8 @@
 
                             <!-- Name -->
                             <div>
-                                <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                    Your Name <span class="text-red-500">*</span>
-                                </label>
-
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Your Name <span class="text-red-500">*</span></label>
                                 @if(auth()->check())
-                                    <!-- Logged in user -->
                                     <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
                                         <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor"
                                              viewBox="0 0 24 24">
@@ -81,9 +75,7 @@
                                         <span class="text-sm font-medium text-gray-900">{{ $user_name }}</span>
                                         <span class="ml-auto text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">Logged-in User</span>
                                     </div>
-
                                 @elseif($is_existing_user)
-                                    <!-- Existing user (by phone) -->
                                     <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
                                         <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor"
                                              viewBox="0 0 24 24">
@@ -94,7 +86,6 @@
                                         <span class="ml-auto text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">Verified</span>
                                     </div>
                                 @else
-                                    <!-- New user -->
                                     <input type="text" wire:model.defer="user_name" required
                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 placeholder:text-gray-400 transition"
                                            placeholder="Enter your full name">
@@ -105,22 +96,22 @@
                             <!-- Location -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                    Location Found <span class="text-gray-500 font-normal text-xs">(optional)</span>
+                                    Where You Lost It <span class="text-gray-500 font-normal text-xs">(optional)</span>
                                 </label>
                                 <input type="text" wire:model.defer="location"
                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 placeholder:text-gray-400 transition"
-                                       placeholder="e.g. Near Cafeteria, Parking Area">
+                                       placeholder="e.g. Library, Cafeteria, Hallway">
                                 @error('location') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
 
-                            <!-- Date -->
+                            <!-- Date Lost -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                    Date Found <span class="text-gray-500 font-normal text-xs">(optional)</span>
+                                    Date Lost <span class="text-gray-500 font-normal text-xs">(optional)</span>
                                 </label>
-                                <input type="date" wire:model.defer="date_found"
+                                <input type="date" wire:model.defer="date_lost"
                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 transition">
-                                @error('date_found') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
+                                @error('date_lost') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
                         </div>
                     </div>
@@ -131,12 +122,12 @@
                             <div class="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center shadow-md">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M20 7l-8-4-8 4v10l8 4 8-4z"/>
+                                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="text-xl font-semibold text-gray-900">Item Information</h2>
-                                <p class="text-sm text-gray-500">Tell us about the found item</p>
+                                <h2 class="text-xl font-semibold text-gray-900">Item Details</h2>
+                                <p class="text-sm text-gray-500">Tell us about your lost item</p>
                             </div>
                         </div>
 
@@ -148,15 +139,13 @@
                                 </label>
                                 <input type="text" wire:model.defer="item_name" required
                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 placeholder:text-gray-400 transition"
-                                       placeholder="e.g. Blue Backpack with Laptop">
+                                       placeholder="e.g. Black Wallet, Laptop, ID Card">
                                 @error('item_name') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
 
                             <!-- Category -->
                             <div>
-                                <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                    Category <span class="text-red-500">*</span>
-                                </label>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Category <span class="text-red-500">*</span></label>
                                 <select wire:model="category" required
                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 transition">
                                     <option value="">-- Select Category --</option>
@@ -170,11 +159,11 @@
                             <!-- Description -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                    Description / Characteristics <span class="text-red-500">*</span>
+                                    Description <span class="text-red-500">*</span>
                                 </label>
                                 <textarea rows="4" wire:model.defer="description" required maxlength="200"
                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 placeholder:text-gray-400 transition resize-none"
-                                          placeholder="Brand, color, condition, unique marks, etc."></textarea>
+                                          placeholder="Color, brand, unique marks, contents, etc."></textarea>
                                 @error('description') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
 
@@ -183,15 +172,13 @@
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
                                     Photos <span class="text-gray-500 font-normal text-xs">(optional)</span>
                                 </label>
-
-                                <input type="file" multiple accept="image/*" class="hidden" wire:model="photos" id="photoUpload">
+                                <input type="file" accept="image/*" multiple class="hidden" wire:model="photos" id="lostPhotos">
                                 <div class="space-y-3">
                                     @if(empty($photos))
-                                        <button type="button" onclick="document.getElementById('photoUpload').click()"
+                                        <button type="button" onclick="document.getElementById('lostPhotos').click()"
                                                 class="w-full flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 p-8 transition">
                                             <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow">
-                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
-                                                     viewBox="0 0 24 24">
+                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                           d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                                 </svg>
@@ -225,10 +212,9 @@
                     </div>
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Submit -->
                 <div class="mt-8">
-                    <button type="submit"
-                            wire:loading.attr="disabled"
+                    <button type="submit" wire:loading.attr="disabled"
                             class="w-full inline-flex items-center justify-center gap-3 rounded-xl bg-gray-800 hover:bg-gray-900 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200">
                         <svg wire:loading wire:target="submit" class="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -244,7 +230,7 @@
         </div>
 
         <p class="mt-6 text-center text-sm text-gray-500">
-            Your report helps the rightful owner reclaim their item. Thank you for your honesty.
+            Your information will help others return your lost item. Thank you for reporting.
         </p>
     </div>
 </div>
