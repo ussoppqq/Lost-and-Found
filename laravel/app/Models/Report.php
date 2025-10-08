@@ -18,8 +18,9 @@ class Report extends Model
         'company_id',
         'user_id',
         'item_id',
+        'category_id',
         'report_type',
-        // 'item_name',          
+        'item_name',          
         'report_description',
         'report_datetime',
         'report_location',
@@ -44,6 +45,12 @@ class Report extends Model
     {
         return $this->belongsTo(Item::class, 'item_id', 'item_id');
     }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id', 'category_id');
+    }
+
 
     public function claims()
     {
