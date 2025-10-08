@@ -69,7 +69,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Dashboard Routes
     Route::get('/', Dashboard::class)->name('dashboard');
     Route::get('/dashboard', Dashboard::class)->name('dashboard.home');
-
+    Route::get('/found-form', FoundForm::class)->name('found-form');
     // Lost & Found Management
     Route::get('/lost-found', LostFoundIndex::class)->name('lost-found');
 
@@ -83,7 +83,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Route::get('/settings', Settings::class)->name('settings');
 
 });
-
+Storage::disk('public')->put('test.txt', 'hello');
 Route::middleware(['auth', 'moderator'])->prefix('moderator')->name('moderator.')->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
     Route::get('/categories', App\Livewire\Moderator\categories\Index::class)->name('categories');

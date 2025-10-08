@@ -1,6 +1,5 @@
 <x-layouts.app>
-    
-
+    {{-- ========== HERO SECTION ========== --}}
     <section class="relative w-full h-screen overflow-hidden">
         <div class="absolute inset-0">
             <video 
@@ -83,7 +82,7 @@
                 
                 {{-- LOST Card --}}
                 <div class="group">
-                    <a href="{{ url('/report') }}"
+                    <a href="{{ url('/lost-form') }}"
                         class="block bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                         
                         <div class="relative h-48 md:h-56 lg:h-64 overflow-hidden">
@@ -120,7 +119,7 @@
 
                 {{-- FOUND Card --}}
                 <div class="group">
-                    <a href="{{ url('/found') }}"
+                    <a href="{{ url('/found-form') }}"
                         class="block bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                         
                         <div class="relative h-48 md:h-56 lg:h-64 overflow-hidden">
