@@ -13,7 +13,7 @@ class Claim extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['company_id', 'user_id', 'item_id', 'claim_status', 'pickup_schedule'];
+    protected $fillable = ['company_id', 'user_id', 'item_id', 'report_id', 'claim_status', 'pickup_schedule', 'brand', 'color', 'claim_notes'];
 
     public function company()
     {
@@ -28,5 +28,10 @@ class Claim extends Model
     public function item()
     {
         return $this->belongsTo(Item::class, 'item_id', 'item_id');
+    }
+    
+    public function report()
+    {
+        return $this->belongsTo(Report::class, 'report_id', 'report_id'); // Tambah relasi balik
     }
 }

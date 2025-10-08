@@ -13,7 +13,7 @@ class ItemPhoto extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['company_id', 'item_id', 'photo_url', 'alt_text', 'display_order'];
+    protected $fillable = ['photo_id', 'company_id', 'item_id', 'photo_url', 'alt_text', 'display_order'];
 
     public function company()
     {

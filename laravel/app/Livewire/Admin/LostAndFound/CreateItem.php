@@ -10,11 +10,13 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\ItemPhoto;
 use App\Models\User;
+use App\Models\Claim;
 use App\Enums\ItemStatus;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class CreateItem extends Component
 {
@@ -35,20 +37,20 @@ class CreateItem extends Component
     public $reporter_phone;
     public $reporter_email;
 
-    // Item fields (only for FOUND items)
+    // Item fields
     public $item_name;
     public $brand;
     public $color;
     public $item_description;
     public $storage;
-    public $item_status = 'STORED'; // Default STORED for FOUND items
+    public $item_status = 'STORED';
     public $sensitivity_level = 'NORMAL';
     public $category_id;
     public $post_id;
 
     // Photos
-    public $photos = []; // For admin upload (FOUND items)
-    public $reportPhotos = []; // Photos from user report
+    public $photos = [];
+    public $reportPhotos = [];
 
     public $showModal = false;
 
@@ -61,20 +63,23 @@ class CreateItem extends Component
     {
         $rules = [];
 
-        // Common rules for all modes
-        if ($this->mode === 'standalone') {
+        // Common rules
+        if ($this->mode === 'standalone' || $this->mode === 'from-report') {
             $rules['report_type'] = 'required|in:LOST,FOUND';
+            $rules['item_name'] = 'required|string|max:255';
+            $rules['category_id'] = 'required|exists:categories,category_id';
+        }
+
+        if ($this->mode === 'standalone') {
             $rules['report_description'] = 'required|string';
             $rules['report_location'] = 'required|string|max:255';
             $rules['report_datetime'] = 'required|date';
             $rules['reporter_name'] = 'required|string|max:255';
             $rules['reporter_phone'] = 'required|string|max:20';
             $rules['reporter_email'] = 'required|email|max:255';
-            $rules['item_name'] = 'required|string|max:255';
-            $rules['category_id'] = 'required|exists:categories,category_id';
         }
 
-        // Rules khusus untuk FOUND items
+        // FOUND items
         if ($this->report_type === 'FOUND') {
             $rules['brand'] = 'nullable|string|max:255';
             $rules['color'] = 'nullable|string|max:100';
@@ -83,8 +88,17 @@ class CreateItem extends Component
             $rules['sensitivity_level'] = 'required|in:NORMAL,RESTRICTED';
             $rules['post_id'] = 'required|exists:posts,post_id';
         }
-        
-        // Photos for both LOST and FOUND
+
+        // LOST CLAIM (from-report): Require min 1 photo
+        if ($this->report_type === 'LOST' && $this->mode === 'from-report') {
+            $rules['photos'] = 'required|array|min:1';
+            $rules['photos.*'] = 'image|max:2048';
+            $rules['brand'] = 'nullable|string|max:255';
+            $rules['color'] = 'nullable|string|max:100';
+            $rules['item_description'] = 'nullable|string';
+            $rules['category_id'] = 'required|exists:categories,category_id';
+        }
+
         $rules['photos.*'] = 'nullable|image|max:2048';
 
         return $rules;
@@ -101,7 +115,6 @@ class CreateItem extends Component
         $this->reportId = $reportId;
         $this->report = Report::with(['user'])->findOrFail($reportId);
 
-        // Pre-fill data dari report
         $this->item_name = $this->report->item_name ?? '';
         $this->report_description = $this->report->report_description;
         $this->report_location = $this->report->report_location;
@@ -109,7 +122,6 @@ class CreateItem extends Component
         $this->report_type = $this->report->report_type;
         $this->category_id = $this->report->category_id;
 
-        // Reporter info
         if ($this->report->user) {
             $this->reporter_name = $this->report->user->full_name;
             $this->reporter_phone = $this->report->user->phone_number ?? '-';
@@ -120,12 +132,29 @@ class CreateItem extends Component
             $this->reporter_email = $this->report->reporter_email ?? '-';
         }
 
-        // Load photos from report (user uploaded)
+        $this->reportPhotos = [];
         if ($this->report->photo_url) {
-            $this->reportPhotos = [$this->report->photo_url];
+            if (is_string($this->report->photo_url) && str_starts_with($this->report->photo_url, '[')) {
+                $photosArray = json_decode($this->report->photo_url, true);
+                $this->reportPhotos = is_array($photosArray) ? $photosArray : [$this->report->photo_url];
+            } else {
+                $this->reportPhotos = [$this->report->photo_url];
+            }
+        }
+
+        if ($this->report_type === 'LOST') {
+            $this->item_status = 'CLAIMED';
+        } else {
+            $this->item_status = 'STORED';
         }
 
         $this->showModal = true;
+        
+        Log::info('Modal opened from report', [
+            'reportId' => $reportId,
+            'report_type' => $this->report_type,
+            'reportPhotos' => $this->reportPhotos
+        ]);
     }
 
     public function openModalStandalone()
@@ -146,24 +175,12 @@ class CreateItem extends Component
     public function resetForm()
     {
         $this->reset([
-            'item_name',
-            'brand',
-            'color',
-            'item_description',
-            'storage',
-            'category_id',
-            'post_id',
-            'photos',
-            'reportPhotos',
-            'report_type',
-            'report_description',
-            'report_location',
-            'reporter_name',
-            'reporter_phone',
-            'reporter_email',
+            'item_name', 'brand', 'color', 'item_description', 'storage', 'category_id', 'post_id',
+            'photos', 'reportPhotos', 'report_type', 'report_description', 'report_location',
+            'reporter_name', 'reporter_phone', 'reporter_email',
         ]);
 
-        $this->item_status = 'REGISTERED';
+        $this->item_status = 'STORED';
         $this->sensitivity_level = 'NORMAL';
         $this->report_type = 'FOUND';
         $this->report_datetime = now()->format('Y-m-d\TH:i');
@@ -213,7 +230,20 @@ class CreateItem extends Component
 
     public function save()
     {
-        $this->validate();
+        Log::info('Save method called!', [
+            'mode' => $this->mode,
+            'report_type' => $this->report_type,
+            'photos_count' => count($this->photos),
+            'category_id' => $this->category_id,
+        ]);
+
+        try {
+            $this->validate();
+            Log::info('Validation passed!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed', ['errors' => $e->errors()]);
+            return; // Stop execution, errors will show in view
+        }
 
         try {
             DB::beginTransaction();
@@ -221,21 +251,20 @@ class CreateItem extends Component
             $companyId = auth()->user()->company_id;
             $userId = null;
 
-            // Get or create user
             if ($this->mode === 'standalone') {
                 $walkInUser = $this->getOrCreateWalkInUser($companyId);
                 $userId = $walkInUser->user_id;
             } else {
-                $userId = $this->report->user_id;
+                $userId = $this->report->user_id ?? null;
             }
 
             $itemId = null;
 
-            // ============================================
-            // FOUND ITEMS: Create physical item record
-            // ============================================
             if ($this->report_type === 'FOUND') {
                 $category = Category::find($this->category_id);
+                if (!$category) {
+                    throw new \Exception('Category not found: ' . $this->category_id);
+                }
                 $retentionUntil = now()->addDays($category->retention_days ?? 30);
 
                 $item = Item::create([
@@ -255,30 +284,109 @@ class CreateItem extends Component
 
                 $itemId = $item->item_id;
 
-                // Save item photos (admin upload)
+                Log::info('Found item created', ['item_id' => $itemId]);
+
+                $photoOrder = 0;
                 if (!empty($this->photos)) {
-                    foreach ($this->photos as $index => $photo) {
+                    foreach ($this->photos as $photo) {
                         $path = $photo->store('item-photos', 'public');
                         ItemPhoto::create([
                             'photo_id' => (string) Str::uuid(),
                             'company_id' => $companyId,
                             'item_id' => $itemId,
                             'photo_url' => $path,
-                            'alt_text' => $this->item_name . ' - Photo ' . ($index + 1),
-                            'display_order' => $index,
+                            'alt_text' => $this->item_name . ' - Photo ' . ($photoOrder + 1),
+                            'display_order' => $photoOrder,
                         ]);
+                        $photoOrder++;
                     }
+                    Log::info('Admin photos saved', ['count' => count($this->photos)]);
+                }
+
+                if ($this->mode === 'from-report' && !empty($this->reportPhotos)) {
+                    foreach ($this->reportPhotos as $photoUrl) {
+                        if (Storage::disk('public')->exists($photoUrl)) {
+                            ItemPhoto::create([
+                                'photo_id' => (string) Str::uuid(),
+                                'company_id' => $companyId,
+                                'item_id' => $itemId,
+                                'photo_url' => $photoUrl,
+                                'alt_text' => $this->item_name . ' - Report Photo ' . ($photoOrder + 1),
+                                'display_order' => $photoOrder,
+                            ]);
+                            $photoOrder++;
+                        }
+                    }
+                    Log::info('Report photos copied', ['count' => count($this->reportPhotos)]);
                 }
             }
 
-            // ============================================
-            // Create or Update Report
-            // ============================================
+            if ($this->report_type === 'LOST' && $this->mode === 'from-report') {
+                $category = Category::find($this->category_id);
+                if (!$category) {
+                    throw new \Exception('Category not found: ' . $this->category_id);
+                }
+                $retentionUntil = now()->addDays($category->retention_days ?? 30);
+
+                $item = Item::create([
+                    'item_id' => (string) Str::uuid(),
+                    'company_id' => $companyId,
+                    'post_id' => $this->post_id ?? null,
+                    'category_id' => $this->category_id,
+                    'item_name' => $this->item_name,
+                    'brand' => $this->brand,
+                    'color' => $this->color,
+                    'item_description' => $this->item_description ?? $this->report_description,
+                    'storage' => $this->storage ?? null,
+                    'item_status' => 'CLAIMED',
+                    'retention_until' => $retentionUntil,
+                    'sensitivity_level' => $this->sensitivity_level ?? 'NORMAL',
+                ]);
+
+                $itemId = $item->item_id;
+
+                if (!empty($this->photos)) {
+                    $photoOrder = 0;
+                    foreach ($this->photos as $photo) {
+                        $path = $photo->store('item-photos', 'public');
+                        ItemPhoto::create([
+                            'photo_id' => (string) Str::uuid(),
+                            'company_id' => $companyId,
+                            'item_id' => $itemId,
+                            'photo_url' => $path,
+                            'alt_text' => $this->item_name . ' - Claim Photo ' . ($photoOrder + 1),
+                            'display_order' => $photoOrder,
+                        ]);
+                        $photoOrder++;
+                    }
+                    Log::info('Claim photos saved', ['count' => count($this->photos)]);
+                }
+
+                try {
+                    Claim::create([
+                        'claim_id' => (string) Str::uuid(),
+                        'company_id' => $companyId,
+                        'user_id' => $userId,
+                        'item_id' => $itemId,
+                        'report_id' => $this->reportId,
+                        'brand' => $this->brand,
+                        'color' => $this->color,
+                        'claim_notes' => $this->item_description,
+                        'claim_status' => 'RELEASED',
+                        'pickup_schedule' => now(),
+                    ]);
+                    Log::info('Claim created successfully');
+                } catch (\Exception $claimError) {
+                    Log::error('Claim creation failed', ['error' => $claimError->getMessage()]);
+                    throw $claimError;
+                }
+
+                Log::info('Claim created and item marked as CLAIMED', ['item_id' => $itemId]);
+            }
+
             if ($this->mode === 'standalone') {
-                // Save reference photos to storage first (for LOST items)
                 $photoUrl = null;
                 if (!empty($this->photos) && $this->report_type === 'LOST') {
-                    // For LOST items, save first photo as report photo
                     $photoUrl = $this->photos[0]->store('report-photos', 'public');
                 }
 
@@ -286,7 +394,7 @@ class CreateItem extends Component
                     'report_id' => (string) Str::uuid(),
                     'company_id' => $companyId,
                     'user_id' => $userId,
-                    'item_id' => $itemId, // NULL for LOST, has value for FOUND
+                    'item_id' => $itemId,
                     'category_id' => $this->category_id,
                     'report_type' => $this->report_type,
                     'item_name' => $this->item_name,
@@ -294,33 +402,43 @@ class CreateItem extends Component
                     'report_datetime' => $this->report_datetime,
                     'report_location' => $this->report_location,
                     'report_status' => $this->report_type === 'FOUND' ? 'STORED' : 'OPEN',
-                    'photo_url' => $photoUrl, // Only for LOST items
+                    'photo_url' => $photoUrl,
                     'reporter_name' => $this->reporter_name,
                     'reporter_phone' => $this->reporter_phone,
                     'reporter_email' => $this->reporter_email,
                 ]);
             } else {
-                // Update existing report
+                $reportStatus = $this->report_type === 'FOUND' ? 'STORED' : 'CLOSED';
+                
                 Report::where('report_id', $this->reportId)->update([
                     'item_id' => $itemId,
-                    'report_status' => $this->report_type === 'FOUND' ? 'STORED' : 'OPEN',
+                    'report_status' => $reportStatus,
                 ]);
+                
+                Log::info('Report updated', ['report_id' => $this->reportId, 'status' => $reportStatus]);
             }
 
             DB::commit();
 
             $message = $this->report_type === 'FOUND' 
                 ? 'Found item registered successfully!' 
-                : 'Lost item report confirmed!';
+                : 'Lost item claimed successfully! Status updated to CLAIMED.';
                 
             session()->flash('success', $message);
-            $this->closeModal();
+            
+            $this->showModal = false;
+            $this->resetForm();
             $this->dispatch('item-created');
+            
+            Log::info('Item registration/claim completed successfully');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->addError('item_name', 'Error: ' . $e->getMessage());
-            \Log::error('Error creating item: ' . $e->getMessage());
+            $this->addError('general', 'Error: ' . $e->getMessage()); // General error untuk tampil di view
+            Log::error('Error creating item/claim', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
         }
     }
 
@@ -329,12 +447,10 @@ class CreateItem extends Component
         $categories = Category::where('company_id', auth()->user()->company_id)->get();
         $posts = Post::where('company_id', auth()->user()->company_id)->get();
 
-        // Status options based on report type
         $statusOptions = [];
         if ($this->report_type === 'FOUND') {
             $statusOptions = [
-                ['value' => 'REGISTERED', 'label' => 'Registered (Initial)'],
-                ['value' => 'STORED', 'label' => 'Stored (In Storage)'],
+                ['value' => 'STORED', 'label' => 'Stored (In Storage) - Default'],
                 ['value' => 'CLAIMED', 'label' => 'Claimed (Owner Found)'],
                 ['value' => 'RETURNED', 'label' => 'Returned (Given Back)'],
                 ['value' => 'DISPOSED', 'label' => 'Disposed (After Retention)'],
