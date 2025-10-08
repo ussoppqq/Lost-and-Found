@@ -39,12 +39,45 @@
                         </div>
 
                         <div class="space-y-5">
-                            <!-- Phone -->
+                            <!-- PHONE NUMBER -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
                                     Phone Number <span class="text-red-500">*</span>
                                 </label>
+
+                                @if(auth()->check())
+                                <!-- Kalau user login -->
+                                <div
+                                    class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                                    <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span class="text-sm font-medium text-gray-900">{{ $phone }}</span>
+                                    <span
+                                        class="ml-auto text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">
+                                        Logged-in User
+                                    </span>
+                                </div>
+                                @else
+                                <!-- Kalau belum login -->
+                                <input type="text" wire:model.debounce.500ms="phone" required
+                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 placeholder:text-gray-400 transition"
+                                    placeholder="Enter your phone number">
+                                @error('phone') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
+                                @endif
+                            </div>
+
+
+                            <!-- NAME -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                    Your Name <span class="text-red-500">*</span>
+                                </label>
+
                                 @if($is_existing_user || auth()->check())
+                                <!-- Jika nama sudah diambil dari database / user login -->
                                 <div
                                     class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
                                     <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor"
@@ -59,36 +92,14 @@
                                     </span>
                                 </div>
                                 @else
-                                <input type="text" wire:model.defer="user_name" required
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 placeholder:text-gray-400 transition"
-                                    placeholder="Enter your full name">
-                                @endif
-                                @error('phone') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
-                            </div>
-
-                            <!-- Name -->
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-900 mb-2">Your Name <span
-                                        class="text-red-500">*</span></label>
-                                @if($is_existing_user)
-                                <div
-                                    class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
-                                    <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span class="text-sm font-medium text-gray-900">{{ $user_name }}</span>
-                                    <span
-                                        class="ml-auto text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">Verified</span>
-                                </div>
-                                @else
+                                <!-- Jika user baru (belum ada di database) -->
                                 <input type="text" wire:model.defer="user_name" required
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 placeholder:text-gray-400 transition"
                                     placeholder="Enter your full name">
                                 @error('user_name') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                                 @endif
                             </div>
+
 
                             <!-- Location Found -->
                             <div>

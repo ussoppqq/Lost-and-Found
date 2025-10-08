@@ -86,16 +86,19 @@ class FoundForm extends Component
 
     public function updatedPhone($value)
     {
-        if (! empty($value)) {
-            $user = User::where('phone_number', $value)->first();
 
-            if ($user) {
-                $this->user_name = $user->full_name;
-                $this->is_existing_user = true;
-            } else {
-                $this->user_name = null;
-                $this->is_existing_user = false;
-            }
+        if (empty($value)) {
+            $this->user_name = null;
+            $this->is_existing_user = false;
+
+            return;
+        }
+        $user = User::where('phone_number', $value)->first();
+
+        if ($user) {
+
+            $this->user_name = $user->full_name;
+            $this->is_existing_user = true;
         } else {
             $this->user_name = null;
             $this->is_existing_user = false;
