@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Report;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -17,19 +18,22 @@ class FoundForm extends Component
 {
     use WithFileUploads;
 
-    // Form fields
     public string $item_name = '';
+
     public string $description = '';
+
     public ?string $location = null;
+
     public ?string $date_found = null;
+
     public ?string $category = null;
 
-    // Contact
     public ?string $phone = null;
+
     public ?string $user_name = null;
+
     public bool $is_existing_user = false;
 
-    // Photos
     public $photos = [];
 
     public $company_id;
@@ -65,6 +69,12 @@ class FoundForm extends Component
     public function mount()
     {
         $this->company_id = session('company_id') ?? Company::first()?->company_id;
+
+        if (Auth::check()) {
+            $this->phone = Auth::user()->phone_number;
+            $this->user_name = Auth::user()->full_name;
+            $this->is_existing_user = true;
+        }
     }
 
     public function getCategories()
@@ -76,7 +86,7 @@ class FoundForm extends Component
 
     public function updatedPhone($value)
     {
-        if (!empty($value)) {
+        if (! empty($value)) {
             $user = User::where('phone_number', $value)->first();
 
             if ($user) {
@@ -94,53 +104,52 @@ class FoundForm extends Component
 
     public function submit(): void
     {
+        if (Auth::check()) {
+            $this->phone = Auth::user()->phone_number;
+            $this->user_name = Auth::user()->full_name;
+        }
+
         $this->validate();
 
         DB::beginTransaction();
 
         try {
-            
-           $user = User::where('phone_number', $this->phone)->first();
 
-if ($user) {
-    
-    if ($this->user_name && $user->full_name !== $this->user_name) {
-        $user->update(['full_name' => $this->user_name]);
-    }
-} else {
-  
-    $userRole = Role::where('role_code', 'USER')->first();
+            $user = User::where('phone_number', $this->phone)->first();
 
-    if (! $userRole) {
-        throw new \Exception('User role not found. Please run database seeder.');
-    }
+            if ($user) {
+                if ($this->user_name && $user->full_name !== $this->user_name) {
+                    $user->update(['full_name' => $this->user_name]);
+                }
+            } else {
+                $userRole = Role::where('role_code', 'USER')->first();
+                if (! $userRole) {
+                    throw new \Exception('User role not found. Please run database seeder.');
+                }
 
-
-                 $user = User::create([
-        'user_id' => Str::uuid(),
-        'company_id' => null,
-        'role_id' => $userRole->role_id,
-        'full_name' => $this->user_name,
-        'email' => null,
-        'phone_number' => $this->phone,
-        'password' => null,
-        'is_verified' => false,
+                $user = User::create([
+                    'user_id' => Str::uuid(),
+                    'company_id' => null,
+                    'role_id' => $userRole->role_id,
+                    'full_name' => $this->user_name,
+                    'email' => null,
+                    'phone_number' => $this->phone,
+                    'password' => null,
+                    'is_verified' => false,
                 ]);
             }
 
-            
             $photoUrl = null;
-            if (!empty($this->photos)) {
+            if (! empty($this->photos)) {
                 $uploadedPhotos = [];
                 foreach ($this->photos as $photo) {
-                    $filename = Str::uuid() . '.' . $photo->getClientOriginalExtension();
+                    $filename = Str::uuid().'.'.$photo->getClientOriginalExtension();
                     $path = $photo->storeAs('reports/found', $filename, 'public');
                     $uploadedPhotos[] = Storage::url($path);
                 }
                 $photoUrl = $uploadedPhotos[0];
             }
 
-           
             Report::create([
                 'report_id' => Str::uuid(),
                 'company_id' => $this->company_id,
@@ -161,17 +170,24 @@ if ($user) {
 
             DB::commit();
 
-            session()->flash('status', '✓ Found item reported successfully! Thank you for your honesty.');
+            session()->flash('status', '✓ Lost item reported successfully! We will notify you if we find a match.');
 
-            $this->reset([
-                'item_name', 'description', 'location', 'date_found', 'category',
-                'phone', 'user_name', 'photos', 'is_existing_user',
-            ]);
-
+            DB::commit();
+            session()->flash('status', '✓ Lost item reported successfully!');
+            $this->reset(['item_name', 'category', 'description', 'location', 'date_found', 'photos']);
+            $this->photos = [];
+            $this->dispatch('$refresh');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Found Item Report Error: ' . $e->getMessage());
             session()->flash('error', 'Failed to submit report. Please try again.');
+        }
+    }
+
+    public function removePhoto($index)
+    {
+        if (isset($this->photos[$index])) {
+            unset($this->photos[$index]);
+            $this->photos = array_values($this->photos);
         }
     }
 

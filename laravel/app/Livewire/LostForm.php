@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Report;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -33,14 +34,14 @@ class LostForm extends Component
 
     public ?string $user_name = null;
 
-    public bool $is_existing_user = false; // Track if user exists
+    public bool $is_existing_user = false;
 
-    // File upload (maximum 5 photos)
+    // Photos
     public $photos = [];
 
     public $company_id;
 
-    // Validation rules
+    // Validation
     protected function rules()
     {
         return [
@@ -51,7 +52,7 @@ class LostForm extends Component
             'date_lost' => 'nullable|date|before_or_equal:today',
             'phone' => 'required|string|max:30',
             'user_name' => $this->is_existing_user ? 'nullable' : 'required|string|max:255',
-            'photos.*' => 'nullable|image|max:25600', 
+            'photos.*' => 'nullable|image|max:25600', // 25 MB
             'photos' => 'nullable|array|max:5',
         ];
     }
@@ -65,14 +66,20 @@ class LostForm extends Component
         'phone.required' => 'Phone number is required.',
         'user_name.required' => 'Name is required for new users.',
         'photos.*.image' => 'Each file must be an image.',
-        'photos.*.max' => 'Each image must not exceed 3MB.',
-        'photos.max' => 'You can upload maximum 5 photos.',
+        'photos.*.max' => 'Each image must not exceed 25MB.',
+        'photos.max' => 'You can upload up to 5 photos.',
         'date_lost.before_or_equal' => 'Date lost cannot be in the future.',
     ];
 
     public function mount()
     {
         $this->company_id = session('company_id') ?? Company::first()?->company_id;
+
+        if (Auth::check()) {
+            $this->phone = Auth::user()->phone_number;
+            $this->user_name = Auth::user()->full_name;
+            $this->is_existing_user = true;
+        }
     }
 
     public function getCategories()
@@ -102,52 +109,48 @@ class LostForm extends Component
 
     public function submit(): void
     {
+        if (Auth::check()) {
+            $this->phone = Auth::user()->phone_number;
+            $this->user_name = Auth::user()->full_name;
+        }
+
         $this->validate();
 
         DB::beginTransaction();
 
         try {
-            $user = User::where('phone_number', $this->phone)->first();
-
-            if (! $user) {
-                // Create new user
-                $userRole = Role::where('role_code', 'USER')->first();
-
-                if (! $userRole) {
-                    throw new \Exception('User role not found. Please run database seeder.');
-                }
-
-                $user = User::create([
+            $user = User::firstOrCreate(
+                ['phone_number' => $this->phone],
+                [
                     'user_id' => Str::uuid(),
                     'company_id' => null,
-                    'role_id' => $userRole->role_id,
+                    'role_id' => Role::where('role_code', 'USER')->first()->role_id,
                     'full_name' => $this->user_name,
                     'email' => null,
-                    'phone_number' => $this->phone,
                     'password' => null,
                     'is_verified' => false,
-                ]);
-            }
+                ]
+            );
 
+            if ($this->user_name && $user->full_name !== $this->user_name) {
+                $user->update(['full_name' => $this->user_name]);
+            }
 
             $photoUrl = null;
             if (! empty($this->photos)) {
                 $uploadedPhotos = [];
-                foreach ($this->photos as $index => $photo) {
+                foreach ($this->photos as $photo) {
                     $filename = Str::uuid().'.'.$photo->getClientOriginalExtension();
                     $path = $photo->storeAs('reports/lost', $filename, 'public');
                     $uploadedPhotos[] = Storage::url($path);
                 }
-                
-                $photoUrl = $uploadedPhotos[0]; 
+                $photoUrl = $uploadedPhotos[0];
             }
 
-            // 3. Create LOST report
             Report::create([
                 'report_id' => Str::uuid(),
                 'company_id' => $this->company_id,
                 'user_id' => $user->user_id,
-                'item_id' => null,
                 'category_id' => $this->category,
                 'report_type' => 'LOST',
                 'item_name' => $this->item_name,
@@ -163,31 +166,36 @@ class LostForm extends Component
 
             DB::commit();
 
-            session()->flash('status', '✓ Lost item reported successfully! We will notify you if we find a match.');
+            session()->flash('status', '✓ Lost item reported successfully!');
 
-            // Reset form
-            $this->reset([
-                'item_name', 'category', 'description',
-                'location', 'date_lost', 'phone', 'user_name', 'photos',
-                'is_existing_user',
-            ]);
-
+            $this->reset(['item_name', 'category', 'description', 'location', 'date_lost', 'photos']);
+            $this->photos = [];
+            $this->dispatch('$refresh');
         } catch (\Exception $e) {
             DB::rollBack();
-
-            \Log::error('Lost Item Report Error: '.$e->getMessage());
-
             session()->flash('error', 'Failed to submit report. Please try again.');
+        }
+    }
+
+    public function removePhoto($index)
+    {
+        if (isset($this->photos[$index])) {
+            unset($this->photos[$index]);
+            $this->photos = array_values($this->photos);
         }
     }
 
     public function render()
     {
+        if (Auth::check() && empty($this->user_name)) {
+            $this->user_name = Auth::user()->full_name;
+            $this->phone = Auth::user()->phone_number;
+        }
+
         return view('livewire.lost-form', [
             'categories' => $this->getCategories(),
-        ])
-            ->layout('components.layouts.user', [
-                'title' => 'Report Lost Item',
-            ]);
+        ])->layout('components.layouts.user', [
+            'title' => 'Report Lost Item',
+        ]);
     }
 }
