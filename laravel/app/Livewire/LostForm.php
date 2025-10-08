@@ -2,8 +2,17 @@
 
 namespace App\Livewire;
 
+use App\Models\Category;
+use App\Models\Company;
+use App\Models\Report;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+<<<<<<< HEAD
 
 use App\Models\Report;
 use App\Models\User;
@@ -16,6 +25,8 @@ use App\Models\ItemPhoto;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+=======
+>>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
 
 class LostForm extends Component
 {
@@ -23,8 +34,11 @@ class LostForm extends Component
 
     // ===== Form fields =====
     public string $item_name = '';
+
     public string $category = '';
+
     public string $description = '';
+<<<<<<< HEAD
     public string $location = '';
     public ?string $date_lost = null;
 
@@ -49,6 +63,53 @@ class LostForm extends Component
         'phone'       => 'required|string|max:30',
         'user_name'   => 'required|string|max:255',
         'photo'       => 'nullable|image|max:3072', // 3MB
+=======
+
+    public ?string $location = null;
+
+    public ?string $date_lost = null;
+
+    // Contact fields
+    public ?string $phone = null;
+
+    public ?string $user_name = null;
+
+    public bool $is_existing_user = false; // Track if user exists
+
+    // File upload (maximum 5 photos)
+    public $photos = [];
+
+    public $company_id;
+
+    // Validation rules
+    protected function rules()
+    {
+        return [
+            'item_name' => 'required|string|max:255',
+            'category' => 'required|uuid',
+            'description' => 'required|string|min:10|max:200',
+            'location' => 'nullable|string|max:255',
+            'date_lost' => 'nullable|date|before_or_equal:today',
+            'phone' => 'required|string|max:30',
+            'user_name' => $this->is_existing_user ? 'nullable' : 'required|string|max:255',
+            'photos.*' => 'nullable|image|max:25600', 
+            'photos' => 'nullable|array|max:5',
+        ];
+    }
+
+    protected array $messages = [
+        'item_name.required' => 'Item name is required.',
+        'category.required' => 'Please select a category.',
+        'description.required' => 'Please describe the item.',
+        'description.min' => 'Description must be at least 10 characters.',
+        'description.max' => 'Description cannot exceed 200 characters.',
+        'phone.required' => 'Phone number is required.',
+        'user_name.required' => 'Name is required for new users.',
+        'photos.*.image' => 'Each file must be an image.',
+        'photos.*.max' => 'Each image must not exceed 3MB.',
+        'photos.max' => 'You can upload maximum 5 photos.',
+        'date_lost.before_or_equal' => 'Date lost cannot be in the future.',
+>>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
     ];
 
     protected array $messages = [
@@ -72,7 +133,10 @@ class LostForm extends Component
         $this->company_id = session('company_id') ?? Company::query()->value('company_id');
     }
 
+<<<<<<< HEAD
     /** Ambil kategori untuk dropdown */
+=======
+>>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
     public function getCategories()
     {
         return Category::query()
@@ -84,6 +148,7 @@ class LostForm extends Component
     /** Auto-fill nama saat phone diisi */
     public function updatedPhone($value): void
     {
+<<<<<<< HEAD
         $value = trim((string) $value);
 
         if ($value === '') {
@@ -100,6 +165,21 @@ class LostForm extends Component
         } else {
             $this->user_name = '';
             $this->nameLocked = false;
+=======
+        if (! empty($value)) {
+            $user = User::where('phone_number', $value)->first();
+
+            if ($user) {
+                $this->user_name = $user->full_name;
+                $this->is_existing_user = true;
+            } else {
+                $this->user_name = null;
+                $this->is_existing_user = false;
+            }
+        } else {
+            $this->user_name = null;
+            $this->is_existing_user = false;
+>>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
         }
     }
 
@@ -110,6 +190,7 @@ class LostForm extends Component
         DB::beginTransaction();
 
         try {
+<<<<<<< HEAD
             // 1) Cari/buat user
             $user = User::where('phone_number', $this->phone)->first();
 
@@ -125,12 +206,31 @@ class LostForm extends Component
                     'role_id'      => $userRole->role_id,
                     'full_name'    => $this->user_name ?: 'Guest User',
                     'email'        => null,
+=======
+            $user = User::where('phone_number', $this->phone)->first();
+
+            if (! $user) {
+                // Create new user
+                $userRole = Role::where('role_code', 'USER')->first();
+
+                if (! $userRole) {
+                    throw new \Exception('User role not found. Please run database seeder.');
+                }
+
+                $user = User::create([
+                    'user_id' => Str::uuid(),
+                    'company_id' => null,
+                    'role_id' => $userRole->role_id,
+                    'full_name' => $this->user_name,
+                    'email' => null,
+>>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
                     'phone_number' => $this->phone,
                     'password'     => null,
                     'is_verified'  => false,
                 ]);
             }
 
+<<<<<<< HEAD
             // 2) Upload foto (jika ada)
             $photoUrl = null;
             $storedPath = null;
@@ -138,6 +238,19 @@ class LostForm extends Component
                 $tempName = Str::uuid().'.'.$this->photo->getClientOriginalExtension();
                 $storedPath = $this->photo->storeAs('items/tmp', $tempName, 'public');
                 $photoUrl = Storage::url($storedPath); // /storage/items/tmp/xxxx.jpg
+=======
+
+            $photoUrl = null;
+            if (! empty($this->photos)) {
+                $uploadedPhotos = [];
+                foreach ($this->photos as $index => $photo) {
+                    $filename = Str::uuid().'.'.$photo->getClientOriginalExtension();
+                    $path = $photo->storeAs('reports/lost', $filename, 'public');
+                    $uploadedPhotos[] = Storage::url($path);
+                }
+                
+                $photoUrl = $uploadedPhotos[0]; 
+>>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
             }
 
             // 3) Buat Item
@@ -182,6 +295,7 @@ class LostForm extends Component
 
             // 5) Buat Report LOST
             Report::create([
+<<<<<<< HEAD
                 'report_id'          => (string) Str::uuid(),
                 'company_id'         => $this->company_id,
                 'user_id'            => $user->user_id,
@@ -198,6 +312,23 @@ class LostForm extends Component
                 'category_id'        => $this->category,
                 'item_name'          => $this->item_name,
                 'photo_url'          => $photoUrl, // hanya jika kolom ini ada di table reports
+=======
+                'report_id' => Str::uuid(),
+                'company_id' => $this->company_id,
+                'user_id' => $user->user_id,
+                'item_id' => null,
+                'category_id' => $this->category,
+                'report_type' => 'LOST',
+                'item_name' => $this->item_name,
+                'report_description' => $this->description,
+                'report_datetime' => $this->date_lost ?? now(),
+                'report_location' => $this->location ?? 'Not specified',
+                'report_status' => 'OPEN',
+                'photo_url' => $photoUrl,
+                'reporter_name' => $user->full_name,
+                'reporter_phone' => $user->phone_number,
+                'reporter_email' => $user->email,
+>>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
             ]);
 
             DB::commit();
@@ -206,16 +337,29 @@ class LostForm extends Component
 
             // Reset form (biar bersih)
             $this->reset([
+<<<<<<< HEAD
                 'item_name', 'category', 'description', 'location',
                 'date_lost', 'phone', 'user_name', 'photo'
+=======
+                'item_name', 'category', 'description',
+                'location', 'date_lost', 'phone', 'user_name', 'photos',
+                'is_existing_user',
+>>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
             ]);
             $this->nameLocked = false;
 
         } catch (\Throwable $e) {
             DB::rollBack();
+<<<<<<< HEAD
             \Log::error('Lost Item Report Error: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
 
             session()->flash('error', 'Failed to submit report. Please try again. Error: '.$e->getMessage());
+=======
+
+            \Log::error('Lost Item Report Error: '.$e->getMessage());
+
+            session()->flash('error', 'Failed to submit report. Please try again.');
+>>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
         }
     }
 
@@ -223,8 +367,15 @@ class LostForm extends Component
     {
         return view('livewire.lost-form', [
             'categories' => $this->getCategories(),
+<<<<<<< HEAD
         ])->layout('components.layouts.app', [
             'title' => 'Report Lost Item',
         ]);
+=======
+        ])
+            ->layout('components.layouts.user', [
+                'title' => 'Report Lost Item',
+            ]);
+>>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
     }
 }

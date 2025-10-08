@@ -216,24 +216,17 @@
             </div>
         </div>
 
-        {{-- Footer Bottom --}}
-        <div class="border-t border-gray-200 bg-white">
-            <div class="container mx-auto px-4 md:px-8 py-6">
-                <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-                    <p class="text-gray-500 text-xs lg:text-sm text-center md:text-left">
-                        © 2024 YourBrand. All rights reserved.
-                    </p>
-                    <div class="flex items-center space-x-6 text-xs lg:text-sm">
-                        <a href="#" class="text-gray-500 hover:text-green-600 transition-colors">Cookie Policy</a>
-                        <a href="#" class="text-gray-500 hover:text-green-600 transition-colors">Privacy Policy</a>
-                        <a href="#" class="text-gray-500 hover:text-green-600 transition-colors">Terms of Service</a>
-                    </div>
-                </div>
-            </div>
+    {{-- FOOTER --}}
+    <footer class="bg-gray-50 border-t border-gray-200 mt-16">
+        <div class="container mx-auto px-4 md:px-8 py-12 lg:py-16 text-center">
+            <p class="text-gray-500 text-sm">
+                © 2025 Lost & Found. All rights reserved.
+            </p>
         </div>
     </footer>
 
+    {{-- Scripts --}}
     @livewireScripts
-    <script defer src="https://unpkg.com/alpinejs"></script>
+
 </body>
 </html>

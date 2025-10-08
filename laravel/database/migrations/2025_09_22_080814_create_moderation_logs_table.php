@@ -22,7 +22,7 @@ return new class extends Migration
 
             // Report details
             $table->enum('report_type', ['LOST','FOUND']);
-            $table->string('item_name')->nullable(); // untuk sementara sebelum item dibuat
+            $table->string('item_name')->nullable(); 
             $table->text('report_description')->nullable();
             $table->dateTime('report_datetime');
             $table->string('report_location');
