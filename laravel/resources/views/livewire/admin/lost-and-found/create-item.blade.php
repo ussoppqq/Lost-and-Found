@@ -1,7 +1,7 @@
 <div>
     @if($showModal)
         <!-- Backdrop dengan blur effect -->
-        <div class="fixed inset-0 bg-black bg-opacity-60 transition-opacity z-40 backdrop-blur-sm"></div>
+        <div class="fixed inset-0 bg-opacity-60 transition-opacity z-40 backdrop-blur-sm"></div>
 
         <!-- Modal -->
         <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
@@ -315,7 +315,7 @@
 
                                 <!-- Storage Location (Required for FOUND) -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Storage Location *</label>
+                                    <label class="block text-sm font-medium text-gray-700">Storage Post *</label>
                                     <select wire:model="post_id"
                                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         <option value="">Select Location</option>
