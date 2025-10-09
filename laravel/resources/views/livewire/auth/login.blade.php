@@ -7,7 +7,8 @@
         <div class="w-3/4 max-w-md">
             <div class="text-center mb-6">
                 <a href="/">
-                    <img src="{{ asset('storage/images/footer-logo.png') }}" class="mx-auto h-12 mb-4 hover:opacity-80 transition">
+                    <img src="{{ asset('storage/images/footer-logo.png') }}"
+                        class="mx-auto h-12 mb-4 hover:opacity-80 transition">
                 </a>
                 <h2 class="text-xl tracking-wide">WELCOME TO LOGIN</h2>
             </div>
@@ -33,14 +34,18 @@
                     </div>
 
                     {{-- Button --}}
-                    <button type="submit"
-                        class="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition">
+                    <button type="submit" class="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition">
                         Sign In
                     </button>
                 </form>
 
                 <div class="flex justify-between mt-4 text-sm">
-                    <a class="text-blue-600 hover:underline">Forgot password?</a>
+                    <p class="text-center mt-3">
+                        <a href="{{ route('password.request') }}" class="text-blue-600 hover:underline">
+                            Forgot password?
+                        </a>
+                    </p>
+
                     <a class="text-blue-600 hover:underline">Haven’t login? Register</a>
                 </div>
             </div>

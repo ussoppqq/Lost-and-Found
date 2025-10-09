@@ -6,6 +6,7 @@ use App\Livewire\Admin\Items\Index as ItemsIndex;
 use App\Livewire\Admin\LostAndFound\Index as LostFoundIndex;
 use App\Livewire\Admin\Users\Index as UsersIndex;
 use App\Livewire\Auth\Forgotpassword;
+use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\RegisterExtra;
 use App\Livewire\FoundForm;
@@ -29,7 +30,8 @@ Route::get('/categories', function () {
 // Auth Routes
 Route::get('/login', Login::class)->name('login');
 Route::get('register-extra', RegisterExtra::class)->name('register-extra');
-Route::get('/forgotpassword', Forgotpassword::class)->name('forgotpassword');
+Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
+Route::get('/reset-password/{token}', ResetPassword::class)->name('password.reset');
 
 Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)
     ->middleware(['auth'])->name('dashboard');

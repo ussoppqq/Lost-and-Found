@@ -16,7 +16,7 @@ class PostSeeder extends Seeder
         Post::create([
             'post_id' => Str::uuid(),
             'company_id' => $company1->company_id,
-            'post_name' => 'Main Gate Post',
+            'post_name' => 'post 1',
             'post_address' => 'Gerbang Utama Kebun Raya',
             'capacity' => 100,
         ]);
@@ -24,7 +24,7 @@ class PostSeeder extends Seeder
         Post::create([
             'post_id' => Str::uuid(),
             'company_id' => $company1->company_id,
-            'post_name' => 'Information Center',
+            'post_name' => 'post 2',
             'post_address' => 'Pusat Informasi Kebun Raya',
             'capacity' => 50,
         ]);
@@ -32,7 +32,7 @@ class PostSeeder extends Seeder
         Post::create([
             'post_id' => Str::uuid(),
             'company_id' => $company1->company_id,
-            'post_name' => 'Exit Gate Post',
+            'post_name' => 'post 3',
             'post_address' => 'Gerbang Keluar Kebun Raya',
             'capacity' => 75,
         ]);
