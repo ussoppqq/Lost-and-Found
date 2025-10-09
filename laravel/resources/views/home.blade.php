@@ -1,3 +1,4 @@
+
 <x-layouts.app>
     {{-- ========== HERO SECTION ========== --}}
     <section class="relative w-full h-screen overflow-hidden">
@@ -82,11 +83,7 @@
                 
                 {{-- LOST Card --}}
                 <div class="group">
-<<<<<<< HEAD
-                    <a href="{{ url('/whatsapp-verification') }}"
-=======
                     <a href="{{ url('/lost-form') }}"
->>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
                         class="block bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                         
                         <div class="relative h-48 md:h-56 lg:h-64 overflow-hidden">
@@ -123,11 +120,7 @@
 
                 {{-- FOUND Card --}}
                 <div class="group">
-<<<<<<< HEAD
-                    <a href="{{ url('whatsapp-verification') }}"
-=======
                     <a href="{{ url('/found-form') }}"
->>>>>>> d1e78ab786fee8a8ff2f431bd1a03b6daa55ddce
                         class="block bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
                         
                         <div class="relative h-48 md:h-56 lg:h-64 overflow-hidden">
