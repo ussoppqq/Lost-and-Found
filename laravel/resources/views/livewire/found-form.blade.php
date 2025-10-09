@@ -1,8 +1,6 @@
-<div x-data="{ loading: false }"
-     class="min-h-[100svh] bg-gray-100 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
-
+<div class="min-h-[100svh] bg-gray-100 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
     <div class="w-full max-w-6xl bg-white shadow-2xl rounded-3xl border border-gray-200 p-8 lg:p-10">
-        <!-- Header Section -->
+        <!-- Header -->
         <div class="text-center mb-10">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-800 shadow-lg mb-4">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -18,12 +16,11 @@
             </p>
         </div>
 
-        <!-- Outer Card -->
+        <!-- Card -->
         <div class="bg-gray-50 border border-gray-200 rounded-2xl shadow-inner p-8">
-            <form wire:submit.prevent="submit" @submit="loading = true">
+            <form wire:submit.prevent="submit">
                 <div class="grid lg:grid-cols-2 gap-8">
-
-                    <!-- LEFT CARD: Contact Information -->
+                    <!-- LEFT: Contact Info -->
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-md p-6 sm:p-8">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center shadow-md">
@@ -44,18 +41,52 @@
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
                                     Phone Number <span class="text-red-500">*</span>
                                 </label>
-                                <input type="tel" wire:model.lazy="phone" required
-                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 placeholder:text-gray-400 transition"
-                                       placeholder="+62 812-xxxx-xxxx">
-                                @error('phone') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
+
+                                @if(auth()->check())
+                                    <!-- Logged in -->
+                                    <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                                        <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor"
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <span class="text-sm font-medium text-gray-900">{{ $phone }}</span>
+                                        <span class="ml-auto text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">Logged-in User</span>
+                                    </div>
+                                @else
+                                    <!-- Manual input -->
+                                    <input type="text"
+                                           wire:model.live="phone"
+                                           required
+                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 placeholder:text-gray-400 transition"
+                                           placeholder="Enter your phone number">
+                                    @error('phone') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
+                                @endif
                             </div>
 
                             <!-- Name -->
                             <div>
-                                <label class="block text-sm font-semibold text-gray-900 mb-2">Your Name <span class="text-red-500">*</span></label>
-                                @if($is_existing_user)
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                    Your Name <span class="text-red-500">*</span>
+                                </label>
+
+                                @if(auth()->check())
+                                    <!-- Logged in user -->
                                     <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
-                                        <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor"
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <span class="text-sm font-medium text-gray-900">{{ $user_name }}</span>
+                                        <span class="ml-auto text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">Logged-in User</span>
+                                    </div>
+
+                                @elseif($is_existing_user)
+                                    <!-- Existing user (by phone) -->
+                                    <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                                        <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor"
+                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
@@ -63,6 +94,7 @@
                                         <span class="ml-auto text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">Verified</span>
                                     </div>
                                 @else
+                                    <!-- New user -->
                                     <input type="text" wire:model.defer="user_name" required
                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 placeholder:text-gray-400 transition"
                                            placeholder="Enter your full name">
@@ -70,7 +102,7 @@
                                 @endif
                             </div>
 
-                            <!-- Location Found -->
+                            <!-- Location -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
                                     Location Found <span class="text-gray-500 font-normal text-xs">(optional)</span>
@@ -81,7 +113,7 @@
                                 @error('location') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
 
-                            <!-- Date Found -->
+                            <!-- Date -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
                                     Date Found <span class="text-gray-500 font-normal text-xs">(optional)</span>
@@ -93,7 +125,7 @@
                         </div>
                     </div>
 
-                    <!-- RIGHT CARD: Item Information -->
+                    <!-- RIGHT: Item Info -->
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-md p-6 sm:p-8">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center shadow-md">
@@ -120,6 +152,21 @@
                                 @error('item_name') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
 
+                            <!-- Category -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                    Category <span class="text-red-500">*</span>
+                                </label>
+                                <select wire:model="category" required
+                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 transition">
+                                    <option value="">-- Select Category --</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->category_id }}">{{ $cat->category_name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('category') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
+                            </div>
+
                             <!-- Description -->
                             <div>
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
@@ -128,12 +175,7 @@
                                 <textarea rows="4" wire:model.defer="description" required maxlength="200"
                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-700 focus:ring-gray-700 placeholder:text-gray-400 transition resize-none"
                                           placeholder="Brand, color, condition, unique marks, etc."></textarea>
-                                <div class="flex justify-between items-center mt-1.5">
-                                    @error('description') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
-                                    <p class="text-xs text-gray-500">
-                                        <span x-text="$wire.description ? $wire.description.length : 0"></span>/200
-                                    </p>
-                                </div>
+                                @error('description') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
 
                             <!-- Photos -->
@@ -141,14 +183,15 @@
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
                                     Photos <span class="text-gray-500 font-normal text-xs">(optional)</span>
                                 </label>
-                                <input type="file" accept="image/*" multiple class="hidden" x-ref="fileInput" wire:model="photos">
 
+                                <input type="file" multiple accept="image/*" class="hidden" wire:model="photos" id="photoUpload">
                                 <div class="space-y-3">
                                     @if(empty($photos))
-                                        <button type="button" @click="$refs.fileInput.click()"
+                                        <button type="button" onclick="document.getElementById('photoUpload').click()"
                                                 class="w-full flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 p-8 transition">
                                             <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow">
-                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
+                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                           d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                                 </svg>
@@ -166,7 +209,8 @@
                                                          class="w-full h-32 rounded-lg object-cover border border-gray-300 shadow-sm">
                                                     <button type="button" wire:click="removePhoto({{ $index }})"
                                                             class="absolute top-2 right-2 p-1.5 bg-gray-800 text-white rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-gray-700">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                             viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                                   d="M6 18L18 6M6 6l12 12"/>
                                                         </svg>
@@ -181,22 +225,24 @@
                     </div>
                 </div>
 
-                <!-- Submit -->
+                <!-- Submit Button -->
                 <div class="mt-8">
-                    <button type="submit" :disabled="loading"
+                    <button type="submit"
+                            wire:loading.attr="disabled"
                             class="w-full inline-flex items-center justify-center gap-3 rounded-xl bg-gray-800 hover:bg-gray-900 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200">
-                        <svg x-show="loading" class="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <svg wire:loading wire:target="submit" class="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                             <path class="opacity-75" fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 
+                                  3.042 1.135 5.824 3 7.938l3-2.647z"/>
                         </svg>
-                        <span x-text="loading ? 'Submitting...' : 'Submit Report'"></span>
+                        <span wire:loading.remove wire:target="submit">Submit Report</span>
+                        <span wire:loading wire:target="submit">Submitting...</span>
                     </button>
                 </div>
             </form>
         </div>
 
-        <!-- Footer Note -->
         <p class="mt-6 text-center text-sm text-gray-500">
             Your report helps the rightful owner reclaim their item. Thank you for your honesty.
         </p>

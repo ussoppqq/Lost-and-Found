@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Report;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -17,21 +18,15 @@ class FoundForm extends Component
 {
     use WithFileUploads;
 
-    // Form fields
     public string $item_name = '';
     public string $description = '';
     public ?string $location = null;
     public ?string $date_found = null;
     public ?string $category = null;
-
-    // Contact
     public ?string $phone = null;
     public ?string $user_name = null;
     public bool $is_existing_user = false;
-
-    // Photos
     public $photos = [];
-
     public $company_id;
 
     protected function rules()
@@ -44,7 +39,7 @@ class FoundForm extends Component
             'date_found' => 'nullable|date|before_or_equal:today',
             'phone' => 'required|string|max:30',
             'user_name' => $this->is_existing_user ? 'nullable' : 'required|string|max:255',
-            'photos.*' => 'nullable|image|max:25600', // 25MB per image
+            'photos.*' => 'nullable|image|max:25600',
             'photos' => 'nullable|array|max:5',
         ];
     }
@@ -62,73 +57,88 @@ class FoundForm extends Component
         'date_found.before_or_equal' => 'Date found cannot be in the future.',
     ];
 
+    // ✅ Jalankan saat pertama kali form dibuka
     public function mount()
     {
         $this->company_id = session('company_id') ?? Company::first()?->company_id;
+
+        // Jika user login → ambil dari Auth
+        if (Auth::check()) {
+            $this->fillFromAuthenticatedUser();
+        }
     }
 
-    public function getCategories()
+    // ✅ Ambil data dari user yang sedang login
+    public function fillFromAuthenticatedUser(): void
     {
-        return Category::where('company_id', $this->company_id)
-            ->orderBy('category_name')
-            ->get();
+        $this->phone = Auth::user()->phone_number;
+        $this->user_name = Auth::user()->full_name;
+        $this->is_existing_user = true;
     }
 
-    public function updatedPhone($value)
+    // ✅ Ambil data user yang pernah isi form (berdasarkan phone)
+    public function fillFromExistingPhone($phone): void
     {
-        if (!empty($value)) {
-            $user = User::where('phone_number', $value)->first();
+        $user = User::where('phone_number', trim($phone))->first();
 
-            if ($user) {
-                $this->user_name = $user->full_name;
-                $this->is_existing_user = true;
-            } else {
-                $this->user_name = null;
-                $this->is_existing_user = false;
-            }
+        if ($user) {
+            $this->user_name = $user->full_name;
+            $this->is_existing_user = true;
         } else {
-            $this->user_name = null;
+            $this->reset(['user_name']);
             $this->is_existing_user = false;
         }
     }
 
+    // ✅ Dipanggil otomatis saat nomor HP berubah
+    public function updatedPhone($value)
+    {
+        if (Auth::check()) {
+            // Kalau login, selalu isi dari Auth biar tidak bentrok
+            $this->fillFromAuthenticatedUser();
+        } else {
+            // Kalau belum login, cek database
+            $this->fillFromExistingPhone($value);
+        }
+    }
+
+    // ✅ Submit form
     public function submit(): void
     {
+        if (Auth::check()) {
+            $this->fillFromAuthenticatedUser();
+        }
+
         $this->validate();
 
         DB::beginTransaction();
 
         try {
-            
-           $user = User::where('phone_number', $this->phone)->first();
+            // Cek apakah user sudah ada berdasarkan phone
+            $user = User::where('phone_number', $this->phone)->first();
 
-if ($user) {
-    
-    if ($this->user_name && $user->full_name !== $this->user_name) {
-        $user->update(['full_name' => $this->user_name]);
-    }
-} else {
-  
-    $userRole = Role::where('role_code', 'USER')->first();
+            if ($user) {
+                // Update nama jika beda
+                if ($this->user_name && $user->full_name !== $this->user_name) {
+                    $user->update(['full_name' => $this->user_name]);
+                }
+            } else {
+                // Buat user baru
+                $userRole = Role::where('role_code', 'USER')->firstOrFail();
 
-    if (! $userRole) {
-        throw new \Exception('User role not found. Please run database seeder.');
-    }
-
-
-                 $user = User::create([
-        'user_id' => Str::uuid(),
-        'company_id' => null,
-        'role_id' => $userRole->role_id,
-        'full_name' => $this->user_name,
-        'email' => null,
-        'phone_number' => $this->phone,
-        'password' => null,
-        'is_verified' => false,
+                $user = User::create([
+                    'user_id' => Str::uuid(),
+                    'company_id' => null,
+                    'role_id' => $userRole->role_id,
+                    'full_name' => $this->user_name,
+                    'email' => null,
+                    'phone_number' => $this->phone,
+                    'password' => null,
+                    'is_verified' => false,
                 ]);
             }
 
-            
+            // Upload foto
             $photoUrl = null;
             if (!empty($this->photos)) {
                 $uploadedPhotos = [];
@@ -140,7 +150,7 @@ if ($user) {
                 $photoUrl = $uploadedPhotos[0];
             }
 
-           
+            // Simpan laporan
             Report::create([
                 'report_id' => Str::uuid(),
                 'company_id' => $this->company_id,
@@ -161,24 +171,27 @@ if ($user) {
 
             DB::commit();
 
-            session()->flash('status', '✓ Found item reported successfully! Thank you for your honesty.');
-
-            $this->reset([
-                'item_name', 'description', 'location', 'date_found', 'category',
-                'phone', 'user_name', 'photos', 'is_existing_user',
-            ]);
-
+            session()->flash('status', '✓ Found item reported successfully!');
+            $this->reset(['item_name', 'category', 'description', 'location', 'date_found', 'photos']);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Found Item Report Error: ' . $e->getMessage());
             session()->flash('error', 'Failed to submit report. Please try again.');
+        }
+    }
+
+    // ✅ Hapus foto sebelum submit
+    public function removePhoto($index)
+    {
+        if (isset($this->photos[$index])) {
+            unset($this->photos[$index]);
+            $this->photos = array_values($this->photos);
         }
     }
 
     public function render()
     {
         return view('livewire.found-form', [
-            'categories' => $this->getCategories(),
+            'categories' => Category::where('company_id', $this->company_id)->orderBy('category_name')->get(),
         ])->layout('components.layouts.user', [
             'title' => 'Report Found Item',
         ]);
