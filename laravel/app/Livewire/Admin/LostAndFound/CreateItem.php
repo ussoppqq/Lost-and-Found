@@ -87,21 +87,32 @@ class CreateItem extends Component
             $rules['item_status'] = 'required|in:REGISTERED,STORED,CLAIMED,DISPOSED,RETURNED';
             $rules['sensitivity_level'] = 'required|in:NORMAL,RESTRICTED';
             $rules['post_id'] = 'required|exists:posts,post_id';
+            $rules['photos.*'] = 'nullable|image|max:2048';
         }
 
         // LOST CLAIM (from-report): Require min 1 photo
         if ($this->report_type === 'LOST' && $this->mode === 'from-report') {
             $rules['photos'] = 'required|array|min:1';
-            $rules['photos.*'] = 'image|max:2048';
+            $rules['photos.*'] = 'required|image|max:2048';
             $rules['brand'] = 'nullable|string|max:255';
             $rules['color'] = 'nullable|string|max:100';
             $rules['item_description'] = 'nullable|string';
-            $rules['category_id'] = 'required|exists:categories,category_id';
         }
 
-        $rules['photos.*'] = 'nullable|image|max:2048';
-
         return $rules;
+    }
+
+    protected function messages()
+    {
+        return [
+            'photos.required' => 'At least one claim photo is required to document the return process.',
+            'photos.min' => 'Please upload at least one photo showing the item return.',
+            'photos.*.required' => 'Please select valid image files.',
+            'photos.*.image' => 'All files must be valid images (jpg, png, jpeg, gif).',
+            'photos.*.max' => 'Each photo must not exceed 2MB.',
+            'category_id.required' => 'Please select a category.',
+            'item_name.required' => 'Item name is required.',
+        ];
     }
 
     public function mount()
@@ -234,6 +245,7 @@ class CreateItem extends Component
             'mode' => $this->mode,
             'report_type' => $this->report_type,
             'photos_count' => count($this->photos),
+            'photos_data' => $this->photos,
             'category_id' => $this->category_id,
         ]);
 
@@ -242,7 +254,17 @@ class CreateItem extends Component
             Log::info('Validation passed!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation failed', ['errors' => $e->errors()]);
-            return; // Stop execution, errors will show in view
+            
+            // Tampilkan error dengan lebih jelas
+            foreach ($e->errors() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $this->addError($field, $message);
+                }
+            }
+            
+            // Tambahkan error umum untuk user
+            $this->addError('general', 'Please fix the validation errors above before submitting.');
+            return;
         }
 
         try {
@@ -322,6 +344,11 @@ class CreateItem extends Component
             }
 
             if ($this->report_type === 'LOST' && $this->mode === 'from-report') {
+                Log::info('Processing LOST claim', [
+                    'photos_count' => count($this->photos),
+                    'category_id' => $this->category_id
+                ]);
+
                 $category = Category::find($this->category_id);
                 if (!$category) {
                     throw new \Exception('Category not found: ' . $this->category_id);
@@ -331,35 +358,32 @@ class CreateItem extends Component
                 $item = Item::create([
                     'item_id' => (string) Str::uuid(),
                     'company_id' => $companyId,
-                    'post_id' => $this->post_id ?? null,
+                    'post_id' => null, // LOST items tidak perlu post_id
                     'category_id' => $this->category_id,
                     'item_name' => $this->item_name,
                     'brand' => $this->brand,
                     'color' => $this->color,
                     'item_description' => $this->item_description ?? $this->report_description,
-                    'storage' => $this->storage ?? null,
+                    'storage' => null, // LOST items tidak ada storage
                     'item_status' => 'CLAIMED',
                     'retention_until' => $retentionUntil,
-                    'sensitivity_level' => $this->sensitivity_level ?? 'NORMAL',
+                    'sensitivity_level' => 'NORMAL',
                 ]);
 
                 $itemId = $item->item_id;
+                Log::info('LOST item created', ['item_id' => $itemId]);
 
+                // Upload claim photos dan simpan path-nya
+                $claimPhotoPaths = [];
                 if (!empty($this->photos)) {
-                    $photoOrder = 0;
                     foreach ($this->photos as $photo) {
-                        $path = $photo->store('item-photos', 'public');
-                        ItemPhoto::create([
-                            'photo_id' => (string) Str::uuid(),
-                            'company_id' => $companyId,
-                            'item_id' => $itemId,
-                            'photo_url' => $path,
-                            'alt_text' => $this->item_name . ' - Claim Photo ' . ($photoOrder + 1),
-                            'display_order' => $photoOrder,
-                        ]);
-                        $photoOrder++;
+                        $path = $photo->store('claim-photos', 'public');
+                        $claimPhotoPaths[] = $path;
                     }
-                    Log::info('Claim photos saved', ['count' => count($this->photos)]);
+                    Log::info('Claim photos uploaded', [
+                        'count' => count($claimPhotoPaths),
+                        'paths' => $claimPhotoPaths
+                    ]);
                 }
 
                 try {
@@ -372,12 +396,16 @@ class CreateItem extends Component
                         'brand' => $this->brand,
                         'color' => $this->color,
                         'claim_notes' => $this->item_description,
+                        'claim_photos' => $claimPhotoPaths, // Simpan array foto di claims
                         'claim_status' => 'RELEASED',
                         'pickup_schedule' => now(),
                     ]);
-                    Log::info('Claim created successfully');
+                    Log::info('Claim created successfully with photos');
                 } catch (\Exception $claimError) {
-                    Log::error('Claim creation failed', ['error' => $claimError->getMessage()]);
+                    Log::error('Claim creation failed', [
+                        'error' => $claimError->getMessage(),
+                        'trace' => $claimError->getTraceAsString()
+                    ]);
                     throw $claimError;
                 }
 
@@ -434,7 +462,7 @@ class CreateItem extends Component
 
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->addError('general', 'Error: ' . $e->getMessage()); // General error untuk tampil di view
+            $this->addError('general', 'Error: ' . $e->getMessage());
             Log::error('Error creating item/claim', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -463,4 +491,4 @@ class CreateItem extends Component
             'statusOptions' => $statusOptions,
         ]);
     }
-}
+};
