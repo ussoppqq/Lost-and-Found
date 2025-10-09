@@ -160,7 +160,7 @@ class CreateItem extends Component
         }
 
         $this->showModal = true;
-        
+
         Log::info('Modal opened from report', [
             'reportId' => $reportId,
             'report_type' => $this->report_type,
@@ -186,9 +186,21 @@ class CreateItem extends Component
     public function resetForm()
     {
         $this->reset([
-            'item_name', 'brand', 'color', 'item_description', 'storage', 'category_id', 'post_id',
-            'photos', 'reportPhotos', 'report_type', 'report_description', 'report_location',
-            'reporter_name', 'reporter_phone', 'reporter_email',
+            'item_name',
+            'brand',
+            'color',
+            'item_description',
+            'storage',
+            'category_id',
+            'post_id',
+            'photos',
+            'reportPhotos',
+            'report_type',
+            'report_description',
+            'report_location',
+            'reporter_name',
+            'reporter_phone',
+            'reporter_email',
         ]);
 
         $this->item_status = 'STORED';
@@ -254,14 +266,14 @@ class CreateItem extends Component
             Log::info('Validation passed!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation failed', ['errors' => $e->errors()]);
-            
+
             // Tampilkan error dengan lebih jelas
             foreach ($e->errors() as $field => $messages) {
                 foreach ($messages as $message) {
                     $this->addError($field, $message);
                 }
             }
-            
+
             // Tambahkan error umum untuk user
             $this->addError('general', 'Please fix the validation errors above before submitting.');
             return;
@@ -311,18 +323,19 @@ class CreateItem extends Component
                 $photoOrder = 0;
                 if (!empty($this->photos)) {
                     foreach ($this->photos as $photo) {
-                        $path = $photo->store('item-photos', 'public');
+                        $filename = Str::uuid() . '.' . $photo->getClientOriginalExtension();
+                        $path = $photo->storeAs('reports/found', $filename, 'public');
+
                         ItemPhoto::create([
                             'photo_id' => (string) Str::uuid(),
                             'company_id' => $companyId,
                             'item_id' => $itemId,
-                            'photo_url' => $path,
+                            'photo_url' => $path,  // ✅ Simpan path, bukan Storage::url($path)
                             'alt_text' => $this->item_name . ' - Photo ' . ($photoOrder + 1),
                             'display_order' => $photoOrder,
                         ]);
                         $photoOrder++;
                     }
-                    Log::info('Admin photos saved', ['count' => count($this->photos)]);
                 }
 
                 if ($this->mode === 'from-report' && !empty($this->reportPhotos)) {
@@ -373,17 +386,14 @@ class CreateItem extends Component
                 $itemId = $item->item_id;
                 Log::info('LOST item created', ['item_id' => $itemId]);
 
-                // Upload claim photos dan simpan path-nya
+                // Upload claim photos dengan path reports/lost
                 $claimPhotoPaths = [];
                 if (!empty($this->photos)) {
                     foreach ($this->photos as $photo) {
-                        $path = $photo->store('claim-photos', 'public');
-                        $claimPhotoPaths[] = $path;
+                        $filename = Str::uuid() . '.' . $photo->getClientOriginalExtension();
+                        $path = $photo->storeAs('reports/lost', $filename, 'public');
+                        $claimPhotoPaths[] = $path;  
                     }
-                    Log::info('Claim photos uploaded', [
-                        'count' => count($claimPhotoPaths),
-                        'paths' => $claimPhotoPaths
-                    ]);
                 }
 
                 try {
@@ -414,8 +424,14 @@ class CreateItem extends Component
 
             if ($this->mode === 'standalone') {
                 $photoUrl = null;
-                if (!empty($this->photos) && $this->report_type === 'LOST') {
-                    $photoUrl = $this->photos[0]->store('report-photos', 'public');
+                if (!empty($this->photos)) {
+                    if ($this->report_type === 'FOUND') {
+                        $filename = Str::uuid() . '.' . $this->photos[0]->getClientOriginalExtension();
+                        $photoUrl = $this->photos[0]->storeAs('reports/found', $filename, 'public');  
+                    } elseif ($this->report_type === 'LOST') {
+                        $filename = Str::uuid() . '.' . $this->photos[0]->getClientOriginalExtension();
+                        $photoUrl = $this->photos[0]->storeAs('reports/lost', $filename, 'public');  
+                    }
                 }
 
                 Report::create([
@@ -437,27 +453,27 @@ class CreateItem extends Component
                 ]);
             } else {
                 $reportStatus = $this->report_type === 'FOUND' ? 'STORED' : 'CLOSED';
-                
+
                 Report::where('report_id', $this->reportId)->update([
                     'item_id' => $itemId,
                     'report_status' => $reportStatus,
                 ]);
-                
+
                 Log::info('Report updated', ['report_id' => $this->reportId, 'status' => $reportStatus]);
             }
 
             DB::commit();
 
-            $message = $this->report_type === 'FOUND' 
-                ? 'Found item registered successfully!' 
+            $message = $this->report_type === 'FOUND'
+                ? 'Found item registered successfully!'
                 : 'Lost item claimed successfully! Status updated to CLAIMED.';
-                
+
             session()->flash('success', $message);
-            
+
             $this->showModal = false;
             $this->resetForm();
             $this->dispatch('item-created');
-            
+
             Log::info('Item registration/claim completed successfully');
 
         } catch (\Exception $e) {
@@ -491,4 +507,4 @@ class CreateItem extends Component
             'statusOptions' => $statusOptions,
         ]);
     }
-};
+}

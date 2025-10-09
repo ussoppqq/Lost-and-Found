@@ -141,13 +141,11 @@ class FoundForm extends Component
             // Upload foto
             $photoUrl = null;
             if (!empty($this->photos)) {
-                $uploadedPhotos = [];
                 foreach ($this->photos as $photo) {
                     $filename = Str::uuid() . '.' . $photo->getClientOriginalExtension();
-                    $path = $photo->storeAs('reports/found', $filename, 'public');
-                    $uploadedPhotos[] = Storage::url($path);
+                    $photoUrl = $photo->storeAs('reports/found', $filename, 'public');  
+                    break;
                 }
-                $photoUrl = $uploadedPhotos[0];
             }
 
             // Simpan laporan
@@ -193,7 +191,7 @@ class FoundForm extends Component
         return view('livewire.found-form', [
             'categories' => Category::where('company_id', $this->company_id)->orderBy('category_name')->get(),
         ])->layout('components.layouts.user', [
-            'title' => 'Report Found Item',
-        ]);
+                    'title' => 'Report Found Item',
+                ]);
     }
 }

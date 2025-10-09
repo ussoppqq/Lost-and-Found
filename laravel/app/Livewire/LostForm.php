@@ -129,13 +129,11 @@ class LostForm extends Component
 
             $photoUrl = null;
             if (!empty($this->photos)) {
-                $uploadedPhotos = [];
                 foreach ($this->photos as $photo) {
                     $filename = Str::uuid() . '.' . $photo->getClientOriginalExtension();
-                    $path = $photo->storeAs('reports/lost', $filename, 'public');
-                    $uploadedPhotos[] = Storage::url($path);
+                    $photoUrl = $photo->storeAs('reports/lost', $filename, 'public');  
+                    break;
                 }
-                $photoUrl = $uploadedPhotos[0];
             }
 
             Report::create([
@@ -179,7 +177,7 @@ class LostForm extends Component
         return view('livewire.lost-form', [
             'categories' => Category::where('company_id', $this->company_id)->orderBy('category_name')->get(),
         ])->layout('components.layouts.user', [
-            'title' => 'Report Lost Item',
-        ]);
+                    'title' => 'Report Lost Item',
+                ]);
     }
 }

@@ -121,9 +121,16 @@
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Current Photos</label>
                                         <div class="grid grid-cols-3 gap-4">
                                             @foreach($existingPhotos as $photo)
+                                                @php
+                                                    // Foto dari database bisa berupa full URL atau path
+                                                    $photoUrl = str_starts_with($photo['photo_url'], 'http')
+                                                        ? $photo['photo_url']
+                                                        : url('storage/' . $photo['photo_url']);
+                                                @endphp
                                                 <div class="relative">
-                                                    <img src="{{ Storage::url($photo['photo_url']) }}"
-                                                        class="w-full h-24 object-cover rounded border-2 border-gray-200">
+                                                    <img src="{{ $photoUrl }}" alt="Item photo"
+                                                        class="w-full h-24 object-cover rounded border-2 border-gray-200"
+                                                        onerror="this.src='{{ asset('images/placeholder.png') }}'">
                                                     <button type="button"
                                                         wire:click.prevent="removeExistingPhoto('{{ $photo['photo_id'] }}')"
                                                         class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-lg">
@@ -142,11 +149,11 @@
                                 <div class="sm:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Add New Photos</label>
                                     <input type="file" wire:model="photos" multiple accept="image/*" class="block w-full text-sm text-gray-500
-                                                file:mr-4 file:py-2 file:px-4
-                                                file:rounded-md file:border-0
-                                                file:text-sm file:font-semibold
-                                                file:bg-blue-50 file:text-blue-700
-                                                hover:file:bg-blue-100 cursor-pointer">
+                                                        file:mr-4 file:py-2 file:px-4
+                                                        file:rounded-md file:border-0
+                                                        file:text-sm file:font-semibold
+                                                        file:bg-blue-50 file:text-blue-700
+                                                        hover:file:bg-blue-100 cursor-pointer">
                                     @error('photos.*') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
 
                                     <!-- New Photo Preview -->
@@ -154,8 +161,9 @@
                                         <div class="mt-4 grid grid-cols-3 gap-4">
                                             @foreach($photos as $index => $photo)
                                                 <div class="relative">
-                                                    <img src="{{ $photo->temporaryUrl() }}"
-                                                        class="w-full h-24 object-cover rounded border-2 border-gray-200">
+                                                    <img src="{{ $photo->temporaryUrl() }}" alt="New photo preview"
+                                                        class="w-full h-24 object-cover rounded border-2 border-gray-200"
+                                                        onerror="this.src='{{ asset('images/placeholder.png') }}'">
                                                     <button type="button" wire:click.prevent="removeNewPhoto({{ $index }})"
                                                         class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-lg">
                                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
