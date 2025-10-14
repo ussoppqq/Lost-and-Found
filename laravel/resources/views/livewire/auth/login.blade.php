@@ -46,7 +46,7 @@
                         </a>
                     </p>
 
-                    <a class="text-blue-600 hover:underline">Haven’t login? Register</a>
+                    <a href="{{ route('register-extra') }}" class="text-blue-600 hover:underline">Haven’t login? Register</a>
                 </div>
             </div>
         </div>
