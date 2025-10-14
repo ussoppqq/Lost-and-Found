@@ -226,8 +226,6 @@
                         <span wire:loading wire:target="submit">Submitting...</span>
                     </button>
                 </div>
-            </form>
-        </div>
 
         <p class="mt-6 text-center text-sm text-gray-500">
             Your information will help others return your lost item. Thank you for reporting.

@@ -114,8 +114,13 @@
                                     <label class="text-xs text-gray-500 mb-3 block">User Uploaded Photos</label>
                                     <div class="grid grid-cols-4 gap-3">
                                         @foreach($reportPhotos as $photo)
-                                            <img src="{{ Storage::url($photo) }}" 
-                                                 class="w-full h-24 object-cover rounded-lg border-2 border-gray-200">
+                                            @php
+                                                $photoUrl = str_starts_with($photo, 'http') ? $photo : url('storage/' . $photo);
+                                            @endphp
+                                            <img src="{{ $photoUrl }}" 
+                                                 alt="Report photo"
+                                                 class="w-full h-24 object-cover rounded-lg border-2 border-gray-200"
+                                                 onerror="this.src='{{ asset('images/placeholder.png') }}'">
                                         @endforeach
                                     </div>
                                 </div>
@@ -475,7 +480,6 @@
                                 @endif
                             </div>
                         </div>
-
                     </div>
 
                     <!-- Footer -->

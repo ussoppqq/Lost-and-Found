@@ -56,4 +56,36 @@ class Report extends Model
     {
         return $this->hasMany(Claim::class, 'report_id', 'report_id');
     }
+    
+    public function matchesAsLost()
+    {
+        return $this->hasMany(MatchedItem::class, 'lost_report_id', 'report_id');
+    }
+
+    public function matchesAsFound()
+    {
+        return $this->hasMany(MatchedItem::class, 'found_report_id', 'report_id');
+    }
+
+    public function matches()
+    {
+        return $this->report_type === 'LOST' 
+            ? $this->matchesAsLost() 
+            : $this->matchesAsFound();
+    }
+
+    public function confirmedMatch()
+    {
+        return $this->matches()->where('match_status', 'CONFIRMED')->first();
+    }
+
+    public function hasMatches()
+    {
+        return $this->matches()->exists();
+    }
+
+    public function hasConfirmedMatch()
+    {
+        return $this->matches()->where('match_status', 'CONFIRMED')->exists();
+    }
 }

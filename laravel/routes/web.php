@@ -4,6 +4,7 @@ use App\Livewire\Admin\Categories\Index as CategoriesIndex;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Items\Index as ItemsIndex;
 use App\Livewire\Admin\LostAndFound\Index as LostFoundIndex;
+use App\Livewire\Admin\Matches\MatchList;
 use App\Livewire\Admin\Users\Index as UsersIndex;
 use App\Livewire\Auth\Forgotpassword;
 use App\Livewire\Auth\ResetPassword;
@@ -76,6 +77,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/lost-found', LostFoundIndex::class)->name('lost-found');
 
     Route::get('/items', ItemsIndex::class)->name('items');
+
+    // Matches
+    Route::get('/matches', MatchList::class)->name('matches');
 
     Route::get('/categories', CategoriesIndex::class)->name('categories');
     // Users Management

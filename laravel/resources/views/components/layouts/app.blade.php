@@ -17,6 +17,10 @@
             font-family: 'DM Serif Display', serif; font-weight: 700;
         }
         .font-openSans { font-family: 'Open Sans', sans-serif; }
+
+        /* Biar anchor target gak ketutup navbar fixed */
+        section[id], div[id] { scroll-margin-top: 6rem; }
+        @media (min-width: 1024px) { section[id], div[id] { scroll-margin-top: 7rem; } }
     </style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -43,11 +47,13 @@
 
             {{-- Menu Desktop --}}
             <div class="hidden md:flex items-center space-x-6 lg:space-x-8">
-                <a href="{{ route('lost-form') }}"
+                {{-- Ganti ke anchor di halaman yang sama --}}
+                <a href="#lostandfound"
                    :class="scrolled ? 'text-gray-700 hover:text-green-700' : 'text-white hover:text-green-200 drop-shadow'"
                    class="font-medium text-sm lg:text-base transition-colors duration-300">
-                    Lost & Found
+                    Lost &amp; Found
                 </a>
+
                 <a href="{{ url('/map') }}"
                    :class="scrolled ? 'text-gray-700 hover:text-green-700' : 'text-white hover:text-green-200 drop-shadow'"
                    class="font-medium text-sm lg:text-base transition-colors duration-300">
@@ -105,7 +111,8 @@
                     </button>
                 </div>
                 <div class="space-y-4">
-                    <a href="{{ route('lost-form') }}" class="block py-3 text-gray-700 hover:text-green-700 font-medium border-b border-gray-100">Lost & Found</a>
+                    {{-- Ganti ke anchor & auto-tutup menu saat klik --}}
+                    <a href="#lostandfound" @click="open = false" class="block py-3 text-gray-700 hover:text-green-700 font-medium border-b border-gray-100">Lost &amp; Found</a>
                     <a href="{{ url('/map') }}" class="block py-3 text-gray-700 hover:text-green-700 font-medium border-b border-gray-100">Map</a>
 
                     @auth
@@ -122,6 +129,7 @@
             </div>
         </div>
     </nav>
+
 
     {{-- CONTENT --}}
     <main>
