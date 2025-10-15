@@ -330,7 +330,7 @@ class CreateItem extends Component
                             'photo_id' => (string) Str::uuid(),
                             'company_id' => $companyId,
                             'item_id' => $itemId,
-                            'photo_url' => $path,  // ✅ Simpan path, bukan Storage::url($path)
+                            'photo_url' => $path,  
                             'alt_text' => $this->item_name . ' - Photo ' . ($photoOrder + 1),
                             'display_order' => $photoOrder,
                         ]);
