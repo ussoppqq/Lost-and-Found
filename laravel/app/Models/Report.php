@@ -88,4 +88,12 @@ class Report extends Model
     {
         return $this->matches()->where('match_status', 'CONFIRMED')->exists();
     }
+
+    /**
+     * Use report_id for route model binding.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'report_id';
+    }
 }

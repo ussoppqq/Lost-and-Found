@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ReportPdfController;
 use App\Livewire\Admin\Categories\Index as CategoriesIndex;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Items\Index as ItemsIndex;
@@ -7,11 +8,13 @@ use App\Livewire\Admin\LostAndFound\Index as LostFoundIndex;
 use App\Livewire\Admin\Matches\MatchList;
 use App\Livewire\Admin\Users\Index as UsersIndex;
 use App\Livewire\Auth\Forgotpassword;
-use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\RegisterExtra;
+use App\Livewire\Auth\ResetPassword;
 use App\Livewire\FoundForm;
 use App\Livewire\LostForm;
+use App\Livewire\TrackingDetail;
+use App\Livewire\TrackingIndex;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -100,4 +103,17 @@ Route::redirect('/admin', '/admin/dashboard');
 
 Route::get('/profile', \App\Livewire\Profile::class)
     ->middleware(['auth'])->name('profile');
-    
+
+Route::prefix('tracking')->name('tracking.')->group(function () {
+    // Halaman tracking utama - Form input nomor HP
+    Route::get('/', TrackingIndex::class)
+        ->name('index');
+
+    // Halaman detail tracking - Detail report by report ID
+    Route::get('/{reportId}', TrackingDetail::class)
+        ->name('detail')
+        ->where('reportId', '[0-9a-f\-]+');
+});
+
+Route::get('/reports/{report}/pdf', [ReportPdfController::class, 'download'])
+            ->name('reports.pdf');
