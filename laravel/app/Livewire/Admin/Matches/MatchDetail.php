@@ -10,6 +10,9 @@ class MatchDetail extends Component
 {
     public $matchId;
     public $match;
+    public $showImageModal = false;
+    public $currentImage = '';
+    public $currentImageTitle = '';
 
     public function mount($matchId)
     {
@@ -53,6 +56,20 @@ class MatchDetail extends Component
         $this->loadMatch();
         $this->dispatch('match-updated');
         session()->flash('success', 'Match berhasil ditolak!');
+    }
+
+    public function openImageModal($imageUrl, $title)
+    {
+        $this->currentImage = $imageUrl;
+        $this->currentImageTitle = $title;
+        $this->showImageModal = true;
+    }
+
+    public function closeImageModal()
+    {
+        $this->showImageModal = false;
+        $this->currentImage = '';
+        $this->currentImageTitle = '';
     }
 
     public function render()
