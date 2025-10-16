@@ -1,5 +1,5 @@
 <div>
-    <!-- Stats Cards -->
+<!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
@@ -75,13 +75,13 @@
                         <input 
                             type="text" 
                             wire:model.live.debounce.300ms="search"
-                            placeholder="Cari berdasarkan nama item..."
+                            placeholder="Search by item name..."
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
 
                     <!-- Status Filter -->
                     <select wire:model.live="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Semua Status</option>
+                        <option value="">All Status</option>
                         <option value="PENDING">Pending</option>
                         <option value="CONFIRMED">Confirmed</option>
                         <option value="REJECTED">Rejected</option>
@@ -91,11 +91,11 @@
                 <!-- Create Button -->
                 <button 
                     wire:click="openCreateModal"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition">
+                    class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition">
                     <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Buat Match Baru
+                    Create New Match
                 </button>
             </div>
         </div>
@@ -107,7 +107,6 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lost Report</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Found Report</th>
-                        <!-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th> -->
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matched By</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
@@ -155,18 +154,6 @@
                                     </div>
                                 </div>
                             </td>
-                            <!-- <td class="px-6 py-4">
-                                @if($match->confidence_score)
-                                    <div class="flex items-center">
-                                        <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                            <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $match->confidence_score }}%"></div>
-                                        </div>
-                                        <span class="text-sm font-medium text-gray-700">{{ number_format($match->confidence_score, 0) }}%</span>
-                                    </div>
-                                @else
-                                    <span class="text-sm text-gray-400">-</span>
-                                @endif
-                            </td> -->
                             <td class="px-6 py-4">
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $match->getStatusBadgeClass() }}">
                                     {{ $match->match_status }}
@@ -182,7 +169,8 @@
                                 <div class="flex items-center justify-end space-x-2">
                                     <button 
                                         wire:click="viewMatch('{{ $match->match_id }}')"
-                                        class="text-blue-600 hover:text-blue-900">
+                                        class="text-blue-600 hover:text-blue-900"
+                                        title="View Details">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -192,8 +180,9 @@
                                     @if($match->isPending())
                                         <button 
                                             wire:click="confirmMatch('{{ $match->match_id }}')"
-                                            wire:confirm="Konfirmasi match ini?"
-                                            class="text-green-600 hover:text-green-900">
+                                            wire:confirm="Confirm this match?"
+                                            class="text-green-600 hover:text-green-900"
+                                            title="Confirm Match">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                             </svg>
@@ -201,8 +190,9 @@
 
                                         <button 
                                             wire:click="rejectMatch('{{ $match->match_id }}')"
-                                            wire:confirm="Tolak match ini?"
-                                            class="text-red-600 hover:text-red-900">
+                                            wire:confirm="Reject this match?"
+                                            class="text-red-600 hover:text-red-900"
+                                            title="Reject Match">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
@@ -211,8 +201,9 @@
 
                                     <button 
                                         wire:click="deleteMatch('{{ $match->match_id }}')"
-                                        wire:confirm="Hapus match ini?"
-                                        class="text-gray-600 hover:text-gray-900">
+                                        wire:confirm="Delete this match?"
+                                        class="text-gray-600 hover:text-gray-900"
+                                        title="Delete Match">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
@@ -222,11 +213,11 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
-                                <p class="mt-2 text-sm text-gray-500">Tidak ada data match</p>
+                                <p class="mt-2 text-sm text-gray-500">No matches found</p>
                             </td>
                         </tr>
                     @endforelse
@@ -242,13 +233,13 @@
 
     <!-- Create Modal -->
     @if($showCreateModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" x-data="{ show: @entangle('showCreateModal') }">
-            <div class="flex items-center justify-center min-h-screen px-4">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeCreateModal"></div>
-                
-                <div class="relative bg-white rounded-lg shadow-xl max-w-4xl w-full">
-                    <livewire:admin.matches.match-create :key="'create-'.now()" />
-                </div>
+        <div class="fixed inset-0 z-50 overflow-y-auto">
+            <!-- Backdrop transparan dengan blur -->
+            <div class="fixed inset-0 backdrop-blur-sm z-40"></div>
+
+            <!-- Modal Container -->
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <livewire:admin.matches.match-create :key="'create-'.now()" />
             </div>
         </div>
     @endif
@@ -256,12 +247,12 @@
     <!-- Detail Modal -->
     @if($selectedMatchId)
         <div class="fixed inset-0 z-50 overflow-y-auto">
-            <div class="flex items-center justify-center min-h-screen px-4">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeDetailModal"></div>
-                
-                <div class="relative bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-                    <livewire:admin.matches.match-detail :matchId="$selectedMatchId" :key="'detail-'.$selectedMatchId" />
-                </div>
+            <!-- Backdrop transparan dengan blur -->
+            <div class="fixed inset-0 backdrop-blur-sm z-40"></div>
+            
+            <!-- Modal Container -->
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <livewire:admin.matches.match-detail :matchId="$selectedMatchId" :key="'detail-'.$selectedMatchId" />
             </div>
         </div>
     @endif
