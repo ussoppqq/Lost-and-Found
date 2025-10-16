@@ -6,7 +6,6 @@ use App\Models\MatchedItem;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-
 class MatchList extends Component
 {
     use WithPagination;
@@ -18,7 +17,6 @@ class MatchList extends Component
 
     protected $queryString = ['search', 'statusFilter'];
     
-    // Listener untuk refresh setelah match dibuat
     protected $listeners = ['match-created' => 'handleMatchCreated'];
 
     public function updatingSearch()
@@ -73,9 +71,9 @@ class MatchList extends Component
             $match->lostReport->update(['report_status' => 'MATCHED']);
             $match->foundReport->update(['report_status' => 'MATCHED']);
 
-            session()->flash('success', 'Match berhasil dikonfirmasi!');
+            session()->flash('success', 'Match confirmed successfully!');
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal konfirmasi match: ' . $e->getMessage());
+            session()->flash('error', 'Failed to confirm match: ' . $e->getMessage());
         }
     }
 
@@ -88,9 +86,9 @@ class MatchList extends Component
                 'match_status' => 'REJECTED',
             ]);
 
-            session()->flash('success', 'Match berhasil ditolak!');
+            session()->flash('success', 'Match rejected successfully!');
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal tolak match: ' . $e->getMessage());
+            session()->flash('error', 'Failed to reject match: ' . $e->getMessage());
         }
     }
 
@@ -98,9 +96,9 @@ class MatchList extends Component
     {
         try {
             MatchedItem::findOrFail($matchId)->delete();
-            session()->flash('success', 'Match berhasil dihapus!');
+            session()->flash('success', 'Match deleted successfully!');
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal hapus match: ' . $e->getMessage());
+            session()->flash('error', 'Failed to delete match: ' . $e->getMessage());
         }
     }
 
@@ -135,7 +133,7 @@ class MatchList extends Component
             'stats' => $stats,
         ])->layout('components.layouts.admin', [
             'title' => 'Matches',
-            'pageTitle' => 'Matches Management',
+            'pageTitle' => 'Match Management',
             'pageDescription' => 'Manage all matches in the system'
         ]);
     }
