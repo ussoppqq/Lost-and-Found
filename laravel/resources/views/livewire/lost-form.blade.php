@@ -1,3 +1,4 @@
+
 <div class="min-h-screen bg-gray-100 py-4">
   <!-- Mobile-optimized container -->
   <div class="mx-auto w-full px-4 max-w-lg lg:max-w-4xl">
