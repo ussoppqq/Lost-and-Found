@@ -15,7 +15,8 @@ class Report extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'report_id',          
+        'report_id',
+        'report_number',      
         'company_id',
         'user_id',
         'item_id',
@@ -44,6 +45,12 @@ class Report extends Model
             if (empty($model->report_id)) {
                 $model->report_id = (string) Str::uuid();
             }
+            
+            // Auto-generate report_number
+            if (empty($model->report_number)) {
+                $lastReport = static::orderBy('report_number', 'desc')->first();
+                $model->report_number = $lastReport ? $lastReport->report_number + 1 : 1;
+            }
         });
     }
 
@@ -66,7 +73,6 @@ class Report extends Model
     {
         return $this->belongsTo(Category::class, 'category_id', 'category_id');
     }
-
 
     public function claims()
     {
@@ -103,6 +109,14 @@ class Report extends Model
     public function hasConfirmedMatch()
     {
         return $this->matches()->where('match_status', 'CONFIRMED')->exists();
+    }
+
+    /**
+     * Get formatted report ID (e.g., #001, #123)
+     */
+    public function getFormattedReportNumberAttribute()
+    {
+        return '#' . str_pad($this->report_number, 3, '0', STR_PAD_LEFT);
     }
 
     /**

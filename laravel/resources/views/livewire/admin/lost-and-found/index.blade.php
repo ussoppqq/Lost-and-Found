@@ -133,6 +133,23 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <!-- KOLOM ID BARU -->
+                        <th wire:click="sortBy('report_number')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                            <div class="flex items-center space-x-1">
+                                <span>ID</span>
+                                @if($sortBy === 'report_number')
+                                    @if($sortDirection === 'asc')
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        </svg>
+                                    @else
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    @endif
+                                @endif
+                            </div>
+                        </th>
                         <th wire:click="sortBy('item_name')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                             <div class="flex items-center space-x-1">
                                 <span>Report</span>
@@ -188,6 +205,12 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($reports as $report)
                     <tr class="hover:bg-gray-50">
+                        <!-- CELL ID BARU -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800">
+                                {{ $report->formatted_report_number }}
+                            </span>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 @if($report->report_type === 'LOST')
@@ -205,7 +228,7 @@
                                 @endif
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">
-                                        {{ $report->item->item_name ?? 'Unnamed Item' }}
+                                        {{ $report->item_name ?? $report->item->item_name ?? 'Unnamed Item' }}
                                     </div>
                                     <div class="text-sm text-gray-500">{{ Str::limit($report->report_description, 40) }}</div>
                                 </div>
@@ -322,7 +345,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="9" class="px-6 py-12 text-center text-gray-500">
                             <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
