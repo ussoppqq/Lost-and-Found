@@ -42,7 +42,7 @@ class MatchCreate extends Component
             ->whereDoesntHave('matchesAsLost', function($query) {
                 $query->where('match_status', 'CONFIRMED');
             })
-            ->orderBy('report_datetime', 'desc')
+            ->orderBy('report_number', 'desc')
             ->get();
 
         // Load FOUND reports that haven't been matched with eager loading category
@@ -52,7 +52,7 @@ class MatchCreate extends Component
             ->whereDoesntHave('matchesAsFound', function($query) {
                 $query->where('match_status', 'CONFIRMED');
             })
-            ->orderBy('report_datetime', 'desc')
+            ->orderBy('report_number', 'desc')
             ->get();
     }
 
