@@ -66,6 +66,12 @@ class MatchedItem extends Model
         return $this->belongsTo(User::class, 'confirmed_by', 'user_id');
     }
 
+    // Relationship ke Claim (One-to-One)
+    public function claim()
+    {
+        return $this->hasOne(Claim::class, 'match_id', 'match_id');
+    }
+
     // Scopes
     public function scopePending($query)
     {
@@ -96,6 +102,11 @@ class MatchedItem extends Model
     public function isRejected()
     {
         return $this->match_status === 'REJECTED';
+    }
+
+    public function hasClaim()
+    {
+        return $this->claim()->exists();
     }
 
     public function getStatusBadgeClass()

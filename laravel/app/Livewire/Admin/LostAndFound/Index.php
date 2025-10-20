@@ -6,9 +6,6 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Report;
 use App\Models\Item;
-use App\Models\Category;
-use App\Models\Post;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -30,11 +27,14 @@ class Index extends Component
     // Modal states
     public $showDeleteModal = false;
     public $selectedReportId = null;
+    public $showDetailModal = false;
+    public $selectedReportForDetail = null;
 
     // Listeners for modal events
     protected $listeners = [
         'item-created' => '$refresh',
         'item-updated' => '$refresh',
+        'closeDetailModal' => 'closeDetailModal',
     ];
 
     protected $queryString = ['search', 'reportTypeFilter', 'reportStatusFilter', 'dateFrom', 'dateTo'];
@@ -90,16 +90,23 @@ class Index extends Component
         session()->flash('success', 'Report status updated successfully!');
     }
 
+    // View report detail
+    public function viewReportDetail($reportId)
+    {
+        $this->selectedReportForDetail = $reportId;
+        $this->showDetailModal = true;
+    }
+
+    public function closeDetailModal()
+    {
+        $this->showDetailModal = false;
+        $this->selectedReportForDetail = null;
+    }
+
     // Buka modal untuk walk-in item (standalone - langsung buat report + item)
     public function openCreateItemModal()
     {
         $this->dispatch('open-create-item-modal-standalone');
-    }
-
-    // Buka modal untuk create item dari report yang sudah ada (report tanpa item)
-    public function createItemFromReport($reportId)
-    {
-        $this->dispatch('open-create-item-modal', reportId: $reportId);
     }
 
     // Trigger untuk membuka modal Edit Item
