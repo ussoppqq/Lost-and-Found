@@ -16,12 +16,16 @@ class MatchList extends Component
     public $selectedMatchId = null;
     public $showClaimModal = false;
     public $selectedMatchForClaim = null;
+    public $showClaimDetailModal = false;
+    public $selectedClaimId = null;
 
     protected $queryString = ['search', 'statusFilter'];
-    
+
     protected $listeners = [
         'match-created' => 'handleMatchCreated',
         'claim-processed' => 'handleClaimProcessed',
+        'closeClaimDetailModal' => 'closeClaimDetailModal',
+        'closeProcessClaimModal' => 'closeClaimModal',
     ];
 
     public function updatingSearch()
@@ -72,7 +76,7 @@ class MatchList extends Component
     {
         try {
             $match = MatchedItem::with(['lostReport', 'foundReport'])->findOrFail($matchId);
-            
+
             // VALIDASI: Found report HARUS punya item
             if (!$match->foundReport->item_id) {
                 session()->flash('error', 'Cannot confirm match: Found report must have a registered item first!');
@@ -99,7 +103,7 @@ class MatchList extends Component
     {
         try {
             $match = MatchedItem::findOrFail($matchId);
-            
+
             $match->update([
                 'match_status' => 'REJECTED',
             ]);
@@ -114,7 +118,7 @@ class MatchList extends Component
     {
         // Validasi sebelum buka modal
         $match = MatchedItem::with(['foundReport'])->findOrFail($matchId);
-        
+
         if (!$match->foundReport->item_id) {
             session()->flash('error', 'Cannot process claim: Found report must have a registered item first!');
             return;
@@ -128,6 +132,29 @@ class MatchList extends Component
 
         $this->selectedMatchForClaim = $matchId;
         $this->showClaimModal = true;
+    }
+
+    public function viewClaim($matchId)
+    {
+        try {
+            $match = MatchedItem::with('claim')->findOrFail($matchId);
+
+            if (!$match->hasClaim()) {
+                session()->flash('error', 'No claim found for this match!');
+                return;
+            }
+
+            $this->selectedClaimId = $match->claim->claim_id;
+            $this->showClaimDetailModal = true;
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to load claim: ' . $e->getMessage());
+        }
+    }
+
+    public function closeClaimDetailModal()
+    {
+        $this->showClaimDetailModal = false;
+        $this->selectedClaimId = null;
     }
 
     public function closeClaimModal()
@@ -149,24 +176,24 @@ class MatchList extends Component
     public function render()
     {
         $matches = MatchedItem::with([
-            'lostReport.category', 
-            'foundReport.category', 
-            'foundReport.item', // Eager load item dari found report
-            'matcher', 
+            'lostReport.category',
+            'foundReport.category',
+            'foundReport.item',
+            'matcher',
             'confirmer',
             'claim'
         ])
-            ->when($this->search, function($query) {
-                $query->whereHas('lostReport', function($q) {
-                    $q->where('item_name', 'like', '%'.$this->search.'%')
-                      ->orWhere('report_description', 'like', '%'.$this->search.'%');
+            ->when($this->search, function ($query) {
+                $query->whereHas('lostReport', function ($q) {
+                    $q->where('item_name', 'like', '%' . $this->search . '%')
+                        ->orWhere('report_description', 'like', '%' . $this->search . '%');
                 })
-                ->orWhereHas('foundReport', function($q) {
-                    $q->where('item_name', 'like', '%'.$this->search.'%')
-                      ->orWhere('report_description', 'like', '%'.$this->search.'%');
-                });
+                    ->orWhereHas('foundReport', function ($q) {
+                        $q->where('item_name', 'like', '%' . $this->search . '%')
+                            ->orWhere('report_description', 'like', '%' . $this->search . '%');
+                    });
             })
-            ->when($this->statusFilter, function($query) {
+            ->when($this->statusFilter, function ($query) {
                 $query->where('match_status', $this->statusFilter);
             })
             ->latest('matched_at')
@@ -183,9 +210,9 @@ class MatchList extends Component
             'matches' => $matches,
             'stats' => $stats,
         ])->layout('components.layouts.admin', [
-            'title' => 'Matches',
-            'pageTitle' => 'Match Management',
-            'pageDescription' => 'Manage all matches in the system'
-        ]);
+                    'title' => 'Matches',
+                    'pageTitle' => 'Match Management',
+                    'pageDescription' => 'Manage all matches in the system'
+                ]);
     }
 }

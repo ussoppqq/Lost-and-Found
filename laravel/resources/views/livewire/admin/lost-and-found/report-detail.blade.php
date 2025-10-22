@@ -1,6 +1,6 @@
 <div>
 <!-- Backdrop Blur -->
-<div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity z-40"></div>
+<div class="fixed inset-0 bg-opacity-50 backdrop-blur-sm transition-opacity z-40"></div>
 
 <!-- Modal Container -->
 <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
@@ -116,7 +116,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Phone</label>
-                            <p class="text-sm text-gray-900">{{ $report->user->phone ?? 'N/A' }}</p>
+                            <p class="text-sm text-gray-900">{{ $report->user->phone_number ?? 'N/A' }}</p>
                         </div>
                     @else
                         <div>
@@ -125,7 +125,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Phone</label>
-                            <p class="text-sm text-gray-900">{{ $report->reporter_phone ?? 'N/A' }}</p>
+                            <p class="text-sm text-gray-900">{{ $report->reporter_phone_number ?? 'N/A' }}</p>
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Email</label>
@@ -164,7 +164,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-600 mb-1">Storage Location</label>
-                            <p class="text-sm text-gray-900">{{ $report->item->storage_location ?? 'N/A' }}</p>
+                            <p class="text-sm text-gray-900">{{ $report->item->storage ?? 'N/A' }}</p>
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-600 mb-1">Registered Date</label>
