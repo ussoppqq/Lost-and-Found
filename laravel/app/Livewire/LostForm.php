@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Report;
 use App\Models\Role;
 use App\Models\User;
+use Carbon\Carbon; // ✅ import Carbon untuk waktu server
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -62,11 +63,11 @@ class LostForm extends Component
     protected function step2Rules(): array
     {
         return [
-            'item_name'  => 'required|string|max:255',
-            'category'   => 'nullable|uuid',
-            'description'=> 'required|string|min:10|max:200',
-            'photos'     => 'nullable|array|max:5',
-            'photos.*'   => 'nullable|image|max:25600', // 25MB
+            'item_name'   => 'required|string|max:255',
+            'category'    => 'nullable|uuid',
+            'description' => 'required|string|min:10|max:200',
+            'photos'      => 'nullable|array|max:5',
+            'photos.*'    => 'nullable|image|max:25600', // 25MB
         ];
     }
 
@@ -169,14 +170,14 @@ class LostForm extends Component
                 $userRole = Role::where('role_code', 'USER')->firstOrFail();
 
                 $user = User::create([
-                    'user_id'     => Str::uuid(),
-                    'company_id'  => null,
-                    'role_id'     => $userRole->role_id,
-                    'full_name'   => $this->user_name,
-                    'email'       => null,
-                    'phone_number'=> $this->phone,
-                    'password'    => null,
-                    'is_verified' => false,
+                    'user_id'      => Str::uuid(),
+                    'company_id'   => null,
+                    'role_id'      => $userRole->role_id,
+                    'full_name'    => $this->user_name,
+                    'email'        => null,
+                    'phone_number' => $this->phone,
+                    'password'     => null,
+                    'is_verified'  => false,
                 ]);
             }
 
@@ -203,6 +204,10 @@ class LostForm extends Component
                 'report_datetime'    => $this->date_lost ?? now(),
                 'report_location'    => $this->location ?? 'Not specified',
                 'report_status'      => 'OPEN',
+
+                // ✅ waktu server real-time WIB (disimpan dalam UTC)
+                'submitted_at'       => Carbon::now('Asia/Jakarta')->setTimezone('UTC'),
+
                 'photo_url'          => $photoUrl,
                 'reporter_name'      => $user->full_name,
                 'reporter_phone'     => $user->phone_number,

@@ -1,4 +1,3 @@
-
 <div class="min-h-screen bg-gray-100 py-4">
   <!-- Mobile-optimized container -->
   <div class="mx-auto w-full px-4 max-w-lg lg:max-w-4xl">
@@ -45,6 +44,17 @@
 
       {{-- Form --}}
       <form wire:submit.prevent="submit" class="space-y-5">
+
+        <!-- Auto Submit Time (Display Only) -->
+        <div class="rounded-xl border border-gray-200 p-3 sm:p-4 bg-white/60">
+          <p class="text-xs sm:text-sm text-gray-500 mb-1">Waktu submit (otomatis, WIB)</p>
+          <div x-data="{ now: new Date() }" x-init="setInterval(() => now = new Date(), 1000)" class="text-base sm:text-lg font-semibold text-gray-900">
+            <span x-text="now.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) + ' WIB'"></span>
+          </div>
+          <p class="text-[11px] sm:text-xs text-gray-400 mt-1">
+            Waktu final akan direkam dari server saat kamu menekan <strong>Submit</strong>.
+          </p>
+        </div>
 
         {{-- STEP 1: YOUR INFORMATION --}}
         @if ($step === 1)

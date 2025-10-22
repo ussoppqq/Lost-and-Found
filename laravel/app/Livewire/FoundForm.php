@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Report;
 use App\Models\Role;
 use App\Models\User;
+use Carbon\Carbon; // ✅ tambah ini
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -190,6 +191,10 @@ class FoundForm extends Component
                 'report_datetime'    => $this->date_found ?? now(),
                 'report_location'    => $this->location ?? 'Not specified',
                 'report_status'      => 'OPEN',
+
+                // ✅ waktu submit real-time dari server (WIB) disimpan sebagai UTC
+                'submitted_at'       => Carbon::now('Asia/Jakarta')->setTimezone('UTC'),
+
                 'photo_url'          => $photoUrl,
                 'reporter_name'      => $user->full_name,
                 'reporter_phone'     => $user->phone_number,
