@@ -269,6 +269,7 @@
                                     @if($match->hasClaim())
                                         <!-- View Claim Button -->
                                         <button 
+                                            wire:click="viewClaim('{{ $match->match_id }}')"
                                             class="text-indigo-600 hover:text-indigo-900"
                                             title="View Claim">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -336,15 +337,28 @@
     @endif
 
     <!-- Claim Processing Modal -->
-    @if($showClaimModal && $selectedMatchForClaim)
-        <div class="fixed inset-0 z-50 overflow-y-auto">
-            <!-- Backdrop transparan dengan blur -->
-            <div class="fixed inset-0 backdrop-blur-sm z-40"></div>
-            
-            <!-- Modal Container -->
-            <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-                <livewire:admin.matches.process-claim :matchId="$selectedMatchForClaim" :key="'claim-'.$selectedMatchForClaim" />
-            </div>
+@if($showClaimModal && $selectedMatchForClaim)
+    <div class="fixed inset-0 z-50 overflow-y-auto">
+        <!-- Backdrop transparan dengan blur -->
+        <div class="fixed inset-0 backdrop-blur-sm z-40"></div>
+        
+        <!-- Modal Container -->
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <livewire:admin.matches.process-claim :matchId="$selectedMatchForClaim" :key="'claim-'.$selectedMatchForClaim" />
         </div>
-    @endif
+    </div>
+@endif
+
+<!-- Claim Detail Modal -->
+@if($showClaimDetailModal && $selectedClaimId)
+    <div class="fixed inset-0 z-50 overflow-y-auto">
+        <!-- Backdrop transparan dengan blur -->
+        <div class="fixed inset-0 backdrop-blur-sm z-40"></div>
+        
+        <!-- Modal Container -->
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <livewire:admin.matches.claim-detail :claimId="$selectedClaimId" :key="'claim-detail-'.$selectedClaimId" />
+        </div>
+    </div>
+@endif
 </div>

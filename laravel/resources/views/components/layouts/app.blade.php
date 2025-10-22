@@ -54,10 +54,10 @@
                     Lost &amp; Found
                 </a>
 
-                <a href="{{ url('/map') }}"
+                <a href="{{ url('/tracking') }}"
                    :class="scrolled ? 'text-gray-700 hover:text-green-700' : 'text-white hover:text-green-200 drop-shadow'"
                    class="font-medium text-sm lg:text-base transition-colors duration-300">
-                    Map
+                    Tracking
                 </a>
 
                 @auth

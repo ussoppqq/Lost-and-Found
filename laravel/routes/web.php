@@ -16,6 +16,8 @@ use App\Livewire\LostForm;
 use App\Livewire\TrackingDetail;
 use App\Livewire\TrackingIndex;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Admin\Statistic;
+use App\Http\Controllers\Admin\StatisticPdfController;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,8 +90,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Users Management
     Route::get('/users', UsersIndex::class)->name('users');
 
-    // Settings (untuk pengembangan selanjutnya)
-    // Route::get('/settings', Settings::class)->name('settings');
+    // Statistics
+    Route::get('/statistic', Statistic::class)->name('statistic');
+    Route::get('/statistic/pdf', [\App\Http\Controllers\AdminStatisticPdfController::class, 'download'])->name('statistic.pdf');
+
 
 });
 Storage::disk('public')->put('test.txt', 'hello');
@@ -117,3 +121,14 @@ Route::prefix('tracking')->name('tracking.')->group(function () {
 
 Route::get('/reports/{report}/pdf', [ReportPdfController::class, 'download'])
             ->name('reports.pdf');
+            Route::middleware(['auth'])->group(function () {
+                Route::get('/admin/statistic', Statistic::class)->name('admin.statistic');
+            
+                // PDF export
+                Route::get('/admin/statistic/pdf', [StatisticPdfController::class, 'export'])
+                    ->name('admin.statistic.pdf');
+            });
+            
+// routes/web.php
+Route::get('/admin/statistic/pdf', [\App\Http\Controllers\Admin\StatisticPdfController::class, 'export'])
+    ->name('admin.statistic.pdf');

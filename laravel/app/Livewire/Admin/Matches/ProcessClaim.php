@@ -36,12 +36,12 @@ class ProcessClaim extends Component
     public function mount($matchId)
     {
         $this->matchId = $matchId;
-        $this->match = MatchedItem::with(['lostReport', 'foundReport.item'])->findOrFail($matchId);
+        $this->match = MatchedItem::with(['lostReport.user', 'foundReport.item'])->findOrFail($matchId);
         
         // VALIDASI: Found report HARUS punya item
         if (!$this->match->foundReport->item_id) {
             session()->flash('error', 'Cannot process claim: Found report must have a registered item!');
-            $this->dispatch('claim-processed');
+            $this->closeModal();
             return;
         }
 
@@ -77,34 +77,38 @@ class ProcessClaim extends Component
                 $uploadedPhotos[] = $path;
             }
 
-            // Create claim
+            // Create claim dengan status RELEASED (langsung approved)
             Claim::create([
                 'claim_id' => Str::uuid(),
                 'company_id' => auth()->user()->company_id,
-                'user_id' => $this->match->lostReport->user_id, // User yang kehilangan
+                'user_id' => $this->match->lostReport->user_id, 
                 'match_id' => $this->matchId,
-                'item_id' => $this->match->foundReport->item_id, // REQUIRED: Item dari found report
-                'report_id' => $this->match->lostReport->report_id, // Lost report reference
-                'claim_status' => 'PENDING',
+                'item_id' => $this->match->foundReport->item_id, 
+                'report_id' => $this->match->lostReport->report_id, 
+                'claim_status' => 'RELEASED', 
                 'brand' => $this->brand,
                 'color' => $this->color,
                 'claim_notes' => $this->claimNotes,
                 'claim_photos' => $uploadedPhotos,
+                'pickup_schedule' => now(), 
             ]);
 
             // Update report status ke CLOSED
             $this->match->lostReport->update(['report_status' => 'CLOSED']);
             $this->match->foundReport->update(['report_status' => 'CLOSED']);
 
-            // Update item status ke CLAIMED
+            // Update item status ke CLAIMED (bukan RETURNED karena sudah diserahkan)
             if ($this->match->foundReport->item) {
                 $this->match->foundReport->item->update(['item_status' => 'CLAIMED']);
             }
 
             DB::commit();
 
-            session()->flash('success', 'Claim processed successfully!');
+            session()->flash('success', 'Claim processed successfully! Item has been released to the owner.');
+            
+            // Emit event untuk refresh parent dan tutup modal
             $this->dispatch('claim-processed');
+            $this->closeModal();
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -114,7 +118,8 @@ class ProcessClaim extends Component
 
     public function closeModal()
     {
-        $this->dispatch('closeClaimModal')->to(\App\Livewire\Admin\Matches\MatchList::class);
+        // Dispatch event ke parent component untuk menutup modal
+        $this->dispatch('closeProcessClaimModal');
     }
 
     public function render()
