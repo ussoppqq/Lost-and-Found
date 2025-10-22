@@ -69,7 +69,7 @@
                             <option value="">-- Select Lost Report --</option>
                             @foreach($lostReports as $report)
                                 <option value="{{ $report->report_id }}">
-                                    {{ $report->item_name }} - {{ $report->report_datetime->format('d M Y') }} - {{ $report->report_location }}
+                                    {{ $report->formatted_report_number }} - {{ $report->item_name }} - {{ $report->report_datetime->format('d M Y') }} - {{ $report->report_location }}
                                 </option>
                             @endforeach
                         </select>
@@ -103,6 +103,7 @@
                                         @endif
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center mb-2">
+                                                <span class="px-2 py-1 bg-gray-800 text-white text-xs font-bold rounded mr-2">{{ $selectedLost->formatted_report_number }}</span>
                                                 <span class="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded mr-2">LOST</span>
                                                 <h4 class="font-bold text-gray-900 truncate">{{ $selectedLost->item_name }}</h4>
                                             </div>
@@ -159,7 +160,7 @@
                             <option value="">-- Select Found Report --</option>
                             @foreach($foundReports as $report)
                                 <option value="{{ $report->report_id }}">
-                                    {{ $report->item_name }} - {{ $report->report_datetime->format('d M Y') }} - {{ $report->report_location }}
+                                    {{ $report->formatted_report_number }} - {{ $report->item_name }} - {{ $report->report_datetime->format('d M Y') }} - {{ $report->report_location }}
                                 </option>
                             @endforeach
                         </select>
@@ -193,6 +194,7 @@
                                         @endif
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center mb-2">
+                                                <span class="px-2 py-1 bg-gray-800 text-white text-xs font-bold rounded mr-2">{{ $selectedFound->formatted_report_number }}</span>
                                                 <span class="px-2 py-1 bg-green-600 text-white text-xs font-bold rounded mr-2">FOUND</span>
                                                 <h4 class="font-bold text-gray-900 truncate">{{ $selectedFound->item_name }}</h4>
                                             </div>

@@ -133,6 +133,23 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <!-- KOLOM ID BARU -->
+                        <th wire:click="sortBy('report_number')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                            <div class="flex items-center space-x-1">
+                                <span>ID</span>
+                                @if($sortBy === 'report_number')
+                                    @if($sortDirection === 'asc')
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                        </svg>
+                                    @else
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    @endif
+                                @endif
+                            </div>
+                        </th>
                         <th wire:click="sortBy('item_name')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                             <div class="flex items-center space-x-1">
                                 <span>Report</span>
@@ -188,6 +205,12 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($reports as $report)
                     <tr class="hover:bg-gray-50">
+                        <!-- CELL ID BARU -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800">
+                                {{ $report->formatted_report_number }}
+                            </span>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 @if($report->report_type === 'LOST')
@@ -205,7 +228,7 @@
                                 @endif
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">
-                                        {{ $report->item->item_name ?? 'Unnamed Item' }}
+                                        {{ $report->item_name ?? $report->item->item_name ?? 'Unnamed Item' }}
                                     </div>
                                     <div class="text-sm text-gray-500">{{ Str::limit($report->report_description, 40) }}</div>
                                 </div>
@@ -279,26 +302,37 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center space-x-2">
-    @if($report->report_status === 'CLOSED' || ($report->item && $report->item->item_status === 'CLAIMED'))
-        <!-- Ceklis jika sudah claimed/closed -->
-        <button class="text-green-600" title="Item Claimed" disabled>
+    @if($report->report_status === 'CLOSED' || $report->report_status === 'MATCHED')
+        <!-- Ceklis jika sudah claimed/matched -->
+        <button class="text-green-600" title="Completed" disabled>
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
         </button>
     @elseif(!$report->item_id)
-        <!-- Tombol Create Item -->
-        <button wire:click="createItemFromReport('{{ $report->report_id }}')" 
-                class="text-green-600 hover:text-green-900 flex items-center"
-                title="Register Item">
-            <svg class="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        <!-- Tombol View Detail jika belum ada item -->
+        <button wire:click="viewReportDetail('{{ $report->report_id }}')" 
+                class="text-blue-600 hover:text-blue-900"
+                title="View Detail">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
             </svg>
         </button>
     @else
-        <!-- Tombol Edit Item -->
-        <button wire:click="openEditItemModal('{{ $report->item_id }}')" 
+        <!-- Tombol View Detail -->
+        <button wire:click="viewReportDetail('{{ $report->report_id }}')" 
                 class="text-blue-600 hover:text-blue-900"
+                title="View Detail">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+        </button>
+
+        <!-- Tombol Edit Item (jika sudah ada item) -->
+        <button wire:click="openEditItemModal('{{ $report->item_id }}')" 
+                class="text-indigo-600 hover:text-indigo-900"
                 title="Edit Item">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -306,8 +340,8 @@
         </button>
     @endif
     
-    <!-- Delete button tetap ada, tapi mungkin hide jika claimed -->
-    @if($report->report_status !== 'CLOSED')
+    <!-- Delete button -->
+    @if($report->report_status !== 'CLOSED' && $report->report_status !== 'MATCHED')
     <button wire:click="deleteReport('{{ $report->report_id }}')" 
             class="text-red-600 hover:text-red-900"
             title="Delete Report"
@@ -322,7 +356,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="9" class="px-6 py-12 text-center text-gray-500">
                             <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
@@ -346,6 +380,13 @@
     <!-- Include Modals -->
     @livewire('admin.lost-and-found.create-item')
     @livewire('admin.lost-and-found.edit-item')
+
+    <!-- Report Detail Modal -->
+    @if($showDetailModal && $selectedReportForDetail)
+        <div class="fixed inset-0 z-50 overflow-y-auto">
+            <livewire:admin.lost-and-found.report-detail :reportId="$selectedReportForDetail" :key="'detail-'.$selectedReportForDetail" />
+        </div>
+    @endif
 
     <!-- Delete Confirmation Modal -->
     @if($showDeleteModal)
