@@ -88,7 +88,7 @@ class Report extends Model
     {
         return $this->hasMany(MatchedItem::class, 'found_report_id', 'report_id');
     }
-
+    
     public function matches()
     {
         return $this->report_type === 'LOST' 
