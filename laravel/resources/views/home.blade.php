@@ -67,7 +67,8 @@
     </section>
 
     {{-- ========== MAIN CONTENT SECTION ========== --}}
-    <section class="py-16 lg:py-24 bg-white">
+    <section id="lostandfound" class="py-16 lg:py-24 bg-white">
+
         <div class="container mx-auto px-4 md:px-8">
             
             {{-- Section Title --}}

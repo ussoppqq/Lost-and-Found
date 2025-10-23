@@ -48,7 +48,8 @@
             {{-- Menu Desktop --}}
             <div class="hidden md:flex items-center space-x-6 lg:space-x-8">
                 {{-- Ganti ke anchor di halaman yang sama --}}
-                <a href="#lostandfound"
+                <a href="{{ url('/#lostandfound') }}"
+
                    :class="scrolled ? 'text-gray-700 hover:text-green-700' : 'text-white hover:text-green-200 drop-shadow'"
                    class="font-medium text-sm lg:text-base transition-colors duration-300">
                     Lost &amp; Found
