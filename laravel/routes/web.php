@@ -18,6 +18,7 @@ use App\Livewire\TrackingIndex;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Statistic;
 use App\Http\Controllers\Admin\StatisticPdfController;
+use App\Http\Controllers\LostPdfController;
 
 /*
 |--------------------------------------------------------------------------
@@ -132,3 +133,7 @@ Route::get('/reports/{report}/pdf', [ReportPdfController::class, 'download'])
 // routes/web.php
 Route::get('/admin/statistic/pdf', [\App\Http\Controllers\Admin\StatisticPdfController::class, 'export'])
     ->name('admin.statistic.pdf');
+
+Route::get('/reports/{report}/receipt.pdf', [LostPdfController::class, 'download'])
+    ->name('reports.receipt.pdf')
+    ->middleware('signed');

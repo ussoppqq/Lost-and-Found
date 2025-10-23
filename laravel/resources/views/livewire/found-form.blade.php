@@ -1,4 +1,92 @@
-<div class="min-h-[100svh] bg-gray-100 py-4 sm:py-6 overflow-x-hidden">
+<div class="min-h-screen bg-gray-100 py-4"
+     x-data
+     x-on:download-pdf.window="window.location = $event.detail.url">
+
+  <!-- Success Modal -->
+  @if($show_success)
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50" 
+       x-data 
+       x-init="$el.querySelector('.modal-content').focus()">
+    <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 animate-scale-in" tabindex="-1">
+      <!-- Success Icon -->
+      <div class="flex justify-center mb-6">
+        <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
+          <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h2 class="text-2xl font-bold text-gray-900 text-center mb-3">
+        Report Submitted Successfully! 🎉
+      </h2>
+      
+      <p class="text-sm text-gray-600 text-center mb-6">
+        Thank you for reporting the found item. Save your Report ID to track the status.
+      </p>
+
+      <!-- Report ID Display -->
+      <div class="bg-gray-50 border-2 border-gray-800 rounded-xl p-4 mb-6">
+        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center">
+          Your Report ID
+        </div>
+        <div class="flex items-center justify-between gap-3 bg-white rounded-lg p-3 border border-gray-200">
+          <code class="text-sm font-mono text-gray-900 break-all flex-1">
+            {{ $submitted_report_id }}
+          </code>
+          <button type="button" 
+                  onclick="navigator.clipboard.writeText('{{ $submitted_report_id }}')" 
+                  class="flex-shrink-0 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+                  title="Copy to clipboard">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+        <div class="flex gap-3">
+          <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="text-sm text-blue-900">
+            <p class="font-semibold mb-1">Important:</p>
+            <ul class="list-disc list-inside space-y-1 text-xs">
+              <li>Download the PDF receipt for your records</li>
+              <li>Use the Report ID to track the status</li>
+              <li>The owner will contact you if matched</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-3">
+        <button type="button" 
+                wire:click="downloadPDF"
+                class="w-full flex items-center justify-center gap-2 bg-gray-800 text-white rounded-xl px-6 py-3.5 text-base font-semibold hover:bg-gray-900 active:scale-[0.98] transition-all shadow-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Download PDF Receipt
+        </button>
+
+        <button type="button" 
+                wire:click="closeSuccess"
+                class="w-full bg-gray-100 text-gray-700 rounded-xl px-6 py-3 text-base font-semibold hover:bg-gray-200 active:scale-[0.98] transition-all">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+  @endif
+
   <div class="mx-auto w-full max-w-screen-sm sm:max-w-2xl lg:max-w-4xl px-3 sm:px-6">
     <div class="w-full bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 sm:p-6 lg:p-8 overflow-hidden min-w-0">
 
@@ -212,13 +300,14 @@
               </button>
 
               <button type="submit" wire:loading.attr="disabled"
-                      class="inline-flex items-center justify-center gap-2 bg-gray-800 text-white rounded-lg px-6 py-2.5 hover:bg-gray-900 transition">
+                      class="inline-flex items-center justify-center gap-2 bg-gray-800 text-white rounded-lg px-6 py-2.5 hover:bg-gray-900 transition disabled:opacity-50">
                 <svg wire:loading wire:target="submit" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                   <path class="opacity-75" fill="currentColor"
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                 </svg>
                 <span wire:loading.remove wire:target="submit">Submit Report</span>
+                <span wire:loading wire:target="submit">Submitting...</span>
               </button>
             </div>
           </div>
@@ -231,3 +320,20 @@
     </div>
   </div>
 </div>
+
+<style>
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+</style>

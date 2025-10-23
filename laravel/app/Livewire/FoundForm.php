@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -30,10 +31,11 @@ class FoundForm extends Component
     public $photos = [];
     public $company_id;
 
-    // --- WIZARD STATE ---
-    public int $step = 1; // 1 = Finder Info, 2 = Item Details
+    // --- UI STATE ---
+    public int $step = 1;
+    public ?string $submitted_report_id = null;
+    public bool $show_success = false;
 
-    // ---------- VALIDATION ----------
     protected function step1Rules(): array
     {
         return [
@@ -51,13 +53,12 @@ class FoundForm extends Component
             'category'    => 'nullable|uuid',
             'description' => 'required|string|min:10|max:200',
             'photos'      => 'nullable|array|max:5',
-            'photos.*'    => 'nullable|image|max:25600', // 25MB each
+            'photos.*'    => 'nullable|image|max:25600',
         ];
     }
 
     protected function rules()
     {
-        // Full rules used on final submit
         return array_merge($this->step1Rules(), $this->step2Rules());
     }
 
@@ -74,21 +75,16 @@ class FoundForm extends Component
         'date_found.before_or_equal' => 'Date found cannot be in the future.',
     ];
 
-    // ---------- LIFECYCLE ----------
     public function mount()
     {
         $this->company_id = session('company_id') ?? Company::first()?->company_id;
-
-        if (Auth::check()) {
-            $this->fillFromAuthenticatedUser();
-        }
+        if (Auth::check()) $this->fillFromAuthenticatedUser();
     }
 
-    // ---------- HELPERS ----------
     public function fillFromAuthenticatedUser(): void
     {
-        $this->phone = Auth::user()->phone_number;
-        $this->user_name = Auth::user()->full_name;
+        $this->phone = Auth::user()->phone_number ?? null;
+        $this->user_name = Auth::user()->full_name ?? null;
         $this->is_existing_user = true;
     }
 
@@ -107,20 +103,13 @@ class FoundForm extends Component
 
     public function updatedPhone($value)
     {
-        if (Auth::check()) {
-            $this->fillFromAuthenticatedUser();
-        } else {
-            $this->fillFromExistingPhone($value);
-        }
+        if (Auth::check()) $this->fillFromAuthenticatedUser();
+        else $this->fillFromExistingPhone($value);
     }
 
-    // ---------- WIZARD ACTIONS ----------
     public function nextStep(): void
     {
-        // Ensure step-1 is valid before moving on
-        if (Auth::check()) {
-            $this->fillFromAuthenticatedUser();
-        }
+        if (Auth::check()) $this->fillFromAuthenticatedUser();
         $this->validate($this->step1Rules(), $this->messages);
         $this->step = 2;
     }
@@ -130,31 +119,24 @@ class FoundForm extends Component
         $this->step = 1;
     }
 
-    // ---------- SUBMIT ----------
     public function submit(): void
     {
-        // Final submit always validates everything
         $this->step = 2;
-
-        if (Auth::check()) {
-            $this->fillFromAuthenticatedUser();
-        }
+        if (Auth::check()) $this->fillFromAuthenticatedUser();
 
         $this->validate($this->rules(), $this->messages);
 
         DB::beginTransaction();
 
         try {
-            // Upsert user by phone
+            // Upsert user
             $user = User::where('phone_number', $this->phone)->first();
-
             if ($user) {
                 if ($this->user_name && $user->full_name !== $this->user_name) {
                     $user->update(['full_name' => $this->user_name]);
                 }
             } else {
                 $userRole = Role::where('role_code', 'USER')->firstOrFail();
-
                 $user = User::create([
                     'user_id'      => Str::uuid(),
                     'company_id'   => null,
@@ -167,7 +149,7 @@ class FoundForm extends Component
                 ]);
             }
 
-            // Save first photo only (column is single URL)
+            // Save first photo
             $photoUrl = null;
             if (!empty($this->photos)) {
                 foreach ($this->photos as $photo) {
@@ -178,7 +160,7 @@ class FoundForm extends Component
             }
 
             // Create FOUND report
-            Report::create([
+            $report = Report::create([
                 'report_id'          => Str::uuid(),
                 'company_id'         => $this->company_id,
                 'user_id'            => $user->user_id,
@@ -198,18 +180,43 @@ class FoundForm extends Component
 
             DB::commit();
 
-            session()->flash('status', '✓ Found item reported successfully!');
+            $this->submitted_report_id = $report->report_id;
+            $this->show_success = true;
 
-            // Reset item fields only; keep contact for convenience
-            $this->reset(['item_name', 'category', 'description', 'location', 'date_found', 'photos']);
-            $this->step = 1;
+            // === AUTO DOWNLOAD TANPA ALPINE ===
+            $signedUrl = URL::temporarySignedRoute(
+                'reports.receipt.pdf',
+                now()->addMinutes(10),
+                ['report' => $report->report_id]
+            );
+
+            $this->redirect($signedUrl, navigate: true);
+
         } catch (\Throwable $e) {
             DB::rollBack();
             session()->flash('error', 'Failed to submit report. Please try again.');
         }
     }
 
-    // ---------- PHOTO REMOVE ----------
+    public function downloadPDF()
+    {
+        if (!$this->submitted_report_id) return;
+
+        $signedUrl = URL::temporarySignedRoute(
+            'reports.receipt.pdf',
+            now()->addMinutes(10),
+            ['report' => $this->submitted_report_id]
+        );
+
+        $this->redirect($signedUrl, navigate: true);
+    }
+
+    public function closeSuccess()
+    {
+        $this->show_success = false;
+        $this->submitted_report_id = null;
+    }
+
     public function removePhoto($index)
     {
         if (isset($this->photos[$index])) {
