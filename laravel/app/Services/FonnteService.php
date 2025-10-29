@@ -2,89 +2,93 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class FonnteService
 {
-    public static function sendMessage($target, $message)
+    protected static function httpBase()
+    {
+        $token = env('FONNTE_TOKEN');
+        if (empty($token)) {
+            throw new \Exception('FONNTE_TOKEN tidak ditemukan di .env');
+        }
+
+        // Path ke CA bundle (pakai file yang barusan kamu download)
+        $caPath = base_path('storage/certs/cacert.pem');
+
+        $options = [];
+        if (file_exists($caPath)) {
+            $options['verify'] = $caPath; // ✅ arahkan verifikasi ke cacert.pem
+        }
+
+        // (Opsional) Di LOCAL saja, kamu bisa mematikan verifikasi untuk debugging.
+        // HINDARI di production!
+        if (App::environment('local') && !file_exists($caPath)) {
+            $options['verify'] = false; // ❗ hanya local fallback, tidak disarankan utk prod
+        }
+
+        return Http::timeout(30)
+            ->withHeaders([
+                'Authorization' => $token,
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ])
+            ->withOptions($options)
+            ->asForm();
+    }
+
+    public static function sendMessage(string $target, string $message): array
     {
         try {
-            // Pastikan token ada
-            $token = env('FONNTE_TOKEN');
-            
-            if (empty($token)) {
-                throw new \Exception('FONNTE_TOKEN tidak ditemukan di .env');
-            }
-
             Log::info('Sending OTP to: ' . $target);
-            
-            $response = Http::timeout(30)
-                ->withHeaders([
-                    'Authorization' => $token,
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                ])
-                ->asForm()
-                ->post('https://api.fonnte.com/send', [
-                    'target' => $target,
-                    'message' => $message,
-                    'countryCode' => '62',
-                ]);
 
-            $result = $response->json();
-            
-            Log::info('Fonnte API Response: ', [
-                'status_code' => $response->status(),
-                'body' => $result
+            $response = self::httpBase()->post('https://api.fonnte.com/send', [
+                'target'      => $target,
+                'message'     => $message,
+                'countryCode' => '62',
             ]);
 
-            Log::info('Fonnte Raw Response', ['response' => $response]);
+            // Log ringkas + body mentah untuk debugging
+            Log::info('Fonnte API status=' . $response->status());
+            Log::debug('Fonnte API body: ' . $response->body());
 
             if (!$response->successful()) {
-                Log::error('HTTP Error: ' . $response->status());
-                return [
-                    'status' => false,
-                    'reason' => 'HTTP Error: ' . $response->status()
-                ];
+                // Tangkap pesan SSL spesifik jika ada
+                $reason = 'HTTP Error: ' . $response->status();
+                if ($response->status() === 0) {
+                    $reason = 'Network/SSL error (cek CA bundle & verifikasi SSL).';
+                }
+                return ['status' => false, 'reason' => $reason, 'raw' => $response->body()];
             }
 
-            return $result;
-            
-        } catch (\Exception $e) {
-            Log::error('FonnteService Error: ' . $e->getMessage());
-            return [
-                'status' => false,
-                'reason' => $e->getMessage()
-            ];
+            return $response->json() ?? ['status' => true];
+
+        } catch (\Throwable $e) {
+            // Deteksi error SSL (CURLE_PEER_FAILED_VERIFICATION = 60)
+            $msg = $e->getMessage();
+            if (str_contains($msg, 'cURL error 60') || str_contains($msg, 'SSL certificate')) {
+                $msg .= ' | Perbaiki dengan memasang cacert.pem dan arahkan via withOptions([verify=>...]) atau php.ini.';
+            }
+            Log::error('FonnteService Error: ' . $msg);
+            return ['status' => false, 'reason' => $msg];
         }
     }
 
-    /**
-     * Cek status device Fonnte
-     */
-    public static function checkDevice()
+    public static function checkDevice(): array
     {
         try {
-            $token = env('FONNTE_TOKEN');
-            
-            if (empty($token)) {
-                return [
-                    'status' => false,
-                    'reason' => 'Token tidak ditemukan'
-                ];
+            $response = self::httpBase()
+                ->withHeaders([]) // header sudah di-set di httpBase()
+                ->get('https://api.fonnte.com/device');
+
+            if (!$response->successful()) {
+                return ['status' => false, 'reason' => 'HTTP Error: ' . $response->status(), 'raw' => $response->body()];
             }
 
-            $response = Http::withHeaders([
-                'Authorization' => $token,
-            ])->get('https://api.fonnte.com/device');
-
-            return $response->json();
-            
-        } catch (\Exception $e) {
-            return [
-                'status' => false,
-                'reason' => $e->getMessage()
-            ];
+            return $response->json() ?? ['status' => true];
+        } catch (\Throwable $e) {
+            return ['status' => false, 'reason' => $e->getMessage()];
         }
     }
 }
