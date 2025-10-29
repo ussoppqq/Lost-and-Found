@@ -1,7 +1,7 @@
 <div>
     @if($showModal)
         <!-- Backdrop -->
-        <div class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm transition-opacity z-40"></div>
+        <div class="fixed inset-0 bg-opacity-60 backdrop-blur-sm transition-opacity z-40"></div>
 
         <!-- Modal Container -->
         <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">

@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminMiddleware
+class ModeratorMiddleware
 {
     /**
      * Handle an incoming request.
@@ -25,9 +25,10 @@ class AdminMiddleware
             abort(403, 'Unauthorized access. No role assigned.');
         }
 
-        // Cek apakah role_code adalah 'ADMIN'
-        if (auth()->user()->role->role_code !== 'ADMIN') {
-            abort(403, 'Unauthorized access. Admin only.');
+        $roleCode = auth()->user()->role->role_code;
+        
+        if (!in_array($roleCode, ['MODERATOR', 'ADMIN'])) {
+            abort(403, 'Unauthorized access. Moderator or Admin only.');
         }
 
         return $next($request);

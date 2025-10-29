@@ -66,6 +66,39 @@ class User extends Authenticatable
         ]);
     }
 
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role?->role_code === 'ADMIN';
+    }
+
+    /**
+     * Check if user is moderator
+     */
+    public function isModerator(): bool
+    {
+        return $this->role?->role_code === 'MODERATOR';
+    }
+
+    /**
+     * Check if user is regular user
+     */
+    public function isUser(): bool
+    {
+        return $this->role?->role_code === 'USER';
+    }
+
+    /**
+     * Check if user has role
+     */
+    public function hasRole(string $roleCode): bool
+    {
+        return $this->role?->role_code === $roleCode;
+    }
+
+    // Relationships
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id', 'company_id');
