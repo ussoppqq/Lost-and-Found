@@ -71,7 +71,7 @@
             </div>
 
             {{-- OTP (desktop) --}}
-            @if($needs_otp_verification)
+            @if($needs_otp_verification && !$otp_verified)
               <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-4">
                 <div class="flex items-start gap-3 mb-3">
                   <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,6 +101,7 @@
                     Verify
                   </button>
                 </div>
+                @error('otp_code') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
                 <div class="mt-3 text-center">
                   <button type="button" wire:click="resendOtp"
                           class="text-sm text-blue-600 hover:text-blue-800 underline font-medium">
@@ -149,9 +150,9 @@
             {{-- Date Lost --}}
             <div>
               <label for="date_lost_d" class="block text-sm font-semibold text-gray-900 mb-2">
-                Date Lost <span class="text-gray-500 text-xs font-normal">(optional)</span>
+                Date & Time Lost <span class="text-gray-500 text-xs font-normal">(optional)</span>
               </label>
-              <input id="date_lost_d" type="date" wire:model.defer="date_lost"
+              <input id="date_lost_d" type="datetime-local" wire:model.defer="date_lost"
                      class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800">
               @error('date_lost') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
@@ -324,7 +325,7 @@
               </div>
 
               {{-- OTP (mobile) --}}
-              @if($needs_otp_verification)
+              @if($needs_otp_verification && !$otp_verified)
                 <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-4">
                   <div class="flex items-start gap-3 mb-3">
                     <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -354,6 +355,7 @@
                       Verify
                     </button>
                   </div>
+                  @error('otp_code') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
                   <div class="mt-3 text-center">
                     <button type="button" wire:click="resendOtp"
                             class="text-sm text-blue-600 hover:text-blue-800 underline font-medium">
@@ -402,9 +404,9 @@
               {{-- Date Lost --}}
               <div>
                 <label for="date_lost_m" class="block text-sm font-semibold text-gray-900 mb-2">
-                  Date Lost <span class="text-gray-500 text-xs font-normal">(optional)</span>
+                  Date & Time Lost <span class="text-gray-500 text-xs font-normal">(optional)</span>
                 </label>
-                <input id="date_lost_m" type="date" wire:model.defer="date_lost"
+                <input id="date_lost_m" type="datetime-local" wire:model.defer="date_lost"
                        class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800">
                 @error('date_lost') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
               </div>

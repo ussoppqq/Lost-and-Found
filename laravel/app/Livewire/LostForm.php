@@ -7,9 +7,12 @@ use App\Models\Company;
 use App\Models\Report;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\FonnteService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -29,78 +32,90 @@ class LostForm extends Component
     public ?string $user_name = null;
     public bool    $is_existing_user = false;
 
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
     public array $photos = [];
-
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
     public array $newPhotos = [];
-
     public ?string $company_id = null;
+
+    // --- OTP STATE ---
+    public bool $needs_otp_verification = false;
+    public string $otp_code = '';
+    public bool $otp_sent = false;
+    public ?string $otp_sent_at = null;
+    public bool $otp_verified = false;
 
     // --- UI STATE ---
     public int $step = 1;
     public ?string $submitted_report_id = null;
     public bool $show_success = false;
-
-    // upload input reset key
     public int $uploadKey = 0;
 
-    // --- OTP STATE ---
-    public bool $needs_otp_verification = false;
-    public bool $otp_verified = false;
-    public ?string $otp_code = null;
-
-    protected function rules(): array
+    // ---------- VALIDATION ----------
+    protected function step1Rules(): array
     {
         return [
-            // step 1
-            'phone'       => 'required|string|max:30',
-            'user_name'   => $this->is_existing_user ? 'nullable' : 'required|string|max:255',
-            'location'    => 'nullable|string|max:255',
-            'date_lost'   => 'nullable|date|before_or_equal:today',
+            'phone'      => 'required|string|max:30',
+            'user_name'  => $this->is_existing_user ? 'nullable' : 'required|string|max:255',
+            'location'   => 'nullable|string|max:255',
+            'date_lost'  => 'nullable|date|before_or_equal:now',
+        ];
+    }
 
-            // step 2
+    protected function otpRules(): array
+    {
+        return ['otp_code' => 'required|string|size:6'];
+    }
+
+    protected function step2Rules(): array
+    {
+        return [
             'item_name'   => 'required|string|max:255',
             'category'    => 'required|uuid',
             'description' => 'required|string|min:10|max:200',
-
-            // photos
             'photos'      => 'nullable|array|max:5',
-            'photos.*'    => 'nullable|image|max:25600',  // 25MB
+            'photos.*'    => 'nullable|image|max:25600',
             'newPhotos'   => 'nullable|array',
             'newPhotos.*' => 'nullable|image|max:25600',
         ];
     }
 
+    protected function rules(): array
+    {
+        return array_merge($this->step1Rules(), $this->step2Rules());
+    }
+
     protected array $messages = [
-        'item_name.required'     => 'Item name is required.',
-        'description.required'   => 'Please describe the lost item.',
-        'description.min'        => 'Description must be at least 10 characters.',
-        'description.max'        => 'Description cannot exceed 200 characters.',
-        'phone.required'         => 'Phone number is required.',
-        'user_name.required'     => 'Name is required for new users.',
-        'category.required'      => 'Category is required.',
-        'category.uuid'          => 'Invalid category id.',
-        'photos.max'             => 'You can upload a maximum of 5 photos.',
-        'photos.*.image'         => 'Each file must be an image.',
-        'photos.*.max'           => 'Each image must not exceed 25MB.',
-        'newPhotos.*.image'      => 'Each file must be an image.',
-        'newPhotos.*.max'        => 'Each image must not exceed 25MB.',
-        'date_lost.before_or_equal' => 'Date lost cannot be in the future.',
+        'item_name.required'         => 'Item name is required.',
+        'description.required'       => 'Please describe your lost item.',
+        'description.min'            => 'Description must be at least 10 characters.',
+        'description.max'            => 'Description cannot exceed 200 characters.',
+        'phone.required'             => 'Phone number is required.',
+        'user_name.required'         => 'Name is required for new users.',
+        'category.required'          => 'Category is required.',
+        'category.uuid'              => 'Invalid category selected.',
+        'photos.*.image'             => 'Each file must be an image.',
+        'photos.*.max'               => 'Each image must not exceed 25MB.',
+        'photos.max'                 => 'You can upload a maximum of 5 photos.',
+        'newPhotos.*.image'          => 'Each file must be an image.',
+        'newPhotos.*.max'            => 'Each image must not exceed 25MB.',
+        'date_lost.before_or_equal'  => 'Date and time cannot be in the future.',
+        'otp_code.required'          => 'OTP code is required.',
+        'otp_code.size'              => 'OTP code must be 6 digits.',
     ];
 
+    // ---------- LIFECYCLE ----------
     public function mount(): void
     {
         $this->company_id = session('company_id') ?? Company::first()?->company_id;
+        $this->date_lost = now()->timezone('Asia/Jakarta')->format('Y-m-d\TH:i');
 
         if (Auth::check()) {
             $this->fillFromAuthenticatedUser();
-            // logged-in user tidak butuh OTP
             $this->needs_otp_verification = false;
             $this->otp_verified = true;
         }
     }
 
+    // ---------- HELPERS ----------
     private function fillFromAuthenticatedUser(): void
     {
         $this->phone     = Auth::user()->phone_number ?? null;
@@ -111,12 +126,24 @@ class LostForm extends Component
     private function fillFromExistingPhone($phone): void
     {
         $user = User::where('phone_number', trim((string) $phone))->first();
+
         if ($user) {
-            $this->user_name        = $user->full_name;
+            $this->user_name = $user->full_name;
             $this->is_existing_user = true;
+            $this->needs_otp_verification = false;
+            $this->otp_sent = false;
+            $this->otp_code = '';
+            $this->otp_verified = true;
+            session()->forget(['otp_success', 'otp_error']);
         } else {
-            $this->user_name        = null;
+            $this->reset(['user_name']);
             $this->is_existing_user = false;
+            $this->needs_otp_verification = true;
+            $this->otp_verified = false;
+
+            if (!empty($phone)) {
+                $this->sendOtpAutomatically();
+            }
         }
     }
 
@@ -126,67 +153,84 @@ class LostForm extends Component
             $this->fillFromAuthenticatedUser();
             $this->needs_otp_verification = false;
             $this->otp_verified = true;
-            return;
-        }
-
-        $value = trim((string) $value);
-        $this->fillFromExistingPhone($value);
-
-        if ($this->is_existing_user) {
-            // Nomor sudah ada → anggap verified, tidak perlu OTP
-            $this->needs_otp_verification = false;
-            $this->otp_verified = true;
-            session()->forget(['otp_success', 'otp_error']);
         } else {
-            // Nomor baru → perlu OTP
-            $this->needs_otp_verification = true;
-            $this->otp_verified = false;
-            $this->sendOtp(); // kirim otomatis ketika nomor baru diinput
+            $this->fillFromExistingPhone($value);
         }
     }
 
-    public function sendOtp(): void
+    // ---------- OTP ----------
+    public function sendOtpAutomatically(): void
     {
-        if (!$this->phone) return;
+        if (empty($this->phone)) return;
 
-        $code = (string) random_int(100000, 999999);
-        Cache::put($this->otpCacheKey(), $code, now()->addMinutes(5));
+        $otp = random_int(100000, 999999);
+        Cache::put('otp_' . $this->phone, $otp, now()->addMinutes(5));
+        Cache::put('otp_time_' . $this->phone, time(), now()->addMinutes(5));
 
-        // Production: kirim via SMS/WA; Dev: tampilkan via flash.
-        session()->flash('otp_success', "OTP code has been sent to your phone. (DEV: $code)");
-        session()->forget('otp_error');
-    }
+        try {
+            $message = "Kode OTP kamu adalah: {$otp}\n\nJangan bagikan kode ini ke siapapun.\n\nKode akan kadaluarsa dalam 5 menit.";
+            $response = FonnteService::sendMessage($this->phone, $message);
+            Log::info('Fonnte OTP Response', ['response' => $response]);
 
-    public function verifyOtpAndProceed(): void
-    {
-        if (!$this->needs_otp_verification) {
-            $this->otp_verified = true;
-            return;
-        }
+            $isSuccess = false;
 
-        $cached = Cache::get($this->otpCacheKey());
-        if ($cached && $this->otp_code === $cached) {
-            $this->otp_verified = true;
-            $this->needs_otp_verification = false;
-            session()->flash('otp_success', 'Phone number verified.');
-            session()->forget('otp_error');
-            Cache::forget($this->otpCacheKey());
-        } else {
-            $this->otp_verified = false;
-            session()->flash('otp_error', 'Invalid or expired OTP code.');
+            if (is_array($response)) {
+                if (isset($response['status']) && $response['status'] === true) $isSuccess = true;
+                elseif (isset($response['status']) && strtolower($response['status']) === 'success') $isSuccess = true;
+                elseif (!isset($response['error']) && !isset($response['reason'])) $isSuccess = true;
+                elseif (isset($response['detail']) && stripos($response['detail'], 'success') !== false) $isSuccess = true;
+            } elseif (is_string($response) && (strtolower($response) === 'ok' || stripos($response, 'success') !== false)) {
+                $isSuccess = true;
+            }
+
+            if ($isSuccess) {
+                $this->otp_sent = true;
+                $this->otp_sent_at = now()->toDateTimeString();
+                session()->flash('otp_success', 'OTP has been sent to ' . $this->phone);
+            } else {
+                $errorMsg = $response['reason'] ?? $response['error'] ?? $response['message'] ?? 'Unknown error';
+                session()->flash('otp_error', 'Failed to send OTP: ' . $errorMsg);
+                $this->otp_sent = false;
+            }
+        } catch (\Exception $e) {
+            Log::error("Error sending OTP: " . $e->getMessage(), [
+                'exception' => $e,
+                'phone_number' => $this->phone,
+            ]);
+            session()->flash('otp_error', 'Error sending OTP. Please try again.');
+            $this->otp_sent = false;
         }
     }
 
     public function resendOtp(): void
     {
-        $this->sendOtp();
+        $this->sendOtpAutomatically();
     }
 
-    private function otpCacheKey(): string
+    public function verifyOtpAndProceed(): void
     {
-        return 'lost_form_otp_' . md5((string) $this->phone);
+        $this->validate($this->otpRules(), $this->messages);
+
+        $storedOtp = Cache::get('otp_' . $this->phone);
+        if (!$storedOtp) {
+            $this->addError('otp_code', 'OTP has expired. Please request a new one.');
+            return;
+        }
+
+        if ($this->otp_code != $storedOtp) {
+            $this->addError('otp_code', 'Invalid OTP code. Please try again.');
+            return;
+        }
+
+        Cache::forget('otp_' . $this->phone);
+        Cache::forget('otp_time_' . $this->phone);
+        $this->needs_otp_verification = false;
+        $this->otp_verified = true;
+
+        session()->flash('status', '✓ Phone number verified successfully!');
     }
 
+    // ---------- PHOTO FLOW ----------
     public function updatedNewPhotos(): void
     {
         $this->validateOnly('newPhotos.*');
@@ -196,7 +240,6 @@ class LostForm extends Component
             $this->photos[] = $file;
         }
 
-        // kosongkan newPhotos + paksa re-render input file
         $this->newPhotos = [];
         $this->uploadKey++;
     }
@@ -206,26 +249,21 @@ class LostForm extends Component
         if (isset($this->photos[$index])) {
             unset($this->photos[$index]);
             $this->photos = array_values($this->photos);
-            $this->uploadKey++; // sync id input file
+            $this->uploadKey++;
         }
     }
 
+    // ---------- NAVIGATION ----------
     public function nextStep(): void
     {
-        // Validasi step 1
-        $this->validate([
-            'phone'      => 'required|string|max:30',
-            'user_name'  => $this->is_existing_user ? 'nullable' : 'required|string|max:255',
-            'location'   => 'nullable|string|max:255',
-            'date_lost'  => 'nullable|date|before_or_equal:today',
-        ]);
+        if (Auth::check()) $this->fillFromAuthenticatedUser();
 
-        // Wajib OTP valid bila diperlukan
         if ($this->needs_otp_verification && !$this->otp_verified) {
-            session()->flash('otp_error', 'Please verify the OTP before continuing.');
+            $this->addError('otp_code', 'Please verify your phone number first.');
             return;
         }
 
+        $this->validate($this->step1Rules(), $this->messages);
         $this->step = 2;
     }
 
@@ -234,16 +272,18 @@ class LostForm extends Component
         $this->step = 1;
     }
 
+    // ---------- SUBMIT ----------
     public function submit(): void
     {
-        // Pastikan step 1 & 2 tervalidasi
-        $this->validate();
+        if (Auth::check()) $this->fillFromAuthenticatedUser();
 
         if ($this->needs_otp_verification && !$this->otp_verified) {
-            session()->flash('otp_error', 'Please verify the OTP before submitting.');
+            $this->addError('general', 'Please verify your phone number first.');
             $this->step = 1;
             return;
         }
+
+        $this->validate($this->rules(), $this->messages);
 
         DB::beginTransaction();
 
@@ -257,14 +297,15 @@ class LostForm extends Component
             } else {
                 $role = Role::where('role_code', 'USER')->firstOrFail();
                 $user = User::create([
-                    'user_id'      => Str::uuid(),
-                    'company_id'   => null,
-                    'role_id'      => $role->role_id,
-                    'full_name'    => $this->user_name,
-                    'email'        => null,
-                    'phone_number' => $this->phone,
-                    'password'     => null,
-                    'is_verified'  => true, // diverifikasi via OTP
+                    'user_id'           => Str::uuid(),
+                    'company_id'        => null,
+                    'role_id'           => $role->role_id,
+                    'full_name'         => $this->user_name,
+                    'email'             => null,
+                    'phone_number'      => $this->phone,
+                    'password'          => null,
+                    'is_verified'       => true,
+                    'phone_verified_at' => now(),
                 ]);
             }
 
@@ -276,6 +317,11 @@ class LostForm extends Component
             }
             $primaryPhoto = $photoPaths[0] ?? null;
 
+            // Parse datetime WIB
+            $reportDateTime = $this->date_lost
+                ? Carbon::parse($this->date_lost, 'Asia/Jakarta')
+                : Carbon::now('Asia/Jakarta');
+
             // Simpan report
             $report = Report::create([
                 'report_id'          => Str::uuid(),
@@ -286,7 +332,7 @@ class LostForm extends Component
                 'report_type'        => 'LOST',
                 'item_name'          => $this->item_name,
                 'report_description' => $this->description,
-                'report_datetime'    => $this->date_lost ?? now(),
+                'report_datetime'    => $reportDateTime,
                 'report_location'    => $this->location ?? 'Not specified',
                 'report_status'      => 'OPEN',
                 'photo_url'          => $primaryPhoto,
@@ -297,28 +343,50 @@ class LostForm extends Component
 
             DB::commit();
 
+            // ✅ PINDAHKAN KE SINI - setelah commit berhasil
             $this->submitted_report_id = $report->report_id;
             $this->show_success = true;
 
-            // (opsional) auto-download PDF signed route
-            $signedUrl = URL::temporarySignedRoute(
-                'reports.receipt.pdf',
-                now()->addMinutes(10),
-                ['report' => $report->report_id]
-            );
-            $this->dispatch('download-pdf', url: $signedUrl);
+            // ✅ WRAP DALAM TRY-CATCH TERPISAH
+            try {
+                // Generate signed URL untuk PDF
+                $signedUrl = URL::temporarySignedRoute(
+                    'reports.receipt.pdf',
+                    now()->addMinutes(10),
+                    ['report' => $report->report_id]
+                );
+                $this->dispatch('download-pdf', url: $signedUrl);
+            } catch (\Exception $pdfError) {
+                // Log error tapi jangan ganggu flow utama
+                Log::warning('PDF download dispatch failed', [
+                    'error' => $pdfError->getMessage(),
+                    'report_id' => $report->report_id
+                ]);
+            }
 
-            // Flash + reset form
+            // Flash message
             session()->flash('message', 'Report submitted successfully.');
+            
+            // ✅ RESET FORM
             $this->resetForm();
 
-            // HARD RELOAD setelah 800ms (biar event jalan)
-            $this->js('setTimeout(() => window.location.reload(), 800)');
+            // ✅ RELOAD dengan delay lebih lama
+            $this->js('setTimeout(() => window.location.reload(), 1500)');
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            session()->flash('error', 'Failed to submit report. Please try again.');
-            report($e);
+            
+            // ✅ LOG DETAIL ERROR
+            Log::error('Lost form submission error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'phone' => $this->phone,
+                'item_name' => $this->item_name,
+            ]);
+            
+            session()->flash('error', 'Failed to submit report: ' . $e->getMessage());
         }
     }
 
@@ -327,7 +395,7 @@ class LostForm extends Component
         $this->item_name = '';
         $this->description = '';
         $this->location = null;
-        $this->date_lost = null;
+        $this->date_lost = now()->timezone('Asia/Jakarta')->format('Y-m-d\TH:i');
         $this->category = null;
         $this->phone = null;
         $this->user_name = null;
@@ -336,13 +404,13 @@ class LostForm extends Component
         $this->photos = [];
         $this->newPhotos = [];
 
-        $this->step = 1;
-
-        // OTP reset
         $this->needs_otp_verification = false;
+        $this->otp_code = '';
+        $this->otp_sent = false;
+        $this->otp_sent_at = null;
         $this->otp_verified = false;
-        $this->otp_code = null;
 
+        $this->step = 1;
         $this->uploadKey++;
     }
 

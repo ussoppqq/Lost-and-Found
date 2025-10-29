@@ -32,12 +32,8 @@ class FoundForm extends Component
     public ?string $user_name = null;
     public bool    $is_existing_user = false;
 
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
     public array $photos = [];
-
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile> */
     public array $newPhotos = [];
-
     public ?string $company_id = null;
 
     // --- OTP STATE ---
@@ -48,11 +44,9 @@ class FoundForm extends Component
     public bool $otp_verified = false;
 
     // --- UI STATE ---
-    public int $step = 1; // 1=Your Info, 2=Item Details
+    public int $step = 1;
     public ?string $submitted_report_id = null;
     public bool $show_success = false;
-
-    // kunci untuk reset input file (dibinding ke wire:key)
     public int $uploadKey = 0;
 
     // ---------- VALIDATION ----------
@@ -75,7 +69,7 @@ class FoundForm extends Component
     {
         return [
             'item_name'   => 'required|string|max:255',
-            'category'    => 'nullable|uuid',
+            'category'    => 'required|uuid',
             'description' => 'required|string|min:10|max:200',
             'photos'      => 'nullable|array|max:5',
             'photos.*'    => 'nullable|image|max:25600',
@@ -84,7 +78,7 @@ class FoundForm extends Component
         ];
     }
 
-    protected function rules()
+    protected function rules(): array
     {
         return array_merge($this->step1Rules(), $this->step2Rules());
     }
@@ -96,6 +90,8 @@ class FoundForm extends Component
         'description.max'            => 'Description cannot exceed 200 characters.',
         'phone.required'             => 'Phone number is required.',
         'user_name.required'         => 'Name is required for new users.',
+        'category.required'          => 'Category is required.',
+        'category.uuid'              => 'Invalid category selected.',
         'photos.*.image'             => 'Each file must be an image.',
         'photos.*.max'               => 'Each image must not exceed 25MB.',
         'photos.max'                 => 'You can upload a maximum of 5 photos.',
@@ -244,7 +240,6 @@ class FoundForm extends Component
             $this->photos[] = $file;
         }
 
-        // kosongkan newPhotos + paksa re-render input file
         $this->newPhotos = [];
         $this->uploadKey++;
     }
@@ -254,7 +249,7 @@ class FoundForm extends Component
         if (isset($this->photos[$index])) {
             unset($this->photos[$index]);
             $this->photos = array_values($this->photos);
-            $this->uploadKey++; // sync id input file
+            $this->uploadKey++;
         }
     }
 
@@ -263,7 +258,6 @@ class FoundForm extends Component
     {
         if (Auth::check()) $this->fillFromAuthenticatedUser();
 
-        // kalau masih butuh OTP dan belum verified → tahan
         if ($this->needs_otp_verification && !$this->otp_verified) {
             $this->addError('otp_code', 'Please verify your phone number first.');
             return;
@@ -315,7 +309,7 @@ class FoundForm extends Component
                 ]);
             }
 
-            // Simpan foto (ambil pertama sebagai primary)
+            // Simpan foto
             $photoPaths = [];
             foreach ($this->photos as $file) {
                 $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
@@ -323,7 +317,7 @@ class FoundForm extends Component
             }
             $primaryPhoto = $photoPaths[0] ?? null;
 
-            // Parse datetime WIB & simpan apa adanya (tanpa convert)
+            // Parse datetime WIB
             $reportDateTime = $this->date_found
                 ? Carbon::parse($this->date_found, 'Asia/Jakarta')
                 : Carbon::now('Asia/Jakarta');
@@ -349,34 +343,55 @@ class FoundForm extends Component
 
             DB::commit();
 
+            // ✅ PINDAHKAN KE SINI - setelah commit berhasil
             $this->submitted_report_id = $report->report_id;
             $this->show_success = true;
 
-            // AUTO DOWNLOAD RECEIPT (signed URL)
-            $signedUrl = URL::temporarySignedRoute(
-                'reports.receipt.pdf',
-                now()->addMinutes(10),
-                ['report' => $report->report_id]
-            );
-            $this->dispatch('download-pdf', url: $signedUrl);
+            // ✅ WRAP DALAM TRY-CATCH TERPISAH
+            try {
+                // Generate signed URL untuk PDF
+                $signedUrl = URL::temporarySignedRoute(
+                    'reports.receipt.pdf',
+                    now()->addMinutes(10),
+                    ['report' => $report->report_id]
+                );
+                $this->dispatch('download-pdf', url: $signedUrl);
+            } catch (\Exception $pdfError) {
+                // Log error tapi jangan ganggu flow utama
+                Log::warning('PDF download dispatch failed', [
+                    'error' => $pdfError->getMessage(),
+                    'report_id' => $report->report_id
+                ]);
+            }
 
-            // Flash + reset form
+            // Flash message
             session()->flash('message', 'Report submitted successfully.');
+            
+            // ✅ RESET FORM
             $this->resetForm();
 
-            // reload ringan agar event sempat jalan
-            $this->js('setTimeout(() => window.location.reload(), 800)');
+            // ✅ RELOAD dengan delay lebih lama
+            $this->js('setTimeout(() => window.location.reload(), 1500)');
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Found form submission error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            session()->flash('error', 'Failed to submit report. Please try again.');
+            
+            // ✅ LOG DETAIL ERROR
+            Log::error('Found form submission error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'phone' => $this->phone,
+                'item_name' => $this->item_name,
+            ]);
+            
+            session()->flash('error', 'Failed to submit report: ' . $e->getMessage());
         }
     }
 
     private function resetForm(): void
     {
-        // kosongkan seluruh field input & state upload
         $this->item_name = '';
         $this->description = '';
         $this->location = null;

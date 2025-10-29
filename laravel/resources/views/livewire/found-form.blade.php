@@ -19,16 +19,12 @@
       <div class="flex justify-center mb-6 lg:hidden">
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-2">
-            <div
-              class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold shadow-sm {{ $step === 1 ? 'bg-gray-800' : 'bg-gray-400' }}">
-              1</div>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold shadow-sm {{ $step === 1 ? 'bg-gray-800' : 'bg-gray-400' }}">1</div>
             <span class="text-sm font-medium {{ $step === 1 ? 'text-gray-900' : 'text-gray-500' }}">Your Info</span>
           </div>
           <div class="w-8 h-0.5 bg-gray-300"></div>
           <div class="flex items-center gap-2">
-            <div
-              class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold shadow-sm {{ $step === 2 ? 'bg-gray-800' : 'bg-gray-400' }}">
-              2</div>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold shadow-sm {{ $step === 2 ? 'bg-gray-800' : 'bg-gray-400' }}">2</div>
             <span class="text-sm font-medium {{ $step === 2 ? 'text-gray-900' : 'text-gray-500' }}">Item Details</span>
           </div>
         </div>
@@ -36,8 +32,7 @@
 
       {{-- Flash top-level --}}
       @if(session('status'))
-      <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">{{ session('status')
-        }}</div>
+      <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">{{ session('status') }}</div>
       @endif
       @if(session('error'))
       <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">{{ session('error') }}</div>
@@ -60,12 +55,10 @@
               @if(auth()->check())
               <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
                 <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="text-sm font-medium text-gray-900 flex-1">{{ $phone }}</span>
-                <span
-                  class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg whitespace-nowrap">Logged-in</span>
+                <span class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg whitespace-nowrap">Logged-in</span>
               </div>
               @else
               <input id="phone_d" type="tel" inputmode="tel" autocomplete="tel" wire:model.live="phone" required
@@ -76,13 +69,11 @@
             </div>
 
             {{-- OTP (desktop) --}}
-            @if($needs_otp_verification)
+            @if($needs_otp_verification && !$otp_verified)
             <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-4">
               <div class="flex items-start gap-3 mb-3">
-                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
                 <div class="flex-1">
                   <p class="text-sm font-semibold text-blue-900">New Phone Number Detected</p>
@@ -107,6 +98,7 @@
                   Verify
                 </button>
               </div>
+              @error('otp_code') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
               <div class="mt-3 text-center">
                 <button type="button" wire:click="resendOtp"
                   class="text-sm text-blue-600 hover:text-blue-800 underline font-medium">
@@ -124,8 +116,7 @@
               @if(auth()->check() || $is_existing_user)
               <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
                 <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="text-sm font-medium text-gray-900 flex-1 break-words">{{ $user_name }}</span>
                 <span class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg whitespace-nowrap">
@@ -191,9 +182,9 @@
             {{-- Category --}}
             <div class="mb-4">
               <label for="category_d" class="block text-sm font-semibold text-gray-900 mb-2">
-                Category <span class="text-gray-500 text-xs font-normal">(optional)</span>
+                Category <span class="text-red-500">*</span>
               </label>
-              <select id="category_d" wire:model="category"
+              <select id="category_d" wire:model="category" required
                 class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 appearance-none bg-white"
                 style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%236b7280%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
                 <option value="">-- Select Category --</option>
@@ -236,8 +227,7 @@
                     <button type="button" wire:click="removePhoto({{ $index }})"
                       class="absolute -top-2 -right-2 p-2 bg-gray-800 text-white rounded-full shadow-lg opacity-90 group-hover:opacity-100 transition hover:bg-gray-700 active:scale-90">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                          d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
@@ -245,12 +235,12 @@
                 </div>
                 @endif
 
-                @if(count($photos) < 5) <button type="button" onclick="document.getElementById('foundPhotos_d').click()"
+                @if(count($photos) < 5)
+                <button type="button" onclick="document.getElementById('foundPhotos_d').click()"
                   class="w-full flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 active:bg-gray-200 p-8 transition">
                   <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                   </div>
                   <div class="text-center">
@@ -259,24 +249,22 @@
                     </p>
                     <p class="text-sm text-gray-500 mt-1">JPG, PNG up to 25MB each</p>
                   </div>
-                  </button>
-                  @else
-                  <div class="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <p class="text-sm font-medium text-gray-600">Maximum photos reached (5/5)</p>
-                  </div>
-                  @endif
+                </button>
+                @else
+                <div class="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <p class="text-sm font-medium text-gray-600">Maximum photos reached (5/5)</p>
+                </div>
+                @endif
 
-                  <div wire:loading wire:target="newPhotos"
-                    class="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
-                    <div class="flex items-center justify-center gap-2">
-                      <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                        <path class="opacity-75" fill="currentColor"
-                          d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      <p class="text-sm font-medium text-blue-700">Uploading photos...</p>
-                    </div>
+                <div wire:loading wire:target="newPhotos" class="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <div class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                      <path class="opacity-75" fill="currentColor" d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    <p class="text-sm font-medium text-blue-700">Uploading photos...</p>
                   </div>
+                </div>
               </div>
 
               @error('photos') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -314,12 +302,10 @@
               @if(auth()->check())
               <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
                 <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="text-sm font-medium text-gray-900 flex-1">{{ $phone }}</span>
-                <span
-                  class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg whitespace-nowrap">Logged-in</span>
+                <span class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg whitespace-nowrap">Logged-in</span>
               </div>
               @else
               <input id="phone_m" type="tel" inputmode="tel" autocomplete="tel" wire:model.live="phone" required
@@ -330,13 +316,11 @@
             </div>
 
             {{-- OTP (mobile) --}}
-            @if($needs_otp_verification)
+            @if($needs_otp_verification && !$otp_verified)
             <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-4">
               <div class="flex items-start gap-3 mb-3">
-                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
                 <div class="flex-1">
                   <p class="text-sm font-semibold text-blue-900">New Phone Number Detected</p>
@@ -361,6 +345,7 @@
                   Verify
                 </button>
               </div>
+              @error('otp_code') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
               <div class="mt-3 text-center">
                 <button type="button" wire:click="resendOtp"
                   class="text-sm text-blue-600 hover:text-blue-800 underline font-medium">
@@ -378,8 +363,7 @@
               @if(auth()->check() || $is_existing_user)
               <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
                 <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="text-sm font-medium text-gray-900 flex-1 break-words">{{ $user_name }}</span>
                 <span class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-lg whitespace-nowrap">
@@ -417,10 +401,10 @@
 
             {{-- Next (selalu tampil; disable jika OTP belum verified) --}}
             <div class="pt-4 space-y-2">
-              <button type="button" wire:click="nextStep" @if($needs_otp_verification && !$otp_verified) disabled
-                aria-disabled="true" @else aria-disabled="false" @endif
+              <button type="button" wire:click="nextStep" 
+                @if($needs_otp_verification && !$otp_verified) disabled aria-disabled="true" @else aria-disabled="false" @endif
                 class="w-full flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-semibold transition-all shadow-lg text-white
-                         {{ ($needs_otp_verification && !$otp_verified) ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800 hover:bg-gray-900 active:scale-[0.98]' }}">
+                       {{ ($needs_otp_verification && !$otp_verified) ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800 hover:bg-gray-900 active:scale-[0.98]' }}">
                 Next Step
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -457,11 +441,11 @@
             {{-- Category --}}
             <div class="mb-4">
               <label for="category_m" class="block text-sm font-semibold text-gray-900 mb-2">
-                Category <span class="text-gray-500 text-xs font-normal">(optional)</span>
+                Category <span class="text-red-500">*</span>
               </label>
-              <select id="category_m" wire:model="category"
+              <select id="category_m" wire:model="category" required
                 class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 appearance-none bg-white"
-                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%236b7280%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
+                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%236b7280%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
                 <option value="">-- Select Category --</option>
                 @foreach($categories as $cat)
                 <option value="{{ $cat->category_id }}">{{ $cat->category_name }}</option>
@@ -501,8 +485,7 @@
                     <button type="button" wire:click="removePhoto({{ $index }})"
                       class="absolute -top-2 -right-2 p-2 bg-gray-800 text-white rounded-full shadow-lg opacity-90 group-hover:opacity-100 transition hover:bg-gray-700 active:scale-90">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                          d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
@@ -510,12 +493,12 @@
                 </div>
                 @endif
 
-                @if(count($photos) < 5) <button type="button" onclick="document.getElementById('foundPhotos_m').click()"
+                @if(count($photos) < 5)
+                <button type="button" onclick="document.getElementById('foundPhotos_m').click()"
                   class="w-full flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 active:bg-gray-200 p-8 transition">
                   <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                   </div>
                   <div class="text-center">
@@ -524,24 +507,22 @@
                     </p>
                     <p class="text-sm text-gray-500 mt-1">JPG, PNG up to 25MB each</p>
                   </div>
-                  </button>
-                  @else
-                  <div class="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <p class="text-sm font-medium text-gray-600">Maximum photos reached (5/5)</p>
-                  </div>
-                  @endif
+                </button>
+                @else
+                <div class="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <p class="text-sm font-medium text-gray-600">Maximum photos reached (5/5)</p>
+                </div>
+                @endif
 
-                  <div wire:loading wire:target="newPhotos"
-                    class="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
-                    <div class="flex items-center justify-center gap-2">
-                      <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                        <path class="opacity-75" fill="currentColor"
-                          d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      <p class="text-sm font-medium text-blue-700">Uploading photos...</p>
-                    </div>
+                <div wire:loading wire:target="newPhotos" class="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <div class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                      <path class="opacity-75" fill="currentColor" d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    <p class="text-sm font-medium text-blue-700">Uploading photos...</p>
                   </div>
+                </div>
               </div>
 
               @error('photos') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
