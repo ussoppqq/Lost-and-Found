@@ -6,7 +6,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Items</p>
-                    <p class="text-3xl font-semibold text-gray-900">{{ $totalItems }}</p>
+                    <p class="text-3xl font-semibold text-gray-900">{{ $stats['total'] ?? $totalItems }}</p>
                 </div>
                 <div class="p-3 rounded-full bg-blue-100">
                     <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,7 +113,7 @@
                                 @endif
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">
-                                        {{ $report->item ? $report->item->item_name : 'No Item Linked' }}
+                                        {{ optional($report->item)->item_name ?? ($report->item_name ?? '—') }}
                                     </div>
                                     <div class="text-sm text-gray-500">{{ Str::limit($report->report_description, 30) }}</div>
                                 </div>
