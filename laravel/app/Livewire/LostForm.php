@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\Report;
+use App\Models\ReportPhoto;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\FonnteService;
@@ -309,20 +310,12 @@ class LostForm extends Component
                 ]);
             }
 
-            // Simpan foto
-            $photoPaths = [];
-            foreach ($this->photos as $file) {
-                $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
-                $photoPaths[] = $file->storeAs('reports/lost/'.$user->user_id, $filename, 'public');
-            }
-            $primaryPhoto = $photoPaths[0] ?? null;
-
             // Parse datetime WIB
             $reportDateTime = $this->date_lost
                 ? Carbon::parse($this->date_lost, 'Asia/Jakarta')
                 : Carbon::now('Asia/Jakarta');
 
-            // Simpan report
+            // Create report (without photo_url first)
             $report = Report::create([
                 'report_id'          => Str::uuid(),
                 'company_id'         => $this->company_id,
@@ -335,21 +328,41 @@ class LostForm extends Component
                 'report_datetime'    => $reportDateTime,
                 'report_location'    => $this->location ?? 'Not specified',
                 'report_status'      => 'OPEN',
-                'photo_url'          => $primaryPhoto,
+                'photo_url'          => null, 
                 'reporter_name'      => $user->full_name,
                 'reporter_phone'     => $user->phone_number,
                 'reporter_email'     => $user->email,
             ]);
 
+            // Simpan multiple photos
+            if (!empty($this->photos)) {
+                foreach ($this->photos as $index => $file) {
+                    $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
+                    $photoPath = $file->storeAs('reports/lost/'.$user->user_id, $filename, 'public');
+                    
+                    ReportPhoto::create([
+                        'photo_id' => Str::uuid(),
+                        'report_id' => $report->report_id,
+                        'photo_url' => $photoPath,
+                        'is_primary' => $index === 0, // First photo is primary
+                        'photo_order' => $index,
+                    ]);
+
+                    // Set primary photo URL di report
+                    if ($index === 0) {
+                        $report->update(['photo_url' => $photoPath]);
+                    }
+                }
+            }
+
             DB::commit();
 
-            // ✅ PINDAHKAN KE SINI - setelah commit berhasil
+            // Set success state
             $this->submitted_report_id = $report->report_id;
             $this->show_success = true;
 
-            // ✅ WRAP DALAM TRY-CATCH TERPISAH
+            // Try to dispatch PDF download
             try {
-                // Generate signed URL untuk PDF
                 $signedUrl = URL::temporarySignedRoute(
                     'reports.receipt.pdf',
                     now()->addMinutes(10),
@@ -357,7 +370,6 @@ class LostForm extends Component
                 );
                 $this->dispatch('download-pdf', url: $signedUrl);
             } catch (\Exception $pdfError) {
-                // Log error tapi jangan ganggu flow utama
                 Log::warning('PDF download dispatch failed', [
                     'error' => $pdfError->getMessage(),
                     'report_id' => $report->report_id
@@ -367,16 +379,15 @@ class LostForm extends Component
             // Flash message
             session()->flash('message', 'Report submitted successfully.');
             
-            // ✅ RESET FORM
+            // Reset form
             $this->resetForm();
 
-            // ✅ RELOAD dengan delay lebih lama
+            // Reload page
             $this->js('setTimeout(() => window.location.reload(), 1500)');
 
         } catch (\Throwable $e) {
             DB::rollBack();
             
-            // ✅ LOG DETAIL ERROR
             Log::error('Lost form submission error', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
