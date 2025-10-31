@@ -3,24 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 
 class ReportPdfController extends Controller
 {
-    public function download(Report $report)
+    /**
+     * Download a PDF for a single report (public/simple use).
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function download(Request $request, Report $report)
     {
-        $report->load([
-            'user',
-            'company',
-            'item.photos',
-            'item.category',
-            'item.post',
-            'item.claims.user',
-        ]);
 
-        $pdf = \PDF::loadView('reports.pdf', ['report' => $report])
-                   ->setPaper('a4', 'portrait');
+        $report->loadMissing(['item.photos', 'category', 'company', 'user']);
 
-        $filename = 'Report-' . ($report->report_id ?? $report->id) . '.pdf';
-        return $pdf->download($filename);
+        $reportType = ucfirst(strtolower($report->report_type ?? 'Report'));
+        $generatedAt = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i');
+
+        $pdf = Pdf::loadView('pdf.report-receipt', [
+            'report' => $report,
+            'reportType' => $reportType,
+            'generatedAt' => $generatedAt,
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'Report-'.strtolower($report->report_type).'-'.$report->report_id.'.pdf';
+
+      
+        if ($request->query('download') === '1') {
+            return $pdf->download($filename);
+        }
+
+        return $pdf->stream($filename);
     }
 }

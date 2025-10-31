@@ -22,6 +22,11 @@ class LostForm extends Component
 {
     use WithFileUploads;
 
+    // ===== CONFIG =====
+    private const OTP_TTL_SECONDS      = 300; // 5 menit
+    private const OTP_COOLDOWN_SECONDS = 60;  // jeda kirim/ulang OTP
+    private const SUBMIT_LOCK_SECONDS  = 3;   // kunci tombol submit sesaat
+
     // --- FORM STATE ---
     public string  $item_name = '';
     public string  $description = '';
@@ -48,6 +53,9 @@ class LostForm extends Component
     public ?string $submitted_report_id = null;
     public bool $show_success = false;
     public int $uploadKey = 0;
+
+    // cooldown sisa detik (untuk ditampilkan di UI bila perlu)
+    public int $resendCooldownSec = 0;
 
     // ---------- VALIDATION ----------
     protected function step1Rules(): array
@@ -140,10 +148,6 @@ class LostForm extends Component
             $this->is_existing_user = false;
             $this->needs_otp_verification = true;
             $this->otp_verified = false;
-
-            if (!empty($phone)) {
-                $this->sendOtpAutomatically();
-            }
         }
     }
 
@@ -158,14 +162,49 @@ class LostForm extends Component
         }
     }
 
+    // === OTP COOLDOWN KEYS ===
+    private function otpCodeKey(): string     { return 'otp_code_'.$this->phone; }
+    private function otpTimeKey(): string     { return 'otp_time_'.$this->phone; }
+    private function otpCooldownKey(): string { return 'otp_cooldown_'.$this->phone; }
+
+    private function cooldownRemaining(): int
+    {
+        if (empty($this->phone)) return 0;
+        $until = Cache::get($this->otpCooldownKey());
+        if (!$until) return 0;
+        $remain = $until - time();
+        return $remain > 0 ? $remain : 0;
+    }
+
+    private function startCooldown(int $sec = self::OTP_COOLDOWN_SECONDS): void
+    {
+        if (empty($this->phone)) return;
+        Cache::put($this->otpCooldownKey(), time() + $sec, $sec);
+        $this->resendCooldownSec = $sec;
+        // Trigger JS untuk disable tombol (btnSendOtp/btnResendOtp) + timer
+        $this->dispatch('start-resend-cooldown', seconds: $sec);
+    }
+
     // ---------- OTP ----------
     public function sendOtpAutomatically(): void
     {
         if (empty($this->phone)) return;
 
-        $otp = random_int(100000, 999999);
-        Cache::put('otp_' . $this->phone, $otp, now()->addMinutes(5));
-        Cache::put('otp_time_' . $this->phone, time(), now()->addMinutes(5));
+        // ⛔ jika masih cooldown, jangan kirim; cukup trigger countdown di UI
+        $remain = $this->cooldownRemaining();
+        if ($remain > 0) {
+            $this->resendCooldownSec = $remain;
+            $this->dispatch('start-resend-cooldown', seconds: $remain);
+            session()->flash('otp_error', "Please wait {$remain}s before requesting another OTP.");
+            return;
+        }
+
+        // generate / pakai ulang OTP idempotent (kalau masih aktif, jangan ganti)
+        $existing = Cache::get($this->otpCodeKey());
+        $otp = $existing ?: random_int(100000, 999999);
+
+        Cache::put($this->otpCodeKey(), $otp, self::OTP_TTL_SECONDS);
+        Cache::put($this->otpTimeKey(), time(), self::OTP_TTL_SECONDS);
 
         try {
             $message = "Kode OTP kamu adalah: {$otp}\n\nJangan bagikan kode ini ke siapapun.\n\nKode akan kadaluarsa dalam 5 menit.";
@@ -187,6 +226,8 @@ class LostForm extends Component
                 $this->otp_sent = true;
                 $this->otp_sent_at = now()->toDateTimeString();
                 session()->flash('otp_success', 'OTP has been sent to ' . $this->phone);
+                // ✅ mulai cooldown tombol
+                $this->startCooldown(self::OTP_COOLDOWN_SECONDS);
             } else {
                 $errorMsg = $response['reason'] ?? $response['error'] ?? $response['message'] ?? 'Unknown error';
                 session()->flash('otp_error', 'Failed to send OTP: ' . $errorMsg);
@@ -194,8 +235,8 @@ class LostForm extends Component
             }
         } catch (\Exception $e) {
             Log::error("Error sending OTP: " . $e->getMessage(), [
-                'exception' => $e,
-                'phone_number' => $this->phone,
+                'exception'   => $e,
+                'phone_number'=> $this->phone,
             ]);
             session()->flash('otp_error', 'Error sending OTP. Please try again.');
             $this->otp_sent = false;
@@ -204,6 +245,13 @@ class LostForm extends Component
 
     public function resendOtp(): void
     {
+        // tombol Resend juga tunduk pada cooldown
+        $remain = $this->cooldownRemaining();
+        if ($remain > 0) {
+            $this->resendCooldownSec = $remain;
+            $this->dispatch('start-resend-cooldown', seconds: $remain);
+            return;
+        }
         $this->sendOtpAutomatically();
     }
 
@@ -211,7 +259,7 @@ class LostForm extends Component
     {
         $this->validate($this->otpRules(), $this->messages);
 
-        $storedOtp = Cache::get('otp_' . $this->phone);
+        $storedOtp = Cache::get($this->otpCodeKey());
         if (!$storedOtp) {
             $this->addError('otp_code', 'OTP has expired. Please request a new one.');
             return;
@@ -222,8 +270,8 @@ class LostForm extends Component
             return;
         }
 
-        Cache::forget('otp_' . $this->phone);
-        Cache::forget('otp_time_' . $this->phone);
+        Cache::forget($this->otpCodeKey());
+        Cache::forget($this->otpTimeKey());
         $this->needs_otp_verification = false;
         $this->otp_verified = true;
 
@@ -343,13 +391,12 @@ class LostForm extends Component
 
             DB::commit();
 
-            // ✅ PINDAHKAN KE SINI - setelah commit berhasil
+            // Setelah commit
             $this->submitted_report_id = $report->report_id;
             $this->show_success = true;
 
-            // ✅ WRAP DALAM TRY-CATCH TERPISAH
+            // Signed URL untuk PDF
             try {
-                // Generate signed URL untuk PDF
                 $signedUrl = URL::temporarySignedRoute(
                     'reports.receipt.pdf',
                     now()->addMinutes(10),
@@ -357,35 +404,34 @@ class LostForm extends Component
                 );
                 $this->dispatch('download-pdf', url: $signedUrl);
             } catch (\Exception $pdfError) {
-                // Log error tapi jangan ganggu flow utama
                 Log::warning('PDF download dispatch failed', [
                     'error' => $pdfError->getMessage(),
                     'report_id' => $report->report_id
                 ]);
             }
 
-            // Flash message
             session()->flash('message', 'Report submitted successfully.');
-            
-            // ✅ RESET FORM
+
+            // ✅ Kunci tombol submit sesaat biar tak dobel klik
+            $this->dispatch('lock-submit', seconds: self::SUBMIT_LOCK_SECONDS);
+
             $this->resetForm();
 
-            // ✅ RELOAD dengan delay lebih lama
+            // reload halus
             $this->js('setTimeout(() => window.location.reload(), 1500)');
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            
-            // ✅ LOG DETAIL ERROR
+
             Log::error('Lost form submission error', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-                'phone' => $this->phone,
+                'message'   => $e->getMessage(),
+                'file'      => $e->getFile(),
+                'line'      => $e->getLine(),
+                'trace'     => $e->getTraceAsString(),
+                'phone'     => $this->phone,
                 'item_name' => $this->item_name,
             ]);
-            
+
             session()->flash('error', 'Failed to submit report: ' . $e->getMessage());
         }
     }
@@ -412,6 +458,7 @@ class LostForm extends Component
 
         $this->step = 1;
         $this->uploadKey++;
+        $this->resendCooldownSec = 0;
     }
 
     public function render()
