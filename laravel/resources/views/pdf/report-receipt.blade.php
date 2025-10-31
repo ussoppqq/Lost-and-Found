@@ -2,276 +2,235 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Report Receipt</title>
+    <title>Report Receipt - {{ $report->report_id }}</title>
     <style>
-        /* --- Page setup (A4) --- */
-        @page {
-            margin: 24mm 18mm 22mm 18mm;
-        }
-
-        * { box-sizing: border-box; }
-        html, body {
-            font-family: DejaVu Sans, Arial, sans-serif;
-            font-size: 12px;
-            color: #333;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 11pt;
             line-height: 1.6;
+            color: #333;
+            padding: 40px;
         }
-        body { padding: 0; }
-
         .header {
             text-align: center;
-            margin-bottom: 22px;
-            padding-bottom: 12px;
+            margin-bottom: 30px;
             border-bottom: 3px solid #1f2937;
+            padding-bottom: 20px;
         }
         .header h1 {
-            font-size: 20px;
+            font-size: 24pt;
             color: #1f2937;
-            margin: 0 0 4px;
-            font-weight: 700;
+            margin-bottom: 5px;
         }
         .header p {
-            font-size: 13px;
             color: #6b7280;
-            margin: 0;
+            font-size: 10pt;
         }
-
-        .report-id-box {
+        .tracking-box {
             background: #f3f4f6;
-            border: 2px solid #1f2937;
+            border: 3px solid #1f2937;
             border-radius: 8px;
-            padding: 12px;
-            margin: 16px 0 18px;
+            padding: 20px;
+            margin: 25px 0;
             text-align: center;
         }
-        .report-id-label {
-            font-size: 10px;
+        .tracking-box .label {
+            font-size: 10pt;
             color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
         }
-        .report-id {
-            font-size: 15px;
+        .tracking-box .id {
+            font-size: 14pt;
             font-weight: bold;
             color: #1f2937;
-            font-family: "DejaVu Sans Mono", "Courier New", monospace;
-            word-break: break-word;
+            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            line-height: 1.4;
         }
-
+        .tracking-instruction {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .tracking-instruction .title {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .tracking-instruction .steps {
+            font-size: 9pt;
+            color: #1e3a8a;
+            line-height: 1.8;
+        }
+        .tracking-instruction .steps li {
+            margin-bottom: 5px;
+        }
+        .tracking-url {
+            background: #f0f9ff;
+            border: 2px dashed #3b82f6;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .tracking-url .url {
+            font-size: 10pt;
+            font-weight: bold;
+            color: #1e40af;
+            font-family: 'Courier New', monospace;
+        }
         .section {
-            margin-bottom: 18px;
-            page-break-inside: avoid; /* keep blocks together */
+            margin: 25px 0;
         }
         .section-title {
-            font-size: 13px;
+            font-size: 14pt;
             font-weight: bold;
             color: #1f2937;
-            margin-bottom: 8px;
+            margin-bottom: 15px;
             padding-bottom: 5px;
             border-bottom: 2px solid #e5e7eb;
         }
-
         .info-row {
             display: table;
             width: 100%;
-            margin-bottom: 6px;
+            margin-bottom: 10px;
         }
         .info-label {
             display: table-cell;
             width: 35%;
-            font-weight: 600;
+            font-weight: bold;
             color: #4b5563;
-            padding-right: 10px;
-            vertical-align: top;
+            padding: 5px 0;
         }
         .info-value {
             display: table-cell;
+            width: 65%;
             color: #1f2937;
-            word-break: break-word;
+            padding: 5px 0;
         }
-
-        .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-            border: 1px solid #d1d5db;
-        }
-        .status-open     { background: #fef3c7; color: #92400e; }
-        .status-claimed  { background: #d1fae5; color: #065f46; }
-        .status-closed   { background: #e5e7eb; color: #374151; }
-        .type-lost       { background: #fee2e2; color: #991b1b; }
-        .type-found      { background: #dbeafe; color: #1e40af; }
-
-        .description-box {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 10px;
-            margin-top: 5px;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        .instructions {
-            background: #eff6ff;
-            border-left: 4px solid #3b82f6;
-            padding: 12px;
-            margin: 12px 0 18px;
-            border-radius: 4px;
-        }
-        .instructions h3 {
-            font-size: 12px;
-            color: #1e40af;
-            margin: 0 0 6px;
-        }
-        .instructions p {
-            font-size: 11px;
-            color: #1e3a8a;
-            margin: 0;
-        }
-
-        .photo-info {
-            background: #fef3c7;
-            border: 1px solid #fbbf24;
-            border-radius: 6px;
-            padding: 8px;
-            margin-top: 6px;
-            font-size: 11px;
-            color: #92400e;
-        }
-
         .footer {
-            margin-top: 26px;
-            padding-top: 12px;
+            margin-top: 40px;
+            padding-top: 20px;
             border-top: 2px solid #e5e7eb;
             text-align: center;
-            font-size: 11px;
+            font-size: 9pt;
             color: #6b7280;
-            page-break-inside: avoid;
+        }
+        .important-note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 10pt;
+        }
+        .important-note strong {
+            color: #92400e;
+        }
+        .qr-section {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Report Receipt</h1>
-        <p>{{ $report->report_type === 'LOST' ? 'Lost Item Report' : 'Found Item Report' }}</p>
+        <h1>📋 REPORT RECEIPT</h1>
+        <p>{{ $reportType }} Report Confirmation</p>
     </div>
 
-    <div class="report-id-box">
-        <div class="report-id-label">Report ID</div>
-        <div class="report-id">{{ $report->report_id }}</div>
+    <div class="tracking-box">
+        <div class="label">🔍 Your Tracking ID</div>
+        <div class="id">{{ $report->report_id }}</div>
     </div>
 
-    <div class="instructions">
-        <h3>How to Track Your Report</h3>
-        <p>
-            Use the Report ID above to track your report status on our website. 
-            <strong>Please save this document for your records.</strong>
-        </p>
+    <div class="important-note">
+        <strong>⚠️ IMPORTANT - SAVE THIS DOCUMENT:</strong> This Tracking ID is your unique reference number. Keep this PDF safe to track your item status and communicate with support.
     </div>
+
+    <div class="tracking-instruction">
+        <div class="title">📱 How to Track Your Item:</div>
+        <ol class="steps">
+            <li><strong>Visit our tracking page:</strong> Go to the URL below or scan the QR code</li>
+            <li><strong>Enter your Tracking ID:</strong> Copy the ID from the box above</li>
+            <li><strong>View real-time status:</strong> See updates on your item's location and status</li>
+            <li><strong>Get notifications:</strong> We'll contact you if there are any updates</li>
+        </ol>
+    </div>
+
+    <div class="tracking-url">
+        <div style="font-size: 9pt; color: #6b7280; margin-bottom: 5px;">Track online at:</div>
+        <div class="url">{{ url('/tracking') }}</div>
+    </div>
+
+    {{-- Optional: Add QR Code if you have QR generator package
+    <div class="qr-section">
+        <p style="font-size: 9pt; color: #6b7280; margin-bottom: 10px;">Scan to track instantly:</p>
+        <img src="data:image/png;base64,{{ base64_encode(QrCode::format('png')->size(150)->generate(url('/tracking?id=' . $report->report_id))) }}" alt="QR Code">
+    </div>
+    --}}
 
     <div class="section">
-        <div class="section-title">Report Information</div>
-
+        <div class="section-title">Reporter Information</div>
         <div class="info-row">
-            <div class="info-label">Report Type:</div>
-            <div class="info-value">
-                <span class="badge {{ $report->report_type === 'LOST' ? 'type-lost' : 'type-found' }}">
-                    {{ $report->report_type }}
-                </span>
-            </div>
+            <div class="info-label">Name:</div>
+            <div class="info-value">{{ $report->reporter_name }}</div>
         </div>
-
         <div class="info-row">
-            <div class="info-label">Status:</div>
-            <div class="info-value">
-                @php
-                    $statusClass = match($report->report_status) {
-                        'OPEN'     => 'status-open',
-                        'CLAIMED'  => 'status-claimed',
-                        default    => 'status-closed',
-                    };
-                @endphp
-                <span class="badge {{ $statusClass }}">{{ $report->report_status }}</span>
-            </div>
+            <div class="info-label">Phone:</div>
+            <div class="info-value">{{ $report->reporter_phone }}</div>
         </div>
-
+        @if($report->reporter_email)
         <div class="info-row">
-            <div class="info-label">Date {{ $report->report_type === 'LOST' ? 'Lost' : 'Found' }}:</div>
-            <div class="info-value">
-                {{ optional($report->report_datetime)->format('d M Y, H:i') ?? '-' }}
-            </div>
+            <div class="info-label">Email:</div>
+            <div class="info-value">{{ $report->reporter_email }}</div>
         </div>
-
-        <div class="info-row">
-            <div class="info-label">Location:</div>
-            <div class="info-value">{{ $report->report_location ?: '-' }}</div>
-        </div>
-
-        <div class="info-row">
-            <div class="info-label">Submitted On:</div>
-            <div class="info-value">{{ optional($report->created_at)->format('d M Y, H:i') ?? '-' }}</div>
-        </div>
+        @endif
     </div>
 
     <div class="section">
         <div class="section-title">Item Details</div>
-
         <div class="info-row">
             <div class="info-label">Item Name:</div>
-            <div class="info-value"><strong>{{ $report->item_name }}</strong></div>
+            <div class="info-value">{{ $report->item_name }}</div>
         </div>
-
-        @if($report->relationLoaded('category') ? $report->category : optional($report->category)->exists)
-            <div class="info-row">
-                <div class="info-label">Category:</div>
-                <div class="info-value">{{ optional($report->category)->category_name ?? '-' }}</div>
-            </div>
-        @endif
-
+        <div class="info-row">
+            <div class="info-label">Category:</div>
+            <div class="info-value">{{ $report->category->category_name ?? 'N/A' }}</div>
+        </div>
         <div class="info-row">
             <div class="info-label">Description:</div>
-            <div class="info-value"></div>
+            <div class="info-value">{{ $report->report_description }}</div>
         </div>
-        <div class="description-box">{{ $report->report_description }}</div>
-
-        @if(!empty($report->photo_url))
-            <div class="photo-info">
-                ℹ️ A photo is attached to this report. View it online using your Report ID.
-            </div>
-        @endif
-    </div>
-
-    <div class="section">
-        <div class="section-title">Reporter Information</div>
-
         <div class="info-row">
-            <div class="info-label">Name:</div>
-            <div class="info-value">{{ $report->reporter_name ?: '-' }}</div>
+            <div class="info-label">Location:</div>
+            <div class="info-value">{{ $report->report_location }}</div>
         </div>
-
         <div class="info-row">
-            <div class="info-label">Phone:</div>
-            <div class="info-value">{{ $report->reporter_phone ?: '-' }}</div>
+            <div class="info-label">Date & Time:</div>
+            <div class="info-value">{{ \Carbon\Carbon::parse($report->report_datetime)->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB</div>
         </div>
-
-        @if(!empty($report->reporter_email))
-            <div class="info-row">
-                <div class="info-label">Email:</div>
-                <div class="info-value">{{ $report->reporter_email }}</div>
-            </div>
-        @endif
+        <div class="info-row">
+            <div class="info-label">Status:</div>
+            <div class="info-value">{{ ucfirst(strtolower($report->report_status)) }}</div>
+        </div>
     </div>
 
     <div class="footer">
-        <div>This is an automatically generated receipt. Keep it for tracking purposes.</div>
-        <div style="margin-top: 4px;">
-            Generated on {{ now()->format('d M Y, H:i:s') }}
-        </div>
+        <p><strong>Generated on:</strong> {{ $generatedAt }} WIB</p>
+        <p style="margin-top: 10px;">This is an automatically generated receipt.</p>
+        <p style="margin-top: 5px; font-weight: bold;">Keep this document for tracking and verification purposes.</p>
     </div>
 </body>
 </html>
