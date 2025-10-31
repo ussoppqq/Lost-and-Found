@@ -34,6 +34,7 @@ class Index extends Component
     protected $listeners = [
         'item-created' => '$refresh',
         'item-updated' => '$refresh',
+        'item-confirmed' => '$refresh', // NEW LISTENER
         'closeDetailModal' => 'closeDetailModal',
     ];
 
@@ -113,6 +114,12 @@ class Index extends Component
     public function openEditItemModal($itemId)
     {
         $this->dispatch('open-edit-item-modal', itemId: $itemId)->to(EditItem::class);
+    }
+
+    // NEW METHOD: Confirm Item
+    public function confirmItem($reportId)
+    {
+        $this->dispatch('open-confirm-item-modal', reportId: $reportId)->to(ConfirmItem::class);
     }
 
     public function deleteReport($reportId)

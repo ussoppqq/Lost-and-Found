@@ -16,6 +16,7 @@ class Dashboard extends Component
     public $claimedItems;
     public $recentReports;
     public $totalUsers;
+    public $stats = [];
 
     public function mount()
     {
@@ -26,10 +27,16 @@ class Dashboard extends Component
     {
         $companyId = auth()->user()->company_id;
 
-        // PERBAIKAN: Total Items = Item yang sudah ada fisiknya (STORED/CLAIMED)
-        $this->totalItems = Item::where('company_id', $companyId)
-            ->whereIn('item_status', ['STORED', 'CLAIMED'])
-            ->count();
+        // Samakan dengan perhitungan di App\Livewire\Admin\Items\Index
+        $this->stats = [
+            'total' => Item::where('company_id', $companyId)->count(),
+            'stored' => Item::where('company_id', $companyId)->where('item_status', 'STORED')->count(),
+            'claimed' => Item::where('company_id', $companyId)->where('item_status', 'CLAIMED')->count(),
+            'disposed' => Item::where('company_id', $companyId)->where('item_status', 'DISPOSED')->count(),
+        ];
+
+        // pastikan fallback $totalItems tetap tersedia untuk view yang menggunakan itu
+        $this->totalItems = $this->stats['total'];
             
         $this->lostReports = Report::where('company_id', $companyId)->where('report_type', 'LOST')->count();
         $this->foundReports = Report::where('company_id', $companyId)->where('report_type', 'FOUND')->count();

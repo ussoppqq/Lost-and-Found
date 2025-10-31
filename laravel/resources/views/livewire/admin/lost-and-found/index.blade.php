@@ -133,7 +133,7 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <!-- KOLOM ID BARU -->
+                        <!-- KOLOM ID -->
                         <th wire:click="sortBy('report_number')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                             <div class="flex items-center space-x-1">
                                 <span>ID</span>
@@ -205,7 +205,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($reports as $report)
                     <tr class="hover:bg-gray-50">
-                        <!-- CELL ID BARU -->
+                        <!-- CELL ID -->
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800">
                                 {{ $report->formatted_report_number }}
@@ -213,19 +213,6 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                                @if($report->report_type === 'LOST')
-                                    <!-- <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
-                                        <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"/>
-                                        </svg>
-                                    </div> -->
-                                @else
-                                    <!-- <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                                        <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                    </div> -->
-                                @endif
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">
                                         {{ $report->item_name ?? $report->item->item_name ?? 'Unnamed Item' }}
@@ -302,56 +289,75 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center space-x-2">
-    @if($report->report_status === 'CLOSED' || $report->report_status === 'MATCHED')
-        <!-- Ceklis jika sudah claimed/matched -->
-        <button class="text-green-600" title="Completed" disabled>
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-        </button>
-    @elseif(!$report->item_id)
-        <!-- Tombol View Detail jika belum ada item -->
-        <button wire:click="viewReportDetail('{{ $report->report_id }}')" 
-                class="text-blue-600 hover:text-blue-900"
-                title="View Detail">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-        </button>
-    @else
-        <!-- Tombol View Detail -->
-        <button wire:click="viewReportDetail('{{ $report->report_id }}')" 
-                class="text-blue-600 hover:text-blue-900"
-                title="View Detail">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-        </button>
+                                @if($report->report_status === 'CLOSED' || $report->report_status === 'MATCHED')
+                                    <!-- Ceklis jika sudah claimed/matched -->
+                                    <button class="text-green-600" title="Completed" disabled>
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </button>
+                                @elseif(!$report->item_id && $report->report_type === 'FOUND')
+                                    <!-- NEW: Tombol Confirm Item untuk FOUND report tanpa item -->
+                                    <button wire:click="confirmItem('{{ $report->report_id }}')" 
+                                            class="text-purple-600 hover:text-purple-900 transition-colors"
+                                            title="Confirm Item">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- Tombol View Detail -->
+                                    <button wire:click="viewReportDetail('{{ $report->report_id }}')" 
+                                            class="text-blue-600 hover:text-blue-900 transition-colors"
+                                            title="View Detail">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </button>
+                                @elseif(!$report->item_id)
+                                    <!-- Tombol View Detail jika belum ada item (LOST report) -->
+                                    <button wire:click="viewReportDetail('{{ $report->report_id }}')" 
+                                            class="text-blue-600 hover:text-blue-900 transition-colors"
+                                            title="View Detail">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </button>
+                                @else
+                                    <!-- Tombol View Detail -->
+                                    <button wire:click="viewReportDetail('{{ $report->report_id }}')" 
+                                            class="text-blue-600 hover:text-blue-900 transition-colors"
+                                            title="View Detail">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </button>
 
-        <!-- Tombol Edit Item (jika sudah ada item) -->
-        <button wire:click="openEditItemModal('{{ $report->item_id }}')" 
-                class="text-indigo-600 hover:text-indigo-900"
-                title="Edit Item">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-            </svg>
-        </button>
-    @endif
-    
-    <!-- Delete button -->
-    @if($report->report_status !== 'CLOSED' && $report->report_status !== 'MATCHED')
-    <button wire:click="deleteReport('{{ $report->report_id }}')" 
-            class="text-red-600 hover:text-red-900"
-            title="Delete Report"
-            onclick="return confirm('Are you sure you want to delete this report?')">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-        </svg>
-    </button>
-    @endif
-</div>
+                                    <!-- Tombol Edit Item (jika sudah ada item) -->
+                                    <button wire:click="openEditItemModal('{{ $report->item_id }}')" 
+                                            class="text-indigo-600 hover:text-indigo-900 transition-colors"
+                                            title="Edit Item">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </button>
+                                @endif
+                                
+                                <!-- Delete button -->
+                                @if($report->report_status !== 'CLOSED' && $report->report_status !== 'MATCHED')
+                                <button wire:click="deleteReport('{{ $report->report_id }}')" 
+                                        class="text-red-600 hover:text-red-900 transition-colors"
+                                        title="Delete Report"
+                                        onclick="return confirm('Are you sure you want to delete this report?')">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty
@@ -380,6 +386,7 @@
     <!-- Include Modals -->
     @livewire('admin.lost-and-found.create-item')
     @livewire('admin.lost-and-found.edit-item')
+    @livewire('admin.lost-and-found.confirm-item')
 
     <!-- Report Detail Modal -->
     @if($showDetailModal && $selectedReportForDetail)
@@ -390,40 +397,40 @@
 
     <!-- Delete Confirmation Modal -->
     @if($showDeleteModal)
-    <!-- Backdrop dengan blur effect -->
-    <div class="fixed inset-0 bg-opacity-60 transition-opacity z-40 backdrop-blur-sm"></div>
+        <!-- Backdrop dengan blur effect -->
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity z-40 backdrop-blur-sm"></div>
 
-    <!-- Modal Container -->
-    <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md my-8 transform transition-all">
-            <div class="p-6">
-                <div class="flex items-center mb-4">
-                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
+        <!-- Modal Container -->
+        <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md my-8 transform transition-all">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <h3 class="ml-3 text-lg font-medium leading-6 text-gray-900">Delete Report</h3>
                     </div>
-                    <h3 class="ml-3 text-lg font-medium leading-6 text-gray-900">Delete Report</h3>
-                </div>
 
-                <p class="text-sm text-gray-500 mb-4">
-                    Are you sure you want to delete this report? This action cannot be undone and will also delete the associated item if exists.
-                </p>
+                    <p class="text-sm text-gray-500 mb-4">
+                        Are you sure you want to delete this report? This action cannot be undone and will also delete the associated item if exists.
+                    </p>
 
-                <div class="flex justify-end gap-3">
-                    <button type="button" wire:click="cancelDelete"
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                        Cancel
-                    </button>
-                    <button type="button" wire:click="confirmDelete" wire:loading.attr="disabled"
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition">
-                        <span wire:loading.remove wire:target="confirmDelete">Delete</span>
-                        <span wire:loading wire:target="confirmDelete">Deleting...</span>
-                    </button>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" wire:click="cancelDelete"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                            Cancel
+                        </button>
+                        <button type="button" wire:click="confirmDelete" wire:loading.attr="disabled"
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition">
+                            <span wire:loading.remove wire:target="confirmDelete">Delete</span>
+                            <span wire:loading wire:target="confirmDelete">Deleting...</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-@endif
+    @endif
 </div>
