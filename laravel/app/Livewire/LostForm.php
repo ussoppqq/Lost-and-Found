@@ -54,8 +54,6 @@ class LostForm extends Component
     public ?string $submitted_report_id = null;
     public bool $show_success = false;
     public int $uploadKey = 0;
-
-    // cooldown sisa detik (untuk ditampilkan di UI bila perlu)
     public int $resendCooldownSec = 0;
 
     // ---------- VALIDATION ----------
@@ -182,7 +180,6 @@ class LostForm extends Component
         if (empty($this->phone)) return;
         Cache::put($this->otpCooldownKey(), time() + $sec, $sec);
         $this->resendCooldownSec = $sec;
-        // Trigger JS untuk disable tombol (btnSendOtp/btnResendOtp) + timer
         $this->dispatch('start-resend-cooldown', seconds: $sec);
     }
 
@@ -191,7 +188,6 @@ class LostForm extends Component
     {
         if (empty($this->phone)) return;
 
-        // ⛔ jika masih cooldown, jangan kirim; cukup trigger countdown di UI
         $remain = $this->cooldownRemaining();
         if ($remain > 0) {
             $this->resendCooldownSec = $remain;
@@ -200,7 +196,6 @@ class LostForm extends Component
             return;
         }
 
-        // generate / pakai ulang OTP idempotent (kalau masih aktif, jangan ganti)
         $existing = Cache::get($this->otpCodeKey());
         $otp = $existing ?: random_int(100000, 999999);
 
@@ -227,7 +222,6 @@ class LostForm extends Component
                 $this->otp_sent = true;
                 $this->otp_sent_at = now()->toDateTimeString();
                 session()->flash('otp_success', 'OTP has been sent to ' . $this->phone);
-                // ✅ mulai cooldown tombol
                 $this->startCooldown(self::OTP_COOLDOWN_SECONDS);
             } else {
                 $errorMsg = $response['reason'] ?? $response['error'] ?? $response['message'] ?? 'Unknown error';
@@ -246,7 +240,6 @@ class LostForm extends Component
 
     public function resendOtp(): void
     {
-        // tombol Resend juga tunduk pada cooldown
         $remain = $this->cooldownRemaining();
         if ($remain > 0) {
             $this->resendCooldownSec = $remain;
@@ -380,23 +373,24 @@ class LostForm extends Component
                 'reporter_name'      => $user->full_name,
                 'reporter_phone'     => $user->phone_number,
                 'reporter_email'     => $user->email,
+                'submitted_at'       => now(),
             ]);
 
-            // Simpan multiple photos
+            // Save multiple photos to report_photos table
             if (!empty($this->photos)) {
                 foreach ($this->photos as $index => $file) {
                     $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
                     $photoPath = $file->storeAs('reports/lost/'.$user->user_id, $filename, 'public');
                     
                     ReportPhoto::create([
-                        'photo_id' => Str::uuid(),
-                        'report_id' => $report->report_id,
-                        'photo_url' => $photoPath,
+                        'photo_id'   => Str::uuid(),
+                        'report_id'  => $report->report_id,
+                        'photo_url'  => $photoPath,
                         'is_primary' => $index === 0, // First photo is primary
-                        'photo_order' => $index,
+                        'photo_order'=> $index,
                     ]);
 
-                    // Set primary photo URL di report
+                    // Set primary photo URL in report for backward compatibility
                     if ($index === 0) {
                         $report->update(['photo_url' => $photoPath]);
                     }
@@ -405,11 +399,11 @@ class LostForm extends Component
 
             DB::commit();
 
-            // ✅ PINDAHKAN KE SINI - setelah commit berhasil
+            // Set success state
             $this->submitted_report_id = $report->report_id;
             $this->show_success = true;
 
-            // ✅ WRAP DALAM TRY-CATCH TERPISAH
+            // Try to dispatch PDF download
             try {
                 $signedUrl = URL::temporarySignedRoute(
                     'reports.receipt.pdf',
@@ -426,16 +420,17 @@ class LostForm extends Component
 
             session()->flash('message', 'Report submitted successfully.');
             
-            // ✅ RESET FORM
+            // Lock submit button
+            $this->dispatch('lock-submit', seconds: self::SUBMIT_LOCK_SECONDS);
+
             $this->resetForm();
 
-            // ✅ RELOAD dengan delay lebih lama
+            // Reload page
             $this->js('setTimeout(() => window.location.reload(), 1500)');
 
         } catch (\Throwable $e) {
             DB::rollBack();
             
-            // ✅ LOG DETAIL ERROR
             Log::error('Lost form submission error', [
                 'message'   => $e->getMessage(),
                 'file'      => $e->getFile(),
@@ -444,7 +439,7 @@ class LostForm extends Component
                 'phone'     => $this->phone,
                 'item_name' => $this->item_name,
             ]);
-
+            
             session()->flash('error', 'Failed to submit report: ' . $e->getMessage());
         }
     }

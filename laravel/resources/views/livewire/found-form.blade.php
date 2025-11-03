@@ -229,7 +229,7 @@
             <div class="mt-4 hidden lg:block">
               <a href="#item-details"
                 class="inline-flex items-center gap-2 text-sm font-semibold text-gray-800 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition">
-                
+                Go to Item Details
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
@@ -712,7 +712,6 @@
     </div>
   </div>
 </div>
-
 
 @once
 <script>
