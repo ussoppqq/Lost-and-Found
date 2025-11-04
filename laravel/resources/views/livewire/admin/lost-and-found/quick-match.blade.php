@@ -6,7 +6,6 @@
 
         <div class="flex items-center justify-center min-h-screen p-4">
             <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-7xl my-8 max-h-[90vh] overflow-hidden" @click.stop>
-                
                 <!-- Header -->
                 <div class="px-6 py-5 border-b bg-gradient-to-r from-blue-50 to-purple-50 sticky top-0 z-10">
                     <div class="flex items-center justify-between">

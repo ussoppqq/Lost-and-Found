@@ -15,15 +15,13 @@ class QuickMatch extends Component
 {
     public $sourceReportId;
     public $sourceReport;
-    public $oppositeType; // 'LOST' or 'FOUND'
+    public $oppositeType;
     
-    // Search & Filter
     public $searchTerm = '';
     public $selectedCategoryId = '';
     public $selectedReportId = null;
     public $selectedReport = null;
     
-    // Modal state
     public $showMatchModal = false;
     public $showClaimModal = false;
     
@@ -35,7 +33,7 @@ class QuickMatch extends Component
 
     public function mount()
     {
-        // Optional: bisa di-set dari parent
+        // Optional
     }
 
     public function openQuickMatch($reportId)
@@ -43,7 +41,6 @@ class QuickMatch extends Component
         $this->sourceReportId = $reportId;
         $this->sourceReport = Report::with(['user', 'category', 'photos'])->findOrFail($reportId);
         
-        // Tentukan opposite type
         $this->oppositeType = $this->sourceReport->report_type === 'LOST' ? 'FOUND' : 'LOST';
         
         $this->showMatchModal = true;
@@ -88,8 +85,6 @@ class QuickMatch extends Component
             return;
         }
 
-        // Validasi: Jika source adalah LOST dan target adalah FOUND, 
-        // maka found report HARUS punya item_id
         if ($this->sourceReport->report_type === 'LOST' && 
             $this->selectedReport->report_type === 'FOUND' && 
             !$this->selectedReport->item_id) {
@@ -108,7 +103,6 @@ class QuickMatch extends Component
                 ? $this->sourceReportId 
                 : $this->selectedReportId;
 
-            // Create match dengan status PENDING
             MatchedItem::create([
                 'match_id' => Str::uuid(),
                 'company_id' => auth()->user()->company_id,
@@ -119,7 +113,6 @@ class QuickMatch extends Component
                 'matched_at' => now(),
             ]);
 
-            // Update report status
             Report::whereIn('report_id', [$lostReportId, $foundReportId])
                 ->update(['report_status' => 'MATCHED']);
 
@@ -132,8 +125,7 @@ class QuickMatch extends Component
 
             session()->flash('success', 'Match created successfully! Redirecting to matches page...');
             
-            // Redirect ke matches page
-            return redirect()->route('admin.matches.index');
+            return redirect()->route('admin.matches');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -151,7 +143,6 @@ class QuickMatch extends Component
             return;
         }
 
-        // Validasi: HARUS ada item_id di found report
         if ($this->sourceReport->report_type === 'LOST') {
             if (!$this->selectedReport->item_id) {
                 session()->flash('error', 'Cannot process claim: The selected FOUND report must have a registered item.');
@@ -191,7 +182,6 @@ class QuickMatch extends Component
 
     public function openCreateAndMatchModal()
     {
-        // Dispatch event to CreateAndMatch component
         $this->dispatch('open-create-and-match-modal', 
             data: [
                 'sourceReportId' => $this->sourceReportId,
@@ -207,11 +197,8 @@ class QuickMatch extends Component
 
     public function refreshQuickMatch()
     {
-        // Refresh available reports after new report created
         $this->resetSearch();
-        
         session()->flash('success', 'Report created successfully! Select it below to create a match or proceed with claim.');
-        
         Log::info('Quick match refreshed after new report created');
     }
 
