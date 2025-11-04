@@ -284,6 +284,31 @@
                     @endif
                 </div>
             </div>
+
+            <!-- Quick Match Section -->
+            @if(in_array($report->report_status, ['OPEN', 'STORED']))
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border-2 border-blue-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-900">Quick Match</h4>
+                                <p class="text-xs text-gray-600">Find and match with {{ $report->report_type === 'LOST' ? 'found' : 'lost' }} items</p>
+                            </div>
+                        </div>
+                        <button 
+                            wire:click="openQuickMatch"
+                            class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            Match Report
+                        </button>
+                    </div>
+                </div>
+            @endif
         </div>
 
         <!-- Footer -->
@@ -350,4 +375,8 @@
     @endif
 </div>
 @endif
+
+<!-- Include QuickMatch Component -->
+@livewire('admin.lost-and-found.quick-match')
+@livewire('admin.lost-and-found.create-item')
 </div>

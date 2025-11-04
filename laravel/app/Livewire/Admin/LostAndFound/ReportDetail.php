@@ -16,6 +16,11 @@ class ReportDetail extends Component
     public $currentPhotoIndex = 0;
     public $allPhotos = [];
 
+    protected $listeners = [
+        'closeDetailModal' => 'closeModal',
+        'refresh-detail' => '$refresh',
+    ];
+
     public function mount($reportId)
     {
         $this->reportId = $reportId;
@@ -62,6 +67,11 @@ class ReportDetail extends Component
             $this->currentPhotoIndex--;
             $this->currentPhotoUrl = $this->allPhotos[$this->currentPhotoIndex];
         }
+    }
+
+    public function openQuickMatch()
+    {
+        $this->dispatch('open-quick-match', reportId: $this->reportId);
     }
 
     public function closeModal()
