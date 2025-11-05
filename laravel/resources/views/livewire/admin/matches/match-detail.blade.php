@@ -310,7 +310,7 @@
                     </div>
 
                     <!-- Confirmed -->
-                    @if($match->isConfirmed())
+                    @if($match->isConfirmed() && $match->confirmed_at)
                         <div class="flex items-start">
                             <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                                 <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

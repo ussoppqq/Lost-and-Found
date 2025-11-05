@@ -2,9 +2,8 @@
 
 namespace App\Livewire\Admin\Matches;
 
-use App\Models\Match;
-use Livewire\Component;
 use App\Models\MatchedItem;
+use Livewire\Component;
 
 class MatchDetail extends Component
 {
@@ -22,16 +21,25 @@ class MatchDetail extends Component
 
     public function loadMatch()
     {
-        $this->match = MatchedItem::with([
-            'lostReport.category',
-            'foundReport.category',
-            'matcher',
-            'confirmer'
-        ])->findOrFail($this->matchId);
+        // PENTING: Gunakan withTrashed() agar bisa load rejected matches
+        $this->match = MatchedItem::withTrashed()
+            ->with([
+                'lostReport.category',
+                'foundReport.category',
+                'matcher',
+                'confirmer'
+            ])
+            ->findOrFail($this->matchId);
     }
 
     public function confirmMatch()
     {
+        // Validasi: tidak bisa confirm match yang sudah rejected
+        if ($this->match->trashed()) {
+            session()->flash('error', 'Cannot confirm a rejected match! Please create a new match instead.');
+            return;
+        }
+
         $this->match->update([
             'match_status' => 'CONFIRMED',
             'confirmed_at' => now(),
@@ -44,18 +52,31 @@ class MatchDetail extends Component
 
         $this->loadMatch();
         $this->dispatch('match-updated');
-        session()->flash('success', 'Match berhasil dikonfirmasi!');
+        session()->flash('success', 'Match successfully confirmed!');
     }
 
     public function rejectMatch()
     {
+        // Validasi: tidak bisa reject match yang sudah rejected
+        if ($this->match->trashed()) {
+            session()->flash('error', 'This match is already rejected!');
+            return;
+        }
+
         $this->match->update([
             'match_status' => 'REJECTED',
         ]);
 
+        // Kembalikan status reports ke STORED
+        $this->match->lostReport->update(['report_status' => 'STORED']);
+        $this->match->foundReport->update(['report_status' => 'STORED']);
+
+        // Soft delete
+        $this->match->delete();
+
         $this->loadMatch();
         $this->dispatch('match-updated');
-        session()->flash('success', 'Match berhasil ditolak!');
+        session()->flash('success', 'Match rejected! Reports are now available for new matching.');
     }
 
     public function openImageModal($imageUrl, $title)

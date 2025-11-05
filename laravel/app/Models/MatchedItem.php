@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class MatchedItem extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'matches'; 
     protected $primaryKey = 'match_id';
     public $incrementing = false;
@@ -28,6 +31,7 @@ class MatchedItem extends Model
     protected $casts = [
         'matched_at' => 'datetime',
         'confirmed_at' => 'datetime',
+        'deleted_at' => 'datetime',
         'confidence_score' => 'decimal:2',
     ];
 

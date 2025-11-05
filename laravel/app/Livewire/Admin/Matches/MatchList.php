@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Matches;
 use App\Models\MatchedItem;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\DB;
 
 class MatchList extends Component
 {
@@ -83,15 +84,17 @@ class MatchList extends Component
                 return;
             }
 
-            $match->update([
-                'match_status' => 'CONFIRMED',
-                'confirmed_at' => now(),
-                'confirmed_by' => auth()->id(),
-            ]);
+            DB::transaction(function () use ($match) {
+                $match->update([
+                    'match_status' => 'CONFIRMED',
+                    'confirmed_at' => now(),
+                    'confirmed_by' => auth()->id(),
+                ]);
 
-            // Update report status
-            $match->lostReport->update(['report_status' => 'MATCHED']);
-            $match->foundReport->update(['report_status' => 'MATCHED']);
+                // Update report status
+                $match->lostReport->update(['report_status' => 'MATCHED']);
+                $match->foundReport->update(['report_status' => 'MATCHED']);
+            });
 
             session()->flash('success', 'Match confirmed successfully! You can now process the claim.');
         } catch (\Exception $e) {
@@ -102,13 +105,23 @@ class MatchList extends Component
     public function rejectMatch($matchId)
     {
         try {
-            $match = MatchedItem::findOrFail($matchId);
+            $match = MatchedItem::with(['lostReport', 'foundReport'])->findOrFail($matchId);
 
-            $match->update([
-                'match_status' => 'REJECTED',
-            ]);
+            DB::transaction(function () use ($match) {
+                // Update match status to REJECTED
+                $match->update([
+                    'match_status' => 'REJECTED',
+                ]);
 
-            session()->flash('success', 'Match rejected successfully!');
+                // Kembalikan status reports ke STORED agar bisa di-match lagi
+                $match->lostReport->update(['report_status' => 'STORED']);
+                $match->foundReport->update(['report_status' => 'STORED']);
+
+                // Soft delete: Hapus match (akan set deleted_at)
+                $match->delete();
+            });
+
+            session()->flash('success', 'Match rejected! Reports are now available for new matching.');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to reject match: ' . $e->getMessage());
         }
@@ -116,7 +129,6 @@ class MatchList extends Component
 
     public function processClaim($matchId)
     {
-        // Validasi sebelum buka modal
         $match = MatchedItem::with(['foundReport'])->findOrFail($matchId);
 
         if (!$match->foundReport->item_id) {
@@ -124,7 +136,6 @@ class MatchList extends Component
             return;
         }
 
-        // Check jika sudah ada claim
         if ($match->hasClaim()) {
             session()->flash('error', 'This match already has a claim!');
             return;
@@ -166,8 +177,23 @@ class MatchList extends Component
     public function deleteMatch($matchId)
     {
         try {
-            MatchedItem::findOrFail($matchId)->delete();
-            session()->flash('success', 'Match deleted successfully!');
+            $match = MatchedItem::withTrashed()->with(['lostReport', 'foundReport'])->findOrFail($matchId);
+
+            if ($match->hasClaim()) {
+                session()->flash('error', 'Cannot delete match with existing claim!');
+                return;
+            }
+
+            DB::transaction(function () use ($match) {
+                // Kembalikan status reports ke STORED
+                $match->lostReport->update(['report_status' => 'STORED']);
+                $match->foundReport->update(['report_status' => 'STORED']);
+
+                // PERMANENT DELETE
+                $match->forceDelete();
+            });
+
+            session()->flash('success', 'Match permanently deleted! Reports returned to stored status.');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to delete match: ' . $e->getMessage());
         }
@@ -175,14 +201,16 @@ class MatchList extends Component
 
     public function render()
     {
-        $matches = MatchedItem::with([
-            'lostReport.category',
-            'foundReport.category',
-            'foundReport.item',
-            'matcher',
-            'confirmer',
-            'claim'
-        ])
+        // Query SEMUA matches termasuk yang REJECTED
+        $matches = MatchedItem::withTrashed()
+            ->with([
+                'lostReport.category',
+                'foundReport.category',
+                'foundReport.item',
+                'matcher',
+                'confirmer',
+                'claim'
+            ])
             ->when($this->search, function ($query) {
                 $query->whereHas('lostReport', function ($q) {
                     $q->where('item_name', 'like', '%' . $this->search . '%')
@@ -194,7 +222,11 @@ class MatchList extends Component
                     });
             })
             ->when($this->statusFilter, function ($query) {
-                $query->where('match_status', $this->statusFilter);
+                if ($this->statusFilter === 'REJECTED') {
+                    $query->onlyTrashed()->where('match_status', 'REJECTED');
+                } else {
+                    $query->whereNull('deleted_at')->where('match_status', $this->statusFilter);
+                }
             })
             ->latest('matched_at')
             ->paginate(10);
@@ -203,7 +235,7 @@ class MatchList extends Component
             'total' => MatchedItem::count(),
             'pending' => MatchedItem::where('match_status', 'PENDING')->count(),
             'confirmed' => MatchedItem::where('match_status', 'CONFIRMED')->count(),
-            'rejected' => MatchedItem::where('match_status', 'REJECTED')->count(),
+            'rejected' => MatchedItem::onlyTrashed()->where('match_status', 'REJECTED')->count(),
         ];
 
         return view('livewire.admin.matches.match-list', [

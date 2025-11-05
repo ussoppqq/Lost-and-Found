@@ -9,7 +9,7 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Total Matches</p>
+                    <p class="text-sm font-medium text-gray-500">Total Active</p>
                     <p class="text-2xl font-semibold text-gray-900">{{ $stats['total'] }}</p>
                 </div>
             </div>
@@ -77,6 +77,23 @@
         </div>
     @endif
 
+    <!-- Info Banner untuk Rejected Matches -->
+    @if($statusFilter === 'REJECTED')
+        <div class="mb-4 bg-blue-50 border border-blue-200 px-4 py-3 rounded-lg">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div class="flex-1">
+                    <p class="text-sm text-blue-800">
+                        <span class="font-semibold">Viewing rejected matches.</span> 
+                        These reports have been returned to STORED status and can be matched again through "Create New Match".
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Filters and Actions -->
     <div class="bg-white rounded-lg shadow mb-6">
         <div class="p-4 border-b border-gray-200">
@@ -127,13 +144,13 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($matches as $match)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-gray-50 {{ $match->trashed() ? 'opacity-60' : '' }}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
                                     @if($match->lostReport->photo_url)
                                         <img src="{{ Storage::url($match->lostReport->photo_url) }}" 
                                              alt="Lost item" 
-                                             class="w-10 h-10 rounded object-cover mr-3">
+                                             class="w-10 h-10 rounded object-cover mr-3 {{ $match->trashed() ? 'grayscale' : '' }}">
                                     @else
                                         <div class="w-10 h-10 bg-gray-200 rounded flex items-center justify-center mr-3">
                                             <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -157,7 +174,7 @@
                                     @if($match->foundReport->photo_url)
                                         <img src="{{ Storage::url($match->foundReport->photo_url) }}" 
                                              alt="Found item" 
-                                             class="w-10 h-10 rounded object-cover mr-3">
+                                             class="w-10 h-10 rounded object-cover mr-3 {{ $match->trashed() ? 'grayscale' : '' }}">
                                     @else
                                         <div class="w-10 h-10 bg-gray-200 rounded flex items-center justify-center mr-3">
                                             <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -173,43 +190,54 @@
                                             <div class="text-sm font-medium text-gray-900">{{ $match->foundReport->item_name }}</div>
                                         </div>
                                         <div class="text-sm text-gray-500">{{ Str::limit($match->foundReport->report_description, 30) }}</div>
-                                        <!-- Item Status Indicator -->
-                                        @if($match->foundReport->item_id)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mt-1">
-                                                <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                                </svg>
-                                                Item Registered
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
-                                                <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                                </svg>
-                                                No Item Yet
-                                            </span>
+                                        @if(!$match->trashed())
+                                            @if($match->foundReport->item_id)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mt-1">
+                                                    <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                    Item Registered
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
+                                                    <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                    </svg>
+                                                    No Item Yet
+                                                </span>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $match->getStatusBadgeClass() }}">
-                                    {{ $match->match_status }}
-                                </span>
-                                @if($match->hasClaim())
-                                    <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
-                                        Claimed
+                                <div class="flex flex-col space-y-1">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $match->getStatusBadgeClass() }}">
+                                        {{ $match->match_status }}
                                     </span>
-                                @endif
+                                    @if($match->hasClaim())
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                            Claimed
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $match->matcher->full_name ?? 'System' }}</div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-500">
-                                {{ $match->matched_at->format('d M Y H:i') }}
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-500">
+                                    {{ $match->matched_at->format('d M Y H:i') }}
+                                </div>
+                                @if($match->trashed())
+                                    <div class="text-xs text-red-600 mt-1">
+                                        Rejected: {{ $match->deleted_at->format('d M Y H:i') }}
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-right text-sm font-medium">
                                 <div class="flex items-center justify-end space-x-2">
+                                    <!-- View Button - Selalu Ada -->
                                     <button 
                                         wire:click="viewMatch('{{ $match->match_id }}')"
                                         class="text-blue-600 hover:text-blue-900"
@@ -220,73 +248,86 @@
                                         </svg>
                                     </button>
 
-                                    @if($match->isPending())
-                                        <!-- Confirm Button - Disable jika found report belum punya item -->
-                                        @if($match->foundReport->item_id)
+                                    @if($match->trashed())
+                                        <!-- Rejected Match - Hanya Delete Permanent -->
+                                        <button 
+                                            wire:click="deleteMatch('{{ $match->match_id }}')"
+                                            wire:confirm="Permanently delete this rejected match? This action cannot be undone!"
+                                            class="text-red-600 hover:text-red-900"
+                                            title="Delete Permanently">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    @else
+                                        <!-- Active Match Actions -->
+                                        @if($match->isPending())
+                                            @if($match->foundReport->item_id)
+                                                <button 
+                                                    wire:click="confirmMatch('{{ $match->match_id }}')"
+                                                    wire:confirm="Confirm this match?"
+                                                    class="text-green-600 hover:text-green-900"
+                                                    title="Confirm Match">
+                                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                </button>
+                                            @else
+                                                <button 
+                                                    disabled
+                                                    class="text-gray-400 cursor-not-allowed"
+                                                    title="Found report must have item first">
+                                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                </button>
+                                            @endif
+
                                             <button 
-                                                wire:click="confirmMatch('{{ $match->match_id }}')"
-                                                wire:confirm="Confirm this match?"
-                                                class="text-green-600 hover:text-green-900"
-                                                title="Confirm Match">
+                                                wire:click="rejectMatch('{{ $match->match_id }}')"
+                                                wire:confirm="Reject this match? Reports will be available for new matching."
+                                                class="text-red-600 hover:text-red-900"
+                                                title="Reject Match">
                                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                                </svg>
-                                            </button>
-                                        @else
-                                            <button 
-                                                disabled
-                                                class="text-gray-400 cursor-not-allowed"
-                                                title="Found report must have item first">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                 </svg>
                                             </button>
                                         @endif
 
-                                        <button 
-                                            wire:click="rejectMatch('{{ $match->match_id }}')"
-                                            wire:confirm="Reject this match?"
-                                            class="text-red-600 hover:text-red-900"
-                                            title="Reject Match">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                            </svg>
-                                        </button>
-                                    @endif
+                                        @if($match->isConfirmed() && !$match->hasClaim())
+                                            <button 
+                                                wire:click="processClaim('{{ $match->match_id }}')"
+                                                class="text-purple-600 hover:text-purple-900"
+                                                title="Process Claim">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                            </button>
+                                        @endif
 
-                                    @if($match->isConfirmed() && !$match->hasClaim())
-                                        <!-- Process Claim Button -->
-                                        <button 
-                                            wire:click="processClaim('{{ $match->match_id }}')"
-                                            class="text-purple-600 hover:text-purple-900"
-                                            title="Process Claim">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                        </button>
-                                    @endif
+                                        @if($match->hasClaim())
+                                            <button 
+                                                wire:click="viewClaim('{{ $match->match_id }}')"
+                                                class="text-indigo-600 hover:text-indigo-900"
+                                                title="View Claim">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </button>
+                                        @endif
 
-                                    @if($match->hasClaim())
-                                        <!-- View Claim Button -->
-                                        <button 
-                                            wire:click="viewClaim('{{ $match->match_id }}')"
-                                            class="text-indigo-600 hover:text-indigo-900"
-                                            title="View Claim">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </button>
+                                        @if(!$match->hasClaim())
+                                            <button 
+                                                wire:click="deleteMatch('{{ $match->match_id }}')"
+                                                wire:confirm="Permanently delete this match? This action cannot be undone!"
+                                                class="text-gray-600 hover:text-gray-900"
+                                                title="Delete Match">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        @endif
                                     @endif
-
-                                    <button 
-                                        wire:click="deleteMatch('{{ $match->match_id }}')"
-                                        wire:confirm="Delete this match?"
-                                        class="text-gray-600 hover:text-gray-900"
-                                        title="Delete Match">
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -310,55 +351,40 @@
         </div>
     </div>
 
-    <!-- Create Modal -->
+    <!-- Modals -->
     @if($showCreateModal)
         <div class="fixed inset-0 z-50 overflow-y-auto">
-            <!-- Backdrop transparan dengan blur -->
             <div class="fixed inset-0 backdrop-blur-sm z-40"></div>
-
-            <!-- Modal Container -->
             <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
                 <livewire:admin.matches.match-create :key="'create-'.now()" />
             </div>
         </div>
     @endif
 
-    <!-- Detail Modal -->
     @if($selectedMatchId)
         <div class="fixed inset-0 z-50 overflow-y-auto">
-            <!-- Backdrop transparan dengan blur -->
             <div class="fixed inset-0 backdrop-blur-sm z-40"></div>
-            
-            <!-- Modal Container -->
             <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
                 <livewire:admin.matches.match-detail :matchId="$selectedMatchId" :key="'detail-'.$selectedMatchId" />
             </div>
         </div>
     @endif
 
-    <!-- Claim Processing Modal -->
-@if($showClaimModal && $selectedMatchForClaim)
-    <div class="fixed inset-0 z-50 overflow-y-auto">
-        <!-- Backdrop transparan dengan blur -->
-        <div class="fixed inset-0 backdrop-blur-sm z-40"></div>
-        
-        <!-- Modal Container -->
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <livewire:admin.matches.process-claim :matchId="$selectedMatchForClaim" :key="'claim-'.$selectedMatchForClaim" />
+    @if($showClaimModal && $selectedMatchForClaim)
+        <div class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="fixed inset-0 backdrop-blur-sm z-40"></div>
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <livewire:admin.matches.process-claim :matchId="$selectedMatchForClaim" :key="'claim-'.$selectedMatchForClaim" />
+            </div>
         </div>
-    </div>
-@endif
+    @endif
 
-<!-- Claim Detail Modal -->
-@if($showClaimDetailModal && $selectedClaimId)
-    <div class="fixed inset-0 z-50 overflow-y-auto">
-        <!-- Backdrop transparan dengan blur -->
-        <div class="fixed inset-0 backdrop-blur-sm z-40"></div>
-        
-        <!-- Modal Container -->
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <livewire:admin.matches.claim-detail :claimId="$selectedClaimId" :key="'claim-detail-'.$selectedClaimId" />
+    @if($showClaimDetailModal && $selectedClaimId)
+        <div class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="fixed inset-0 backdrop-blur-sm z-40"></div>
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <livewire:admin.matches.claim-detail :claimId="$selectedClaimId" :key="'claim-detail-'.$selectedClaimId" />
+            </div>
         </div>
-    </div>
-@endif
+    @endif
 </div>
