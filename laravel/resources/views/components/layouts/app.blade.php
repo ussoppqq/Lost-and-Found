@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ open: false }" class="scroll-smooth">
-
+<html lang="en" class="scroll-smooth" x-data="{ open:false }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,21 +16,25 @@
             font-family: 'DM Serif Display', serif; font-weight: 700;
         }
         .font-openSans { font-family: 'Open Sans', sans-serif; }
-
-        /* Biar anchor target gak ketutup navbar fixed */
+        /* Anchor targets not hidden behind fixed navbar */
         section[id], div[id] { scroll-margin-top: 6rem; }
         @media (min-width: 1024px) { section[id], div[id] { scroll-margin-top: 7rem; } }
     </style>
 
+    {{-- App assets --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @livewireStyles
-</head>
 
+    {{-- Livewire styles --}}
+    @livewireStyles
+
+    {{-- Per-page/component pushed styles (Tom Select, etc.) --}}
+    @stack('styles')
+</head>
 <body class="bg-gray-50 text-gray-900">
 
     {{-- NAVBAR with scroll effect --}}
-    <nav 
-        x-data="{ scrolled: false }" 
+    <nav
+        x-data="{ scrolled:false }"
         x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > window.innerHeight * 0.7 })"
         :class="scrolled ? 'bg-white shadow-lg' : 'bg-transparent'"
         class="fixed top-0 inset-x-0 z-50 transition-all duration-300"
@@ -45,11 +48,9 @@
                      x-show="scrolled" class="h-10 md:h-12 lg:h-14 w-auto transition-opacity duration-300">
             </a>
 
-            {{-- Menu Desktop --}}
+            {{-- Desktop menu --}}
             <div class="hidden md:flex items-center space-x-6 lg:space-x-8">
-                {{-- Ganti ke anchor di halaman yang sama --}}
                 <a href="{{ url('/#lostandfound') }}"
-
                    :class="scrolled ? 'text-gray-700 hover:text-green-700' : 'text-white hover:text-green-200 drop-shadow'"
                    class="font-medium text-sm lg:text-base transition-colors duration-300">
                     Lost &amp; Found
@@ -63,7 +64,7 @@
 
                 @auth
                     {{-- Avatar Dropdown --}}
-                    <div class="relative" x-data="{ dropdown: false }">
+                    <div class="relative" x-data="{ dropdown:false }">
                         <button @click="dropdown = !dropdown" class="flex items-center focus:outline-none">
                             <img src="{{ asset('images/avatar.png') }}" alt="Avatar"
                                  class="h-9 w-9 lg:h-10 lg:w-10 rounded-full border-2 border-white shadow-lg">
@@ -86,9 +87,9 @@
                 @endauth
             </div>
 
-            {{-- Hamburger Mobile --}}
+            {{-- Hamburger (mobile) --}}
             <div class="md:hidden">
-                <button @click="open = true" 
+                <button @click="open = true"
                         :class="scrolled ? 'text-gray-700' : 'text-white drop-shadow'"
                         class="focus:outline-none transition-colors duration-300">
                     <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,7 +113,6 @@
                     </button>
                 </div>
                 <div class="space-y-4">
-                    {{-- Ganti ke anchor & auto-tutup menu saat klik --}}
                     <a href="#lostandfound" @click="open = false" class="block py-3 text-gray-700 hover:text-green-700 font-medium border-b border-gray-100">Lost &amp; Found</a>
                     <a href="{{ url('/map') }}" class="block py-3 text-gray-700 hover:text-green-700 font-medium border-b border-gray-100">Map</a>
 
@@ -131,29 +131,25 @@
         </div>
     </nav>
 
-
-    {{-- CONTENT --}}
-    <main>
+    {{-- CONTENT (add top padding to avoid navbar overlap) --}}
+    <main class="pt-20 lg:pt-24">
         {{ $slot }}
     </main>
 
-    {{-- ===== MASCOTS BAR just above footer ===== --}}
+    {{-- Mascots bar --}}
     <div class="bg-white">
         <div class="container mx-auto">
             <div class="flex justify-between items-end px-6 md:px-12 py-2">
-                {{-- Left mascots --}}
                 <img src="{{ asset('storage/images/krb3.png') }}" alt="Mascots Left"
                      class="h-24 md:h-32 lg:h-36 object-contain select-none pointer-events-none">
-                {{-- Right mascots --}}
                 <img src="{{ asset('storage/images/krb2.png') }}" alt="Mascots Right"
                      class="h-24 md:h-32 lg:h-36 object-contain select-none pointer-events-none">
             </div>
         </div>
     </div>
-    {{-- ===== END MASCOTS BAR ===== --}}
 
-    {{-- NEW FOOTER DESIGN --}}
-    <footer class="bg-gray-50 border-t border-gray-200">
+    {{-- Footer --}}
+    <footer class="bg-gray-50 border-t border-gray-200 mt-16">
         <div class="container mx-auto px-4 md:px-8 py-12 lg:py-16">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
                 {{-- Logo & Description --}}
@@ -223,19 +219,20 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-    {{-- FOOTER --}}
-    <footer class="bg-gray-50 border-t border-gray-200 mt-16">
-        <div class="container mx-auto px-4 md:px-8 py-12 lg:py-16 text-center">
-            <p class="text-gray-500 text-sm">
-                © 2025 Lost & Found. All rights reserved.
-            </p>
+            <div class="text-center mt-12">
+                <p class="text-gray-500 text-sm">© 2025 Lost &amp; Found. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
-    {{-- Scripts --}}
+    {{-- Alpine (you use x-data/x-init) --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    {{-- Livewire scripts --}}
     @livewireScripts
 
+    {{-- Per-page/component pushed scripts (Tom Select init, etc.) --}}
+    @stack('scripts')
 </body>
 </html>
