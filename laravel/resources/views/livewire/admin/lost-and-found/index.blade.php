@@ -133,8 +133,9 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <!-- KOLOM ID -->
-                        <th wire:click="sortBy('report_number')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                        <!-- ID Column -->
+                        <th wire:click="sortBy('report_number')" 
+                            class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 w-20">
                             <div class="flex items-center space-x-1">
                                 <span>ID</span>
                                 @if($sortBy === 'report_number')
@@ -150,7 +151,10 @@
                                 @endif
                             </div>
                         </th>
-                        <th wire:click="sortBy('item_name')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+
+                        <!-- Report Column -->
+                        <th wire:click="sortBy('item_name')" 
+                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                             <div class="flex items-center space-x-1">
                                 <span>Report</span>
                                 @if($sortBy === 'item_name')
@@ -166,19 +170,30 @@
                                 @endif
                             </div>
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+
+                        <!-- Type -->
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                             Type
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+
+                        <!-- Status -->
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                             Status
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+
+                        <!-- Item Status -->
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                             Item Status
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+
+                        <!-- Location -->
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Location
                         </th>
-                        <th wire:click="sortBy('report_datetime')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+
+                        <!-- Date -->
+                        <th wire:click="sortBy('report_datetime')" 
+                            class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 w-28">
                             <div class="flex items-center space-x-1">
                                 <span>Date</span>
                                 @if($sortBy === 'report_datetime')
@@ -194,10 +209,14 @@
                                 @endif
                             </div>
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+
+                        <!-- Reporter -->
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Reporter
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+
+                        <!-- Actions -->
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                             Actions
                         </th>
                     </tr>
@@ -205,30 +224,38 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($reports as $report)
                     <tr class="hover:bg-gray-50">
-                        <!-- CELL ID -->
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800">
+                        <!-- ID Cell -->
+                        <td class="px-3 py-4">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-800">
                                 {{ $report->formatted_report_number }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900">
+
+                        <!-- Report Cell -->
+                        <td class="px-4 py-4 max-w-xs">
+                            <div class="flex items-start">
+                                <div class="min-w-0">
+                                    <div class="text-sm font-medium text-gray-900 truncate">
                                         {{ $report->item_name ?? $report->item->item_name ?? 'Unnamed Item' }}
                                     </div>
-                                    <div class="text-sm text-gray-500">{{ Str::limit($report->report_description, 40) }}</div>
+                                    <div class="text-xs text-gray-500 line-clamp-2">
+                                        {{ Str::limit($report->report_description, 50) }}
+                                    </div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $report->report_type === 'LOST' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
+
+                        <!-- Type Cell -->
+                        <td class="px-3 py-4">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $report->report_type === 'LOST' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
                                 {{ $report->report_type }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+
+                        <!-- Status Cell -->
+                        <td class="px-3 py-4">
                             <select wire:change="updateReportStatus('{{ $report->report_id }}', $event.target.value)" 
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1
+                                    class="text-xs px-2 py-1 rounded-full font-medium border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1
                                     @switch($report->report_status)
                                         @case('OPEN') bg-yellow-100 text-yellow-800 focus:ring-yellow-500 @break
                                         @case('STORED') bg-blue-100 text-blue-800 focus:ring-blue-500 @break
@@ -242,9 +269,11 @@
                                 <option value="CLOSED" {{ $report->report_status === 'CLOSED' ? 'selected' : '' }}>Closed</option>
                             </select>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+
+                        <!-- Item Status Cell -->
+                        <td class="px-3 py-4">
                             @if($report->item)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
                                     @switch($report->item->item_status)
                                         @case('REGISTERED') bg-indigo-100 text-indigo-800 @break
                                         @case('STORED') bg-blue-100 text-blue-800 @break
@@ -259,45 +288,59 @@
                                 <span class="text-gray-400 text-xs">No Item</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $report->report_location }}
+
+                        <!-- Location Cell -->
+                        <td class="px-4 py-4">
+                            <div class="text-sm text-gray-900 truncate max-w-xs">
+                                {{ $report->report_location }}
+                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ \Carbon\Carbon::parse($report->report_datetime)->format('Y-m-d') }}
+
+                        <!-- Date Cell -->
+                        <td class="px-3 py-4 text-xs text-gray-900">
+                            {{ \Carbon\Carbon::parse($report->report_datetime)->format('d M Y') }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
+
+                        <!-- Reporter Cell -->
+                        <td class="px-4 py-4">
+                            <div class="flex items-center min-w-0">
                                 @if($report->user)
-                                    <img class="w-8 h-8 rounded-full mr-3" 
-                                         src="https://ui-avatars.com/api/?name={{ urlencode($report->user->full_name) }}&background=1f2937&color=fff" 
-                                         alt="">
-                                    <div class="text-sm font-medium text-gray-900">{{ $report->user->full_name }}</div>
+                                    <img class="w-8 h-8 rounded-full mr-2 flex-shrink-0" 
+                                        src="https://ui-avatars.com/api/?name={{ urlencode($report->user->full_name) }}&background=1f2937&color=fff" 
+                                        alt="">
+                                    <div class="text-sm font-medium text-gray-900 truncate">
+                                        {{ $report->user->full_name }}
+                                    </div>
                                 @else
-                                    <div class="flex items-center">
-                                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                    <div class="flex items-center min-w-0">
+                                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-2 flex-shrink-0">
                                             <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                             </svg>
                                         </div>
-                                        <div>
-                                            <div class="text-sm font-medium text-gray-900">{{ $report->reporter_name ?? 'Walk-in' }}</div>
-                                            <div class="text-xs text-gray-500">{{ $report->reporter_phone ?? '-' }}</div>
+                                        <div class="min-w-0">
+                                            <div class="text-sm font-medium text-gray-900 truncate">
+                                                {{ $report->reporter_name ?? 'Walk-in' }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 truncate">
+                                                {{ $report->reporter_phone ?? '-' }}
+                                            </div>
                                         </div>
                                     </div>
                                 @endif
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex items-center space-x-2">
+
+                        <!-- Actions Cell -->
+                        <td class="px-3 py-4">
+                            <div class="flex items-center space-x-1">
                                 @if($report->report_status === 'CLOSED' || $report->report_status === 'MATCHED')
-                                    <!-- Ceklis jika sudah claimed/matched -->
                                     <button class="text-green-600" title="Completed" disabled>
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
                                     </button>
                                 @elseif(!$report->item_id && $report->report_type === 'FOUND')
-                                    <!-- NEW: Tombol Confirm Item untuk FOUND report tanpa item -->
                                     <button wire:click="confirmItem('{{ $report->report_id }}')" 
                                             class="text-purple-600 hover:text-purple-900 transition-colors"
                                             title="Confirm Item">
@@ -306,7 +349,6 @@
                                         </svg>
                                     </button>
                                     
-                                    <!-- Tombol View Detail -->
                                     <button wire:click="viewReportDetail('{{ $report->report_id }}')" 
                                             class="text-blue-600 hover:text-blue-900 transition-colors"
                                             title="View Detail">
@@ -316,7 +358,6 @@
                                         </svg>
                                     </button>
                                 @elseif(!$report->item_id)
-                                    <!-- Tombol View Detail jika belum ada item (LOST report) -->
                                     <button wire:click="viewReportDetail('{{ $report->report_id }}')" 
                                             class="text-blue-600 hover:text-blue-900 transition-colors"
                                             title="View Detail">
@@ -326,7 +367,6 @@
                                         </svg>
                                     </button>
                                 @else
-                                    <!-- Tombol View Detail -->
                                     <button wire:click="viewReportDetail('{{ $report->report_id }}')" 
                                             class="text-blue-600 hover:text-blue-900 transition-colors"
                                             title="View Detail">
@@ -336,7 +376,6 @@
                                         </svg>
                                     </button>
 
-                                    <!-- Tombol Edit Item (jika sudah ada item) -->
                                     <button wire:click="openEditItemModal('{{ $report->item_id }}')" 
                                             class="text-indigo-600 hover:text-indigo-900 transition-colors"
                                             title="Edit Item">
@@ -346,7 +385,6 @@
                                     </button>
                                 @endif
                                 
-                                <!-- Delete button -->
                                 @if($report->report_status !== 'CLOSED' && $report->report_status !== 'MATCHED')
                                 <button wire:click="deleteReport('{{ $report->report_id }}')" 
                                         class="text-red-600 hover:text-red-900 transition-colors"
