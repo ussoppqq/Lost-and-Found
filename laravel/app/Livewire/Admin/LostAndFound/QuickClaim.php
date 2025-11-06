@@ -173,9 +173,9 @@ class QuickClaim extends Component
 
     public function closeModal()
     {
-        $this->dispatch('close-claim-modal');
+        $this->dispatch('claim-modal-closed');
         
-        Log::info('QuickClaim modal closed');
+        Log::info('QuickClaim modal close event dispatched');
     }
 
     public function render()
