@@ -12,125 +12,144 @@ class MatchCreate extends Component
     public $lostReportId = '';
     public $foundReportId = '';
     public $matchNotes = '';
-
-    // Queries for search bars
-    public $lostQuery = '';
-    public $foundQuery = '';
+    
+    public $lostReports = [];
+    public $foundReports = [];
+    
+    public $lostSearch = '';
+    public $foundSearch = '';
 
     protected $rules = [
-        'lostReportId'  => 'required|exists:reports,report_id',
+        'lostReportId' => 'required|exists:reports,report_id',
         'foundReportId' => 'required|exists:reports,report_id|different:lostReportId',
-        'matchNotes'    => 'nullable|string|max:1000',
+        'matchNotes' => 'nullable|string|max:1000',
     ];
 
     protected $messages = [
-        'lostReportId.required'   => 'Please select a lost item report',
-        'foundReportId.required'  => 'Please select a found item report',
+        'lostReportId.required' => 'Please select a lost item report',
+        'foundReportId.required' => 'Please select a found item report',
         'foundReportId.different' => 'Lost and Found reports must be different',
     ];
 
+    #[\Livewire\Attributes\On('updated.lostSearch')]
+    public function updatedLostSearch()
+    {
+        $this->filterLostReports();
+    }
+
+    #[\Livewire\Attributes\On('updated.foundSearch')]
+    public function updatedFoundSearch()
+    {
+        $this->filterFoundReports();
+    }
+
+    public function updatedLostReportId()
+    {
+        // Reset search saat item dipilih
+        $this->lostSearch = '';
+        $this->loadReports();
+    }
+
+    public function updatedFoundReportId()
+    {
+        // Reset search saat item dipilih
+        $this->foundSearch = '';
+        $this->loadReports();
+    }
+
     public function mount()
     {
-        // no-op: lists are computed on the fly via getters below
+        $this->loadReports();
     }
 
-    /** --------- Computed options (filtered) ---------- */
-    public function getLostOptionsProperty()
+    public function loadReports()
     {
-        $q = trim($this->lostQuery);
+        // Load LOST reports
+        $this->lostReports = $this->getLostReportsQuery()->get();
+        // Load FOUND reports
+        $this->foundReports = $this->getFoundReportsQuery()->get();
+    }
 
-        $query = Report::with('category')
+    public function filterLostReports()
+    {
+        $this->lostReports = $this->getLostReportsQuery()
+            ->where(function($query) {
+                $query->where('report_number', 'like', '%' . $this->lostSearch . '%')
+                      ->orWhere('item_name', 'like', '%' . $this->lostSearch . '%');
+            })
+            ->get();
+    }
+
+    public function filterFoundReports()
+    {
+        $this->foundReports = $this->getFoundReportsQuery()
+            ->where(function($query) {
+                $query->where('report_number', 'like', '%' . $this->foundSearch . '%')
+                      ->orWhere('item_name', 'like', '%' . $this->foundSearch . '%');
+            })
+            ->get();
+    }
+
+    private function getLostReportsQuery()
+    {
+        return Report::with('category')
             ->where('report_type', 'LOST')
             ->whereIn('report_status', ['OPEN', 'STORED'])
-            ->whereDoesntHave('matchesAsLost', function ($query) {
+            ->whereDoesntHave('matchesAsLost', function($query) {
                 $query->where('match_status', 'CONFIRMED');
-            });
-
-        if ($q !== '') {
-            $query->where(function ($sub) use ($q) {
-                $like = '%' . $q . '%';
-                $sub->where('report_id', 'like', $like)
-                    ->orWhere('report_number', 'like', $like)
-                    ->orWhere('item_name', 'like', $like)
-                    ->orWhere('report_location', 'like', $like)
-                    // cari tanggal human readable, mis: 12 Nov 2025
-                    ->orWhereRaw("DATE_FORMAT(report_datetime, '%d %b %Y %H:%i') like ?", [$like])
-                    ->orWhereRaw("DATE_FORMAT(report_datetime, '%d %b %Y') like ?", [$like]);
-            });
-        }
-
-        return $query->orderBy('report_number', 'desc')->limit(20)->get();
+            })
+            ->orderBy('report_number', 'desc');
     }
 
-    public function getFoundOptionsProperty()
+    private function getFoundReportsQuery()
     {
-        $q = trim($this->foundQuery);
-
-        $query = Report::with('category')
+        return Report::with('category')
             ->where('report_type', 'FOUND')
             ->whereIn('report_status', ['OPEN', 'STORED'])
-            ->whereDoesntHave('matchesAsFound', function ($query) {
+            ->whereDoesntHave('matchesAsFound', function($query) {
                 $query->where('match_status', 'CONFIRMED');
-            });
-
-        if ($q !== '') {
-            $query->where(function ($sub) use ($q) {
-                $like = '%' . $q . '%';
-                $sub->where('report_id', 'like', $like)
-                    ->orWhere('report_number', 'like', $like)
-                    ->orWhere('item_name', 'like', $like)
-                    ->orWhere('report_location', 'like', $like)
-                    ->orWhereRaw("DATE_FORMAT(report_datetime, '%d %b %Y %H:%i') like ?", [$like])
-                    ->orWhereRaw("DATE_FORMAT(report_datetime, '%d %b %Y') like ?", [$like]);
-            });
-        }
-
-        return $query->orderBy('report_number', 'desc')->limit(20)->get();
-    }
-
-    /** --------- Select handlers from dropdown ---------- */
-    public function selectLost(string $reportId)
-    {
-        $this->lostReportId = $reportId;
-    }
-
-    public function selectFound(string $reportId)
-    {
-        $this->foundReportId = $reportId;
+            })
+            ->orderBy('report_number', 'desc');
     }
 
     public function createMatch()
     {
         $this->validate();
 
-        // prevent duplicate
-        $exists = MatchedItem::where('lost_report_id', $this->lostReportId)
-            ->where('found_report_id', $this->foundReportId)
-            ->exists();
+        try {
+            // Check if match already exists
+            $existingMatch = MatchedItem::where('lost_report_id', $this->lostReportId)
+                ->where('found_report_id', $this->foundReportId)
+                ->first();
 
-        if ($exists) {
-            $this->addError('foundReportId', 'A match between these reports already exists!');
-            return;
+            if ($existingMatch) {
+                $this->addError('foundReportId', 'A match between these reports already exists!');
+                return;
+            }
+
+            MatchedItem::create([
+                'match_id' => Str::uuid(),
+                'lost_report_id' => $this->lostReportId,
+                'found_report_id' => $this->foundReportId,
+                'match_status' => 'PENDING',
+                'confidence_score' => null,
+                'match_notes' => $this->matchNotes,
+                'matched_by' => auth()->id(),
+                'matched_at' => now(),
+            ]);
+
+            session()->flash('success', 'Match created successfully!');
+            
+            // Dispatch event to parent to close modal and refresh
+            $this->dispatch('match-created');
+            
+            // Reset form
+            $this->reset(['lostReportId', 'foundReportId', 'matchNotes', 'lostSearch', 'foundSearch']);
+            $this->loadReports();
+            
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to create match: ' . $e->getMessage());
         }
-
-        MatchedItem::create([
-            'match_id'        => Str::uuid(),
-            'lost_report_id'  => $this->lostReportId,
-            'found_report_id' => $this->foundReportId,
-            'match_status'    => 'PENDING',
-            'confidence_score'=> null,
-            'match_notes'     => $this->matchNotes,
-            'matched_by'      => auth()->id(),
-            'matched_at'      => now(),
-        ]);
-
-        session()->flash('success', 'Match created successfully!');
-
-        // reset form
-        $this->reset(['lostReportId', 'foundReportId', 'matchNotes', 'lostQuery', 'foundQuery']);
-
-        // notify parent if needed
-        $this->dispatch('match-created');
     }
 
     public function render()
