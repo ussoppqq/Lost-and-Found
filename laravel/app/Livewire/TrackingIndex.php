@@ -125,6 +125,6 @@ class TrackingIndex extends Component
     public function render()
     {
         return view('livewire.tracking-index')
-            ->layout('components.layouts.app');
+            ->layout('components.layouts.user');
     }
 }
