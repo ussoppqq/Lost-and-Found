@@ -42,9 +42,9 @@
                    class="font-medium text-sm lg:text-base text-gray-700 hover:text-gray-900 transition-colors duration-300">
                     Lost & Found
                 </a>
-                <a href="{{ url('/map') }}"
+                <a href="{{ url('/tracking') }}"
                    class="font-medium text-sm lg:text-base text-gray-700 hover:text-gray-900 transition-colors duration-300">
-                    Map
+                    Tracking
                 </a>
 
                 @auth
