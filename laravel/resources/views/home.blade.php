@@ -33,7 +33,7 @@
                     id="heroSearch"
                     type="text" 
                     name="q" 
-                    placeholder="Search items… or paste Tracking ID"
+                    placeholder="Search tracking ID"
                     class="font-openSans flex-1 pl-12 lg:pl-16 pr-24 lg:pr-32 h-full bg-transparent text-gray-700 placeholder:text-gray-400 
                            placeholder:font-openSans text-sm lg:text-base outline-none rounded-full transition-all duration-300
                            focus:placeholder:text-gray-300" 
