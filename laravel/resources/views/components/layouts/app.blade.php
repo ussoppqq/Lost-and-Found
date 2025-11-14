@@ -256,11 +256,11 @@
                 </a>
             </div>
 
-            <!-- Description -->
+            <!-- Description 
             <p class="text-gray-700 leading-relaxed text-sm lg:text-base max-w-2xl">
                 Kebun Raya Bogor didirikan pada tahun 1817 oleh pemerintah Hindia Belanda dan menjadi pusat penelitian utama pertanian serta hortikultura di Asia Tenggara.
                 Awalnya sebagai kebun percobaan, tempat ini kemudian berkembang menjadi pusat ilmu pengetahuan dan melahirkan berbagai institusi botani penting di Indonesia.
-            </p>
+            </p> -->
 
             <!-- Social Media Icons -->
             <div class="flex space-x-3 justify-center">
