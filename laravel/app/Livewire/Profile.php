@@ -2,10 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Models\Report;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 class Profile extends Component
 {
@@ -14,6 +16,10 @@ class Profile extends Component
     public $full_name, $nickname, $phone_number, $company_name, $email;
     public $avatar, $newAvatar;
     public $editMode = false;
+    public $currentTab = 'profile'; // profile or reports
+
+    // Password change properties
+    public $current_password, $new_password, $new_password_confirmation;
 
     public function mount()
     {
@@ -25,6 +31,11 @@ class Profile extends Component
         $this->company_name = $user->company->company_name ?? '';
         $this->email        = $user->email;
         $this->avatar       = $user->avatar; // path avatar
+    }
+
+    public function switchTab($tab)
+    {
+        $this->currentTab = $tab;
     }
 
     public function update()
@@ -60,15 +71,46 @@ class Profile extends Component
 
         session()->flash('success', 'Profile updated successfully!');
     }
-public function cancelEdit()
-{
-    $this->editMode = false;
-    $this->newAvatar = null;
-    $this->mount(); // reload data
-}
+    public function cancelEdit()
+    {
+        $this->editMode = false;
+        $this->newAvatar = null;
+        $this->mount(); // reload data
+    }
+
+    public function changePassword()
+    {
+        $this->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($this->current_password, $user->password)) {
+            $this->addError('current_password', 'Current password is incorrect');
+            return;
+        }
+
+        $user->password = Hash::make($this->new_password);
+        $user->save();
+
+        $this->current_password = '';
+        $this->new_password = '';
+        $this->new_password_confirmation = '';
+
+        session()->flash('success', 'Password changed successfully!');
+    }
+
     public function render()
     {
-        return view('livewire.profile')
-            ->layout('components.layouts.auth');
+        $reports = Report::with(['item.photos', 'item.category', 'category'])
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('livewire.profile', [
+            'reports' => $reports,
+        ])->layout('components.layouts.profiledashboard');
     }
 }

@@ -1,5 +1,5 @@
 {{-- resources/views/livewire/tracking-detail.blade.php --}}
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4 print:bg-white">
+<div class="min-h-screen bg-white py-12 px-4 print:bg-white">
     {{-- ==== PRINT CSS ==== --}}
     @once
     @push('styles')
@@ -23,9 +23,9 @@
 
     <div class="max-w-6xl mx-auto print:max-w-none" id="print-area">
         <!-- Back Button (no-print) -->
-        <button 
-            onclick="history.back()" 
-            class="no-print inline-flex items-center text-blue-600 hover:text-blue-700 mb-6 transition-colors"
+        <button
+            onclick="history.back()"
+            class="no-print inline-flex items-center text-gray-800 hover:text-gray-900 mb-6 transition-colors font-semibold"
         >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -341,29 +341,6 @@
                     </div>
                 </div>
 
-                <!-- Company Info -->
-                @if($this->report->company)
-                <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white avoid-break">
-                    <h3 class="text-lg font-bold mb-4">Institusi</h3>
-                    
-                    <div class="space-y-3">
-                        <div>
-                            <div class="text-xs text-blue-100 mb-1">Nama</div>
-                            <div class="text-sm font-semibold">
-                                {{ $this->report->company->company_name }}
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="text-xs text-blue-100 mb-1">Alamat</div>
-                            <div class="text-sm">
-                                {{ $this->report->company->company_address }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
                 <!-- Action Buttons (no-print) -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 no-print">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">Bantuan</h3>
@@ -378,8 +355,8 @@
                         </a>
 
                         @if($this->report->reporter_email || ($this->report->user && $this->report->user->email))
-                        <a href="mailto:{{ $this->report->user->email ?? $this->report->reporter_email }}" 
-                           class="flex items-center justify-center w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <a href="mailto:{{ $this->report->user->email ?? $this->report->reporter_email }}"
+                           class="flex items-center justify-center w-full px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 active:scale-[0.98] transition-all">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
@@ -387,18 +364,9 @@
                         </a>
                         @endif
 
-                        {{-- Tombol CETAK (print CSS) --}}
-                        <button onclick="window.print()" 
-                                class="flex items-center justify-center w-full px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                            Cetak Detail (PDF)
-                        </button>
-
                         {{-- Tombol UNDUH PDF (server-side Dompdf) --}}
                         <a href="{{ route('reports.pdf', $this->report) }}" target="_blank"
-                           class="flex items-center justify-center w-full px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                           class="flex items-center justify-center w-full px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 active:scale-[0.98] transition-all">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12v9m0 0l-3-3m3 3l3-3M12 3v9" />
                             </svg>

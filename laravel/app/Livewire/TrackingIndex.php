@@ -12,9 +12,8 @@ class TrackingIndex extends Component
 {
     public $trackingType = 'report_id'; // 'report_id' atau 'phone'
     
-    #[Validate('required_if:trackingType,report_id|string|size:36', message: [
-        'required_if' => 'Report ID wajib diisi',
-        'size' => 'Format Report ID tidak valid'
+    #[Validate('required_if:trackingType,report_id|string', message: [
+        'required_if' => 'Report ID wajib diisi'
     ])]
     public $reportId = '';
 
@@ -33,23 +32,38 @@ class TrackingIndex extends Component
     {
         $this->trackingType = 'report_id';
         $this->validate([
-            'reportId' => 'required|string|size:36'
+            'reportId' => 'required|string'
         ], [
-            'reportId.required' => 'Report ID wajib diisi',
-            'reportId.size' => 'Format Report ID tidak valid (harus 36 karakter)'
+            'reportId.required' => 'Report ID wajib diisi'
         ]);
         
         $this->errorMessage = '';
         $this->showResults = false;
 
         try {
+            // Trim and clean the input
+            $searchId = trim($this->reportId);
+
+            // Try to find by full ID first
             $report = Report::with([
-                'item.photos', 
-                'item.category', 
-                'item.post', 
+                'item.photos',
+                'item.category',
+                'item.post',
                 'company',
                 'user'
-            ])->find($this->reportId);
+            ])->find($searchId);
+
+            // If not found, try to find by partial ID (first characters match)
+            if (!$report) {
+                $report = Report::with([
+                    'item.photos',
+                    'item.category',
+                    'item.post',
+                    'company',
+                    'user'
+                ])->where('report_id', 'LIKE', $searchId . '%')
+                  ->first();
+            }
 
             if (!$report) {
                 $this->errorMessage = 'Report ID tidak ditemukan. Pastikan Anda memasukkan ID yang benar dari PDF receipt.';

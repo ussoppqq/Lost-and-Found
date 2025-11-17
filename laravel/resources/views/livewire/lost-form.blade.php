@@ -71,25 +71,24 @@
                 <span class="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-2 py-1 rounded-lg whitespace-nowrap">Logged-in</span>
               </div>
               @else
-              <div class="flex gap-2">
+              {{-- <div class="flex gap-2"> --}}
                 <input id="phone_d" type="tel" inputmode="tel" autocomplete="tel" wire:model.live="phone" required
                   class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 placeholder:text-gray-400"
                   placeholder="Enter your phone number">
-                @if($needs_otp_verification && !$otp_verified)
+                {{-- @if($needs_otp_verification && !$otp_verified)
                 <button type="button" id="btnSendOtp" wire:click="sendOtpAutomatically"
                   class="px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-60 whitespace-nowrap">
                   Send OTP
                 </button>
                 @endif
-              </div>
+              </div> --}}
               @error('phone') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
               @endif
             </div>
 
             {{-- OTP (desktop) --}}
-            @if($needs_otp_verification && !$otp_verified)
+            {{-- @if($needs_otp_verification && !$otp_verified)
             <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-2xl p-5 mb-4 shadow-sm">
-              {{-- Header --}}
               <div class="flex items-start gap-3 mb-4">
                 <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +102,6 @@
                 </div>
               </div>
 
-              {{-- Flash Messages --}}
               @if(session('otp_success'))
               <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
                 <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -126,7 +124,6 @@
               </div>
               @endif
 
-              {{-- OTP Input --}}
               <div class="mb-4">
                 <label for="otp_code_d" class="block text-sm font-semibold text-gray-900 mb-2">
                   Verification Code <span class="text-red-500">*</span>
@@ -147,7 +144,6 @@
                 <p id="otpHelpD" class="sr-only">6 digit verification code</p>
               </div>
 
-              {{-- Action Buttons --}}
               <div class="flex gap-2">
                 <button type="button" wire:click="verifyOtpAndProceed"
                   class="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-md">
@@ -167,7 +163,6 @@
                 </button>
               </div>
 
-              {{-- Help Text --}}
               <div class="mt-4 p-3 bg-white/60 rounded-lg border border-blue-200">
                 <p class="text-xs text-gray-700 flex items-start gap-2">
                   <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
@@ -182,7 +177,7 @@
                 </p>
               </div>
             </div>
-            @endif
+            @endif --}}
 
             {{-- Name --}}
             <div class="mb-4">
@@ -393,25 +388,24 @@
                 <span class="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-2 py-1 rounded-lg whitespace-nowrap">Logged-in</span>
               </div>
               @else
-              <div class="flex gap-2">
+              {{-- <div class="flex gap-2"> --}}
                 <input id="phone_m" type="tel" inputmode="tel" autocomplete="tel" wire:model.live="phone" required
                   class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 placeholder:text-gray-400"
                   placeholder="Enter your phone number">
-                @if($needs_otp_verification && !$otp_verified)
+                {{-- @if($needs_otp_verification && !$otp_verified)
                 <button type="button" id="btnSendOtpMobile" wire:click="sendOtpAutomatically"
                   class="px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-60 whitespace-nowrap text-sm">
                   Send
                 </button>
                 @endif
-              </div>
+              </div> --}}
               @error('phone') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
               @endif
             </div>
 
             {{-- OTP (mobile) --}}
-            @if($needs_otp_verification && !$otp_verified)
+            {{-- @if($needs_otp_verification && !$otp_verified)
             <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-2xl p-4 mb-4 shadow-sm">
-              {{-- Header --}}
               <div class="flex items-start gap-3 mb-4">
                 <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,7 +419,6 @@
                 </div>
               </div>
 
-              {{-- Flash Messages --}}
               @if(session('otp_success'))
               <div class="mb-3 p-2.5 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
                 <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -448,7 +441,6 @@
               </div>
               @endif
 
-              {{-- OTP Input --}}
               <div class="mb-3">
                 <label for="otp_code_m" class="block text-sm font-semibold text-gray-900 mb-2">
                   Verification Code <span class="text-red-500">*</span>
@@ -469,7 +461,6 @@
                 <p id="otpHelpM" class="sr-only">6 digit verification code</p>
               </div>
 
-              {{-- Action Buttons --}}
               <div class="space-y-2 mb-3">
                 <button type="button" wire:click="verifyOtpAndProceed"
                   class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 active:scale-[0.98] transition-all shadow-md">
@@ -490,7 +481,6 @@
                 </button>
               </div>
 
-              {{-- Help Text --}}
               <div class="p-2.5 bg-white/60 rounded-lg border border-blue-200">
                 <p class="text-xs text-gray-700 flex items-start gap-2">
                   <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
@@ -504,7 +494,7 @@
                 </p>
               </div>
             </div>
-            @endif
+            @endif --}}
 
             {{-- Name --}}
             <div class="mb-4">
@@ -555,20 +545,21 @@
             {{-- Next (selalu tampil; disable jika OTP belum verified) --}}
             <div class="pt-4 space-y-2">
               <button type="button" wire:click="nextStep"
-                @if($needs_otp_verification && !$otp_verified) disabled aria-disabled="true" @else aria-disabled="false" @endif
+                {{-- @if($needs_otp_verification && !$otp_verified) disabled aria-disabled="true" @else aria-disabled="false" @endif --}}
                 class="w-full flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-semibold transition-all shadow-lg text-white
-                       {{ ($needs_otp_verification && !$otp_verified) ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800 hover:bg-gray-900 active:scale-[0.98]' }}">
+                       {{-- {{ ($needs_otp_verification && !$otp_verified) ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800 hover:bg-gray-900 active:scale-[0.98]' }} --}}
+                       bg-gray-800 hover:bg-gray-900 active:scale-[0.98]">
                 Next Step
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
 
-              @if($needs_otp_verification && !$otp_verified)
+              {{-- @if($needs_otp_verification && !$otp_verified)
               <p class="text-xs text-red-600 text-center">
                 Verify the OTP first before continuing.
               </p>
-              @endif
+              @endif --}}
             </div>
           </div>
         </div>

@@ -26,8 +26,10 @@ use App\Livewire\Admin\Statistic;
 
 use App\Livewire\FoundForm;
 use App\Livewire\LostForm;
+use App\Livewire\LostItems;
 use App\Livewire\TrackingIndex;
 use App\Livewire\TrackingDetail;
+use App\Livewire\PublicTrackingDetail;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +52,9 @@ Route::middleware('guest')->group(function () {
 Route::get('/found-form', FoundForm::class)->name('found-form');
 Route::get('/lost-form', LostForm::class)->name('lost-form');
 
+// Lost Items Browse
+Route::get('/lost-items', LostItems::class)->name('lost-items');
+
 // Tracking (Public)
 Route::prefix('tracking')->name('tracking.')->group(function () {
     Route::get('/', TrackingIndex::class)->name('index');
@@ -57,6 +62,11 @@ Route::prefix('tracking')->name('tracking.')->group(function () {
         ->where('reportId', '[0-9a-f\-]+')
         ->name('detail');
 });
+
+// Public Tracking (Limited Info for Security)
+Route::get('/public-tracking/{reportId}', PublicTrackingDetail::class)
+    ->where('reportId', '[0-9a-f\-]+')
+    ->name('public.tracking.detail');
 
 // Public PDF Routes
 Route::get('/reports/{report}/pdf', [ReportPdfController::class, 'download'])

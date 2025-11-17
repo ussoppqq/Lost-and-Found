@@ -43,6 +43,10 @@
                    class="font-medium text-sm lg:text-base text-gray-700 hover:text-gray-900 transition-colors duration-300">
                     Lost &amp; Found
                 </a>
+                <a href="{{ route('lost-items') }}"
+                   class="font-medium text-sm lg:text-base text-gray-700 hover:text-gray-900 transition-colors duration-300">
+                    Lost Items
+                </a>
                 <a href="{{ url('/tracking') }}"
                    class="font-medium text-sm lg:text-base text-gray-700 hover:text-gray-900 transition-colors duration-300">
                     Tracking
@@ -52,8 +56,20 @@
                     {{-- Avatar Dropdown --}}
                     <div class="relative" x-data="{ dropdown: false }">
                         <button @click="dropdown = !dropdown" class="flex items-center focus:outline-none">
-                            <img src="{{ asset('images/avatar.png') }}" alt="Avatar"
-                                 class="h-9 w-9 lg:h-10 lg:w-10 rounded-full border-2 border-gray-200 shadow-sm">
+                            @php
+                                $user = auth()->user();
+                                $initials = collect(explode(' ', $user->full_name ?? 'User'))
+                                    ->map(fn($word) => strtoupper(substr($word, 0, 1)))
+                                    ->join('');
+                            @endphp
+                            @if($user->avatar)
+                                <img src="{{ Storage::url($user->avatar) }}" alt="Avatar"
+                                     class="h-9 w-9 lg:h-10 lg:w-10 rounded-full border-2 border-gray-200 shadow-sm object-cover">
+                            @else
+                                <div class="h-9 w-9 lg:h-10 lg:w-10 rounded-full border-2 border-gray-200 shadow-sm bg-gray-200 flex items-center justify-center text-gray-800 font-bold text-xs lg:text-sm">
+                                    {{ $initials }}
+                                </div>
+                            @endif
                         </button>
                         <div x-show="dropdown" @click.away="dropdown = false" x-transition
                              class="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-xl py-2 border border-gray-100">
@@ -99,8 +115,9 @@
                     </button>
                 </div>
                 <div class="space-y-4">
-                    <a href="{{ route('lost-form') }}" class="block py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100">Lost &amp; Found</a>
-                    <a href="{{ url('/map') }}" class="block py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100">Map</a>
+                    <a href="{{ url('/') }}" @click="open = false" class="block py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100">Lost &amp; Found</a>
+                    <a href="{{ route('lost-items') }}" @click="open = false" class="block py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100">Lost Items</a>
+                    <a href="{{ url('/tracking') }}" @click="open = false" class="block py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100">Tracking</a>
 
                     @auth
                         <a href="{{ url('/profile') }}" class="block py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100">Profile</a>

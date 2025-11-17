@@ -15,21 +15,14 @@ class ReportPdfController extends Controller
      */
     public function download(Request $request, Report $report)
     {
+        $report->loadMissing(['item.photos', 'item.category', 'item.post', 'item.claims.user', 'category', 'user']);
 
-        $report->loadMissing(['item.photos', 'category', 'company', 'user']);
-
-        $reportType = ucfirst(strtolower($report->report_type ?? 'Report'));
-        $generatedAt = \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i');
-
-        $pdf = Pdf::loadView('pdf.report-receipt', [
+        $pdf = Pdf::loadView('pdf.report-detail', [
             'report' => $report,
-            'reportType' => $reportType,
-            'generatedAt' => $generatedAt,
         ])->setPaper('a4', 'portrait');
 
-        $filename = 'Report-'.strtolower($report->report_type).'-'.$report->report_id.'.pdf';
+        $filename = 'Report-Detail-'.strtoupper(substr($report->report_id, 0, 8)).'.pdf';
 
-      
         if ($request->query('download') === '1') {
             return $pdf->download($filename);
         }
