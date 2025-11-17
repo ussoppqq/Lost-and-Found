@@ -2,19 +2,14 @@
     {{-- ========== HERO SECTION ========== --}}
     <section class="relative w-full h-screen overflow-hidden">
         <div class="absolute inset-0">
-            <video 
-                src="{{ asset('storage/images/video.mp4') }}" 
-                autoplay 
-                muted 
-                loop 
-                playsinline
-                class="absolute top-0 left-0 w-full h-full object-cover"
-            ></video>
+            <video src="{{ asset('storage/images/video.mp4') }}" autoplay muted loop playsinline
+                class="absolute top-0 left-0 w-full h-full object-cover"></video>
             <div class="absolute inset-0 bg-black/30"></div>
         </div>
 
         {{-- ===== Search Overlay ===== --}}
-        <div class="absolute bottom-8 md:bottom-12 lg:bottom-16 left-1/2 -translate-x-1/2 w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl px-4 z-20">
+        <div
+            class="absolute bottom-8 md:bottom-12 lg:bottom-16 left-1/2 -translate-x-1/2 w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl px-4 z-20">
             <form id="heroForm" action="{{ url('/search') }}" method="GET"
                 class="relative flex items-center bg-white/95 backdrop-blur-sm rounded-full shadow-2xl overflow-hidden h-12 sm:h-14 md:h-16 lg:h-[65px] border border-white/20">
 
@@ -22,33 +17,24 @@
                 <div class="absolute left-4 lg:left-6 text-gray-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 lg:h-6 lg:w-6" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" 
-                              stroke-width="2" 
-                              d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
                     </svg>
                 </div>
 
                 {{-- Search Input --}}
-                <input 
-                    id="heroSearch"
-                    type="text" 
-                    name="q" 
-                    placeholder="Search tracking ID"
-                    class="font-openSans flex-1 pl-12 lg:pl-16 pr-24 lg:pr-32 h-full bg-transparent text-gray-700 placeholder:text-gray-400 
+                <input id="heroSearch" type="text" name="q" placeholder="Search tracking ID" class="font-openSans flex-1 pl-12 lg:pl-16 pr-24 lg:pr-32 h-full bg-transparent text-gray-700 placeholder:text-gray-400 
                            placeholder:font-openSans text-sm lg:text-base outline-none rounded-full transition-all duration-300
                            focus:placeholder:text-gray-300" />
 
                 {{-- Search Button --}}
-                <button 
-                    type="submit"
-                    class="absolute right-2 lg:right-3 bg-gray-800 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-full 
+                <button type="submit" class="absolute right-2 lg:right-3 bg-gray-800 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-full 
                            text-sm lg:text-base font-medium hover:bg-gray-900 transition-all duration-300 
-                           shadow-lg hover:shadow-xl active:scale-95"
-                >
+                           shadow-lg hover:shadow-xl active:scale-95">
                     <span class="hidden sm:inline">Search</span>
                     <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
                     </svg>
                 </button>
             </form>
@@ -68,42 +54,42 @@
 
         {{-- ==== JS Smart Tracking Logic ==== --}}
         <script>
-        (function () {
-            const form  = document.getElementById('heroForm');
-            const input = document.getElementById('heroSearch');
+            (function () {
+                const form = document.getElementById('heroForm');
+                const input = document.getElementById('heroSearch');
 
-            // clean input: remove '#' and spaces
-            const clean = (v) => (v || '').replace(/#/g, '').replace(/\s+/g, '').trim();
+                // clean input: remove '#' and spaces
+                const clean = (v) => (v || '').replace(/#/g, '').replace(/\s+/g, '').trim();
 
-            // regex for full UUID
-            const isUUID = (v) =>
-                /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+                // regex for full UUID
+                const isUUID = (v) =>
+                    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 
-            // regex for prefix ID (8–36 hex chars or with hyphen)
-            const isPrefix = (v) => /^[0-9a-f-]{8,36}$/i.test(v);
+                // regex for prefix ID (8–36 hex chars or with hyphen)
+                const isPrefix = (v) => /^[0-9a-f-]{8,36}$/i.test(v);
 
-            form.addEventListener('submit', function (e) {
-                const raw = input.value;
-                const v = clean(raw);
-                if (!v) return; // if empty, just submit normally
+                form.addEventListener('submit', function (e) {
+                    const raw = input.value;
+                    const v = clean(raw);
+                    if (!v) return; // if empty, just submit normally
 
-                if (isUUID(v)) {
-                    e.preventDefault();
-                    // redirect langsung ke tracking detail
-                    window.location.href = "{{ route('tracking.detail', ['reportId' => '__ID__']) }}".replace('__ID__', v);
-                    return;
-                }
+                    if (isUUID(v)) {
+                        e.preventDefault();
+                        // redirect langsung ke tracking detail
+                        window.location.href = "{{ route('tracking.detail', ['reportId' => '__ID__']) }}".replace('__ID__', v);
+                        return;
+                    }
 
-                if (isPrefix(v)) {
-                    e.preventDefault();
-                    // redirect ke halaman tracking dengan prefilled ID
-                    window.location.href = "/tracking?reportId=" + encodeURIComponent(v);
-                    return;
-                }
+                    if (isPrefix(v)) {
+                        e.preventDefault();
+                        // redirect ke halaman tracking dengan prefilled ID
+                        window.location.href = "/tracking?reportId=" + encodeURIComponent(v);
+                        return;
+                    }
 
-                // kalau bukan ID, biarkan form lanjut ke /search?q=...
-            });
-        })();
+                    // kalau bukan ID, biarkan form lanjut ke /search?q=...
+                });
+            })();
         </script>
     </section>
 
@@ -121,77 +107,80 @@
 
 
 
+            {{-- Container untuk cards --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto px-4">
+
                 {{-- LOST Card --}}
-             {{-- Container untuk cards --}}
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto px-4">
-    
-    {{-- LOST Card --}}
-    <div class="group">
-        <a href="{{ url('/lost-form') }}"
-            class="block rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 h-full" style="background-color: #fbf2e5;">
+                <div class="group">
+                    <a href="{{ url('/lost-form') }}"
+                        class="block rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 h-full"
+                        style="background-color: #FEFBF8;">
 
-            <!-- Logo Section -->
-            <div class="relative h-40 md:h-48 overflow-hidden flex items-center justify-center p-4 md:p-6" style="background-color: #fbf2e5;">
-                <img src="{{ asset('storage/images/logo/found.png') }}"
-                    class="max-h-full max-w-full object-contain transition-transform duration-700 group-hover:scale-110"
-                    alt="Lost Item" />
-            </div>
+                        <!-- Logo Section -->
+                        <div class="relative h-40 md:h-48 overflow-hidden flex items-center justify-center p-4 md:p-6"
+                            style="background-color: #FEFBF8;">
+                            <img src="{{ asset('storage/images/logo/foundbgputih.png') }}"
+                                class="max-h-full max-w-full object-contain transition-transform duration-700 group-hover:scale-110"
+                                alt="Lost Item" />
+                        </div>
 
-            <!-- Text Section -->
-            <div class="p-4 md:p-6 text-center">
-                <div class="w-12 h-1 bg-red-500 mx-auto rounded-full mb-3"></div>
-                <p class="text-gray-600 leading-relaxed text-sm md:text-base min-h-[3rem]">
-                    Lost something valuable? Let us help you find it back.
-                </p>
-                <div class="mt-4">
-                    <span
-                        class="inline-flex items-center text-red-600 font-semibold group-hover:text-red-700 transition-colors text-sm md:text-base">
-                        Report Lost Item
-                        <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
-                            stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5l7 7-7 7" />
-                        </svg>
-                    </span>
+                        <!-- Text Section -->
+                        <div class="p-4 md:p-6 text-center">
+                            <div class="w-12 h-1 bg-red-500 mx-auto rounded-full mb-3"></div>
+                            <p class="text-gray-600 leading-relaxed text-sm md:text-base min-h-[3rem]">
+                                Lost something valuable? Let us help you find it back.
+                            </p>
+                            <div class="mt-4">
+                                <span
+                                    class="inline-flex items-center text-red-600 font-semibold group-hover:text-red-700 transition-colors text-sm md:text-base">
+                                    Report Lost Item
+                                    <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
                 </div>
-            </div>
-        </a>
-    </div>
 
-    {{-- FOUND Card --}}
-    <div class="group">
-        <a href="{{ url('/found-form') }}"
-            class="block rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 h-full" style="background-color: #fbf2e5;">
+                {{-- FOUND Card --}}
+                <div class="group">
+                    <a href="{{ url('/found-form') }}"
+                        class="block rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 h-full"
+                        style="background-color: #FEFBF8;">
 
-            <!-- Logo Section -->
-            <div class="relative h-40 md:h-48 overflow-hidden flex items-center justify-center p-4 md:p-6" style="background-color: #fbf2e5;">
-                <img src="{{ asset('storage/images/logo/lost.png') }}"
-                    class="max-h-full max-w-full object-contain transition-transform duration-700 group-hover:scale-110"
-                    alt="Found Item" />
-            </div>
+                        <!-- Logo Section -->
+                        <div class="relative h-40 md:h-48 overflow-hidden flex items-center justify-center p-4 md:p-6"
+                            style="background-color: #FEFBF8;">
+                            <img src="{{ asset('storage/images/logo/lostbgputih.png') }}"
+                                class="max-h-full max-w-full object-contain transition-transform duration-700 group-hover:scale-110"
+                                alt="Found Item" />
+                        </div>
 
-            <!-- Text Section -->
-            <div class="p-4 md:p-6 text-center">
-                <div class="w-12 h-1 bg-green-500 mx-auto rounded-full mb-3"></div>
-                <p class="text-gray-600 leading-relaxed text-sm md:text-base min-h-[3rem]">
-                    Found something that doesn't belong to you? Help us return it to the rightful owner.
-                </p>
-                <div class="mt-4">
-                    <span
-                        class="inline-flex items-center text-green-600 font-semibold group-hover:text-green-700 transition-colors text-sm md:text-base">
-                        Report Found Item
-                        <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
-                            stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5l7 7-7 7" />
-                        </svg>
-                    </span>
+                        <!-- Text Section -->
+                        <div class="p-4 md:p-6 text-center">
+                            <div class="w-12 h-1 bg-green-500 mx-auto rounded-full mb-3"></div>
+                            <p class="text-gray-600 leading-relaxed text-sm md:text-base min-h-[3rem]">
+                                Found something that doesn't belong to you? Help us return it to the rightful owner.
+                            </p>
+                            <div class="mt-4">
+                                <span
+                                    class="inline-flex items-center text-green-600 font-semibold group-hover:text-green-700 transition-colors text-sm md:text-base">
+                                    Report Found Item
+                                    <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
                 </div>
+
             </div>
-        </a>
-    </div>
-    
-</div>
 
             {{-- Additional Info Section --}}
             <div class="mt-16 lg:mt-20 text-center">

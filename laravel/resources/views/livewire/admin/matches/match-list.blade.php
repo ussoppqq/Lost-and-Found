@@ -1,58 +1,62 @@
 <div>
-<!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Active -->
         <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Active</p>
+                    <p class="text-3xl font-semibold text-gray-900">{{ $stats['total'] }}</p>
+                </div>
+                <div class="p-3 rounded-full bg-blue-100">
                     <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Total Active</p>
-                    <p class="text-2xl font-semibold text-gray-900">{{ $stats['total'] }}</p>
-                </div>
             </div>
         </div>
 
+        <!-- Pending -->
         <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Pending</p>
+                    <p class="text-3xl font-semibold text-yellow-600">{{ $stats['pending'] }}</p>
+                </div>
+                <div class="p-3 rounded-full bg-yellow-100">
                     <svg class="w-6 h-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Pending</p>
-                    <p class="text-2xl font-semibold text-gray-900">{{ $stats['pending'] }}</p>
-                </div>
             </div>
         </div>
 
+        <!-- Confirmed -->
         <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Confirmed</p>
+                    <p class="text-3xl font-semibold text-green-600">{{ $stats['confirmed'] }}</p>
+                </div>
+                <div class="p-3 rounded-full bg-green-100">
                     <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Confirmed</p>
-                    <p class="text-2xl font-semibold text-gray-900">{{ $stats['confirmed'] }}</p>
-                </div>
             </div>
         </div>
 
+        <!-- Rejected -->
         <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-red-100 rounded-lg p-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Rejected</p>
+                    <p class="text-3xl font-semibold text-gray-900">{{ $stats['rejected'] }}</p>
+                </div>
+                <div class="p-3 rounded-full bg-red-100">
                     <svg class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500">Rejected</p>
-                    <p class="text-2xl font-semibold text-gray-900">{{ $stats['rejected'] }}</p>
                 </div>
             </div>
         </div>
@@ -120,9 +124,9 @@
                 <!-- Create Button -->
                 <button 
                     wire:click="openCreateModal"
-                    class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition">
-                    <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
                     Create New Match
                 </button>
@@ -154,7 +158,7 @@
                                     @else
                                         <div class="w-10 h-10 bg-gray-200 rounded flex items-center justify-center mr-3">
                                             <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                             </svg>
                                         </div>
                                     @endif
