@@ -6,10 +6,12 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Item;
 use App\Models\Report;
+use App\Models\ReportPhoto;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\ItemPhoto;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -34,7 +36,7 @@ class CreateItem extends Component
     public $reporter_name;
     public $reporter_phone;
     public $reporter_email;
-    public $reporterMode = 'user'; // 'user' or 'moderator'
+    public $reporterMode = 'user';
 
     // Item fields
     public $item_name;
@@ -47,8 +49,10 @@ class CreateItem extends Component
     public $category_id;
     public $post_id;
 
-    // Photos
-    public $photos = [];
+    // Photos - PERBAIKAN: Gunakan konsep seperti FoundForm
+    public $photos = [];        // Array untuk preview photos
+    public $newPhotos = [];     // Array untuk upload baru
+    public $uploadKey = 0;      // Key untuk reset input
     public $reportPhotos = [];
 
     public $showModal = false;
@@ -72,25 +76,26 @@ class CreateItem extends Component
             $rules['report_description'] = 'required|string';
             $rules['report_location'] = 'required|string|max:255';
             $rules['report_datetime'] = 'required|date';
-            
-            // Reporter validation based on mode
+
             if ($this->report_type === 'FOUND') {
                 $rules['reporterMode'] = 'required|in:user,moderator';
-                
+
                 if ($this->reporterMode === 'user') {
                     $rules['reporter_name'] = 'required|string|max:255';
                     $rules['reporter_phone'] = 'required|string|max:20';
                     $rules['reporter_email'] = 'nullable|email|max:255';
                 }
             } else {
-                // LOST standalone
                 $rules['reporter_name'] = 'required|string|max:255';
                 $rules['reporter_phone'] = 'required|string|max:20';
                 $rules['reporter_email'] = 'nullable|email|max:255';
             }
-            // Photos optional for all standalone
-            $rules['photos'] = 'nullable|array';
+
+            // PERBAIKAN: Validasi untuk photos dan newPhotos
+            $rules['photos'] = 'nullable|array|max:5';
             $rules['photos.*'] = 'nullable|image|max:2048';
+            $rules['newPhotos'] = 'nullable|array';
+            $rules['newPhotos.*'] = 'nullable|image|max:2048';
         }
 
         if ($this->report_type === 'FOUND') {
@@ -110,6 +115,9 @@ class CreateItem extends Component
         return [
             'photos.*.image' => 'All files must be valid images (jpg, png, jpeg, gif).',
             'photos.*.max' => 'Each photo must not exceed 2MB.',
+            'photos.max' => 'You can upload a maximum of 5 photos.',
+            'newPhotos.*.image' => 'All files must be valid images.',
+            'newPhotos.*.max' => 'Each photo must not exceed 2MB.',
             'category_id.required' => 'Please select a category.',
             'item_name.required' => 'Item name is required.',
             'reporterMode.required' => 'Please select reporter type.',
@@ -123,19 +131,29 @@ class CreateItem extends Component
         $this->report_datetime = now()->timezone('Asia/Jakarta')->format('Y-m-d\TH:i');
     }
 
-    // Fix for multiple file uploads: Handle both single and multiple properly
-    public function updatedPhotos($value)
+    // PERBAIKAN: Gunakan konsep seperti FoundForm
+    public function updatedNewPhotos(): void
     {
-        Log::info('Photos updated', [
-            'existing_count' => count($this->photos ?? []), 
-            'new_value_type' => gettype($value),
-            'is_array' => is_array($value)
+        $this->validateOnly('newPhotos.*');
+
+        // Hitung berapa slot yang masih tersedia (max 5 photos)
+        $allowed = max(0, 5 - count($this->photos));
+
+        // Tambahkan photos baru ke array photos (untuk preview)
+        foreach (array_slice($this->newPhotos, 0, $allowed) as $file) {
+            $this->photos[] = $file;
+        }
+
+        // Reset newPhotos array
+        $this->newPhotos = [];
+
+        // Increment uploadKey untuk reset input file
+        $this->uploadKey++;
+
+        Log::info('Photos updated successfully', [
+            'total_photos' => count($this->photos),
+            'upload_key' => $this->uploadKey
         ]);
-        
-        // Jangan lakukan apa-apa di sini, biarkan Livewire handle secara natural
-        // Livewire akan otomatis populate $this->photos dengan benar
-        
-        Log::info('Photos after update', ['final_count' => count($this->photos ?? [])]);
     }
 
     public function updatedReporterMode()
@@ -149,7 +167,6 @@ class CreateItem extends Component
 
     public function updatedReportType()
     {
-        // Reset reporter mode when switching report type
         if ($this->report_type === 'LOST') {
             $this->reporterMode = 'user';
         }
@@ -188,7 +205,7 @@ class CreateItem extends Component
             }
         }
 
-        $this->item_status = 'STORED'; // Default for all now
+        $this->item_status = 'STORED';
         $this->showModal = true;
 
         Log::info('Modal opened from report', [
@@ -215,10 +232,23 @@ class CreateItem extends Component
     public function resetForm()
     {
         $this->reset([
-            'item_name', 'brand', 'color', 'item_description', 'storage',
-            'category_id', 'post_id', 'photos', 'reportPhotos',
-            'report_type', 'report_description', 'report_location',
-            'reporter_name', 'reporter_phone', 'reporter_email', 'reporterMode',
+            'item_name',
+            'brand',
+            'color',
+            'item_description',
+            'storage',
+            'category_id',
+            'post_id',
+            'photos',
+            'newPhotos',
+            'reportPhotos',
+            'report_type',
+            'report_description',
+            'report_location',
+            'reporter_name',
+            'reporter_phone',
+            'reporter_email',
+            'reporterMode',
         ]);
 
         $this->item_status = 'STORED';
@@ -226,23 +256,30 @@ class CreateItem extends Component
         $this->report_type = 'FOUND';
         $this->reporterMode = 'user';
         $this->report_datetime = now()->timezone('Asia/Jakarta')->format('Y-m-d\TH:i');
+        $this->uploadKey++;
         $this->resetErrorBag();
     }
 
     public function removePhoto($index)
     {
-        unset($this->photos[$index]);
-        $this->photos = array_values($this->photos);
+        if (isset($this->photos[$index])) {
+            unset($this->photos[$index]);
+            $this->photos = array_values($this->photos);
+            $this->uploadKey++;
+
+            Log::info('Photo removed', [
+                'index' => $index,
+                'remaining_photos' => count($this->photos)
+            ]);
+        }
     }
 
     private function getOrCreateWalkInUser($companyId)
     {
-        // If moderator mode, return current moderator user
         if ($this->reporterMode === 'moderator') {
             return auth()->user();
         }
 
-        // Find user by phone first
         $user = User::where('phone_number', $this->reporter_phone)
             ->where('company_id', $companyId)
             ->first();
@@ -250,7 +287,6 @@ class CreateItem extends Component
         if ($user) {
             $updateData = ['full_name' => $this->reporter_name];
 
-            // Update email ONLY if provided and not already used by another user
             if (!empty($this->reporter_email)) {
                 $emailExists = User::where('email', $this->reporter_email)
                     ->where('user_id', '!=', $user->user_id)
@@ -263,7 +299,7 @@ class CreateItem extends Component
             }
 
             $user->update($updateData);
-            
+
             Log::info('Walk-in user updated', [
                 'user_id' => $user->user_id,
                 'email_updated' => isset($updateData['email']),
@@ -272,7 +308,6 @@ class CreateItem extends Component
             return $user;
         }
 
-        // Check by email if phone not found
         if (!empty($this->reporter_email)) {
             $user = User::where('email', $this->reporter_email)
                 ->where('company_id', $companyId)
@@ -289,7 +324,6 @@ class CreateItem extends Component
             }
         }
 
-        // Create new user
         $roleId = \App\Models\Role::where('role_code', 'USER')->first()?->role_id
             ?? \App\Models\Role::where('role_code', 'GUEST')->first()?->role_id;
 
@@ -297,9 +331,8 @@ class CreateItem extends Component
             throw new \Exception('Default role not found.');
         }
 
-        // Use temp email if not provided
-        $email = !empty($this->reporter_email) 
-            ? $this->reporter_email 
+        $email = !empty($this->reporter_email)
+            ? $this->reporter_email
             : 'walkin_' . Str::uuid() . '@temp.local';
 
         $user = User::create([
@@ -328,7 +361,6 @@ class CreateItem extends Component
             'report_type' => $this->report_type,
             'reporter_mode' => $this->reporterMode,
             'photos_count' => count($this->photos),
-            'photos_count_before_save' => count($this->photos ?? []),
         ]);
 
         try {
@@ -362,7 +394,6 @@ class CreateItem extends Component
 
             $itemId = null;
 
-            // Handle FOUND items (both modes)
             if ($this->report_type === 'FOUND') {
                 $category = Category::findOrFail($this->category_id);
                 $retentionUntil = now()->addDays($category->retention_days ?? 30);
@@ -384,12 +415,12 @@ class CreateItem extends Component
 
                 $itemId = $item->item_id;
 
-                // Upload multiple photos
+                // ✅ UPLOAD MULTIPLE PHOTOS
                 $photoOrder = 0;
                 if (!empty($this->photos)) {
                     foreach ($this->photos as $photo) {
                         $filename = Str::uuid() . '.' . $photo->getClientOriginalExtension();
-                        $path = $photo->storeAs('reports/found', $filename, 'public');
+                        $path = $photo->storeAs('items/' . $itemId, $filename, 'public');
 
                         ItemPhoto::create([
                             'photo_id' => (string) Str::uuid(),
@@ -400,9 +431,13 @@ class CreateItem extends Component
                             'display_order' => $photoOrder++,
                         ]);
                     }
+
+                    Log::info('Item photos uploaded successfully', [
+                        'count' => $photoOrder
+                    ]);
                 }
 
-                // Copy report photos if from report
+                // Copy report photos if from-report mode
                 if ($this->mode === 'from-report' && !empty($this->reportPhotos)) {
                     foreach ($this->reportPhotos as $photoUrl) {
                         if (Storage::disk('public')->exists($photoUrl)) {
@@ -419,37 +454,30 @@ class CreateItem extends Component
                 }
             }
 
-            // For LOST from-report: Just close the report (no item creation)
             if ($this->report_type === 'LOST' && $this->mode === 'from-report') {
-                // No item creation, just update report status
                 $itemId = null;
             }
 
-            // Create or update report
             if ($this->mode === 'standalone') {
-                // Store multiple photos for report
-                $photoUrls = [];
-                if (!empty($this->photos)) {
-                    foreach ($this->photos as $photo) {
-                        $folder = $this->report_type === 'FOUND' ? 'reports/found' : 'reports/lost';
-                        $filename = Str::uuid() . '.' . $photo->getClientOriginalExtension();
-                        $photoUrls[] = $photo->storeAs($folder, $filename, 'public');
-                    }
-                }
+                // Parse datetime WIB
+                $reportDateTime = $this->report_datetime
+                    ? Carbon::parse($this->report_datetime, 'Asia/Jakarta')
+                    : Carbon::now('Asia/Jakarta');
 
-                $reporterName = $this->reporterMode === 'moderator' 
-                    ? auth()->user()->full_name 
+                $reporterName = $this->reporterMode === 'moderator'
+                    ? auth()->user()->full_name
                     : $this->reporter_name;
-                    
-                $reporterPhone = $this->reporterMode === 'moderator' 
-                    ? auth()->user()->phone_number ?? '-' 
+
+                $reporterPhone = $this->reporterMode === 'moderator'
+                    ? auth()->user()->phone_number ?? '-'
                     : $this->reporter_phone;
-                    
-                $reporterEmail = $this->reporterMode === 'moderator' 
-                    ? auth()->user()->email 
+
+                $reporterEmail = $this->reporterMode === 'moderator'
+                    ? auth()->user()->email
                     : ($this->reporter_email ?? '');
 
-                Report::create([
+                // Create report (without photo_url first)
+                $report = Report::create([
                     'report_id' => (string) Str::uuid(),
                     'company_id' => $companyId,
                     'user_id' => $userId,
@@ -458,19 +486,41 @@ class CreateItem extends Component
                     'report_type' => $this->report_type,
                     'item_name' => $this->item_name,
                     'report_description' => $this->report_description,
-                    'report_datetime' => $this->report_datetime,
+                    'report_datetime' => $reportDateTime,
                     'report_location' => $this->report_location,
                     'report_status' => $this->report_type === 'FOUND' ? 'STORED' : 'OPEN',
-                    'photo_url' => !empty($photoUrls) ? json_encode($photoUrls) : null,
+                    'photo_url' => null, // Will be set from first photo
                     'reporter_name' => $reporterName,
                     'reporter_phone' => $reporterPhone,
                     'reporter_email' => $reporterEmail,
                 ]);
 
-                Log::info('Standalone report created', [
-                    'report_type' => $this->report_type,
-                    'photos_count' => count($photoUrls),
-                ]);
+                // ✅ SIMPAN MULTIPLE PHOTOS KE REPORT_PHOTOS
+                if (!empty($this->photos)) {
+                    foreach ($this->photos as $index => $photo) {
+                        $folder = $this->report_type === 'FOUND' ? 'reports/found' : 'reports/lost';
+                        $filename = Str::uuid() . '.' . $photo->getClientOriginalExtension();
+                        $photoPath = $photo->storeAs($folder . '/' . $userId, $filename, 'public');
+
+                        \App\Models\ReportPhoto::create([
+                            'photo_id' => Str::uuid(),
+                            'report_id' => $report->report_id,
+                            'photo_url' => $photoPath,
+                            'is_primary' => $index === 0, // First photo is primary
+                            'photo_order' => $index,
+                        ]);
+
+                        // Set primary photo URL di report
+                        if ($index === 0) {
+                            $report->update(['photo_url' => $photoPath]);
+                        }
+                    }
+
+                    Log::info('Report photos uploaded successfully', [
+                        'count' => count($this->photos),
+                        'report_type' => $this->report_type
+                    ]);
+                }
             } else {
                 $reportStatus = $this->report_type === 'FOUND' ? 'STORED' : 'CLOSED';
 

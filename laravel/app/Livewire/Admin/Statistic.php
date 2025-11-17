@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Report;
 use App\Models\Item;
 use App\Models\Claim;
+use App\Models\Category;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
@@ -16,7 +17,10 @@ class Statistic extends Component
     public $periodType = 'weekly';
     
     #[Url(keep: true)]
-    public $selectedDate;
+    public $startDate;
+    
+    #[Url(keep: true)]
+    public $endDate;
     
     public $maxDate;
     
@@ -52,27 +56,66 @@ class Statistic extends Component
     {
         $this->maxDate = now()->format('Y-m-d');
         
-        if (!$this->selectedDate) {
-            $this->selectedDate = now()->format('Y-m-d');
+        if (!$this->startDate || !$this->endDate) {
+            $this->setDefaultDates();
         }
         
         $this->loadStatistics();
     }
 
+    private function setDefaultDates()
+    {
+        $now = now();
+        
+        switch ($this->periodType) {
+            case 'weekly':
+                $this->startDate = $now->copy()->startOfWeek()->format('Y-m-d');
+                $this->endDate = $now->copy()->endOfWeek()->format('Y-m-d');
+                break;
+            case 'monthly':
+                $this->startDate = $now->copy()->startOfMonth()->format('Y-m-d');
+                $this->endDate = $now->copy()->endOfMonth()->format('Y-m-d');
+                break;
+            case 'yearly':
+                $this->startDate = $now->copy()->startOfYear()->format('Y-m-d');
+                $this->endDate = $now->copy()->endOfYear()->format('Y-m-d');
+                break;
+        }
+    }
+
     public function updatedPeriodType()
     {
         \Log::info('Period type updated to: ' . $this->periodType);
+        $this->setDefaultDates();
         $this->loadStatistics();
     }
 
-    public function updatedSelectedDate()
+    public function updatedStartDate()
     {
+        // Validate that end date is after start date
+        if ($this->endDate && $this->startDate > $this->endDate) {
+            $this->endDate = $this->startDate;
+        }
+        $this->loadStatistics();
+    }
+
+    public function updatedEndDate()
+    {
+        // Validate that end date is after start date
+        if ($this->startDate && $this->endDate < $this->startDate) {
+            $this->startDate = $this->endDate;
+        }
         $this->loadStatistics();
     }
 
     public function loadStatistics()
     {
-        \Log::info('Loading statistics for period: ' . $this->periodType . ', date: ' . $this->selectedDate);
+        \Log::info('Loading statistics', [
+            'period' => $this->periodType,
+            'start' => $this->startDate,
+            'end' => $this->endDate
+        ]);
+        
         $dateRange = $this->getDateRange();
         $companyId = auth()->user()->company_id;
 
@@ -83,36 +126,21 @@ class Statistic extends Component
         $this->prepareChartData($dateRange, $companyId);
         
         // Dispatch event to update charts
-        $this->dispatch('statisticsUpdated');
-        \Log::info('Statistics loaded and event dispatched');
+        $this->dispatch('statisticsUpdated', [
+            'reportChartData' => $this->reportChartData,
+            'itemStatusChartData' => $this->itemStatusChartData,
+            'claimStatusChartData' => $this->claimStatusChartData,
+            'categoryChartData' => $this->categoryChartData,
+            'trendChartData' => $this->trendChartData
+        ]);
     }
 
     private function getDateRange()
     {
-        $selectedDate = Carbon::parse($this->selectedDate);
-        
-        switch ($this->periodType) {
-            case 'weekly':
-                return [
-                    'start' => $selectedDate->copy()->startOfWeek(),
-                    'end' => $selectedDate->copy()->endOfWeek(),
-                ];
-            case 'monthly':
-                return [
-                    'start' => $selectedDate->copy()->startOfMonth(),
-                    'end' => $selectedDate->copy()->endOfMonth(),
-                ];
-            case 'yearly':
-                return [
-                    'start' => $selectedDate->copy()->startOfYear(),
-                    'end' => $selectedDate->copy()->endOfYear(),
-                ];
-            default:
-                return [
-                    'start' => $selectedDate->copy()->startOfWeek(),
-                    'end' => $selectedDate->copy()->endOfWeek(),
-                ];
-        }
+        return [
+            'start' => Carbon::parse($this->startDate)->startOfDay(),
+            'end' => Carbon::parse($this->endDate)->endOfDay(),
+        ];
     }
 
     private function loadReportStatistics($dateRange, $companyId)
@@ -165,13 +193,13 @@ class Statistic extends Component
         ];
 
         // Item Status Chart Data
-        $items = Item::where('company_id', $companyId)
-            ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
-            ->select('item_status', DB::raw('COUNT(*) as count'))
-            ->groupBy('item_status')
-            ->get();
-
-        $this->itemStatusChartData = $items->pluck('count', 'item_status')->toArray();
+        $this->itemStatusChartData = array_filter([
+            'REGISTERED' => $this->registeredItems,
+            'STORED' => $this->storedItems,
+            'CLAIMED' => $this->claimedItems,
+            'RETURNED' => $this->returnedItems,
+            'DISPOSED' => $this->disposedItems,
+        ]);
 
         // Claim Status Chart Data
         $this->claimStatusChartData = [
@@ -181,19 +209,23 @@ class Statistic extends Component
             'released' => $this->releasedClaims,
         ];
 
-        // Top Categories
-        $topCategories = Item::where('company_id', $companyId)
+        // Top Categories from REPORTS
+        $categoryReports = Report::where('company_id', $companyId)
             ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
             ->whereNotNull('category_id')
-            ->select('category_id', DB::raw('COUNT(*) as total'))
-            ->with('category:category_id,category_name')
+            ->select('category_id', DB::raw('COUNT(*) as count'))
             ->groupBy('category_id')
-            ->orderByDesc('total')
+            ->orderByDesc('count')
             ->limit(10)
             ->get();
 
-        $this->categoryChartData = $topCategories->mapWithKeys(function($item) {
-            return [$item->category->category_name ?? 'Unknown' => $item->total];
+        $categories = Category::whereIn('category_id', $categoryReports->pluck('category_id'))
+            ->get(['category_id', 'category_name'])
+            ->keyBy('category_id');
+
+        $this->categoryChartData = $categoryReports->mapWithKeys(function($item) use ($categories) {
+            $categoryName = $categories[$item->category_id]->category_name ?? 'Uncategorized';
+            return [$categoryName => $item->count];
         })->toArray();
 
         // Trend Chart - Reports per day
@@ -212,18 +244,24 @@ class Statistic extends Component
         $this->trendChartData = $reportsByDay->map(function($item) {
             return [
                 'date' => Carbon::parse($item->date)->format('M d'),
-                'total' => $item->total,
-                'lost' => $item->lost,
-                'found' => $item->found,
+                'total' => (int)$item->total,
+                'lost' => (int)$item->lost,
+                'found' => (int)$item->found,
             ];
         })->toArray();
+
+        \Log::info('Chart data prepared', [
+            'categories' => count($this->categoryChartData),
+            'trendPoints' => count($this->trendChartData)
+        ]);
     }
 
     public function downloadPdf()
     {
         return redirect()->route('admin.statistic.pdf', [
             'period_type' => $this->periodType,
-            'selected_date' => $this->selectedDate
+            'start_date' => $this->startDate,
+            'end_date' => $this->endDate
         ]);
     }
 
@@ -232,8 +270,8 @@ class Statistic extends Component
         $dateRange = $this->getDateRange();
         
         return view('livewire.admin.statistic', [
-            'startDate' => $dateRange['start']->format('d M Y'),
-            'endDate' => $dateRange['end']->format('d M Y'),
+            'formattedStartDate' => $dateRange['start']->format('d M Y'),
+            'formattedEndDate' => $dateRange['end']->format('d M Y'),
         ])->layout('components.layouts.admin');
     }
 }

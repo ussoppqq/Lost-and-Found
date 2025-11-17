@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Report extends Model
@@ -54,6 +56,8 @@ class Report extends Model
         });
     }
 
+    // ==================== RELATIONSHIPS ====================
+
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id', 'company_id');
@@ -95,6 +99,26 @@ class Report extends Model
             ? $this->matchesAsLost() 
             : $this->matchesAsFound();
     }
+
+    /**
+     * Get all photos associated with this report
+     */
+    public function photos(): HasMany
+    {
+        return $this->hasMany(ReportPhoto::class, 'report_id', 'report_id')
+                    ->orderBy('photo_order');
+    }
+
+    /**
+     * Get the primary photo of this report
+     */
+    public function primaryPhoto(): HasOne
+    {
+        return $this->hasOne(ReportPhoto::class, 'report_id', 'report_id')
+                    ->where('is_primary', true);
+    }
+
+    // ==================== HELPER METHODS ====================
 
     public function confirmedMatch()
     {

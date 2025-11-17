@@ -33,13 +33,55 @@
         <!-- Body -->
         <div class="px-6 py-6 space-y-6">
             
-            <!-- Report Photo -->
-            @if($report->photo_url)
+            <!-- Report Photos - Multiple -->
+            @if($report->photos && $report->photos->count() > 0)
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-sm font-semibold text-gray-900 mb-3">Report Photos ({{ $report->photos->count() }})</h4>
+                    
+                    @if($report->photos->count() === 1)
+                        <!-- Single photo - large display -->
+                        <img src="{{ Storage::url($report->photos->first()->photo_url) }}" 
+                             alt="Report photo" 
+                             wire:click="openLightbox('{{ $report->photos->first()->photo_url }}', 0, 'report')"
+                             class="w-full max-h-96 object-contain rounded-lg border-2 border-gray-200 cursor-pointer hover:border-gray-400 transition">
+                    @else
+                        <!-- Multiple photos - grid display -->
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            @foreach($report->photos as $photo)
+                                <div class="relative group">
+                                    <img src="{{ Storage::url($photo->photo_url) }}" 
+                                         alt="Report photo {{ $loop->iteration }}" 
+                                         wire:click="openLightbox('{{ $photo->photo_url }}', {{ $loop->index }}, 'report')"
+                                         class="w-full h-48 object-cover rounded-lg border-2 cursor-pointer transition
+                                                {{ $photo->is_primary ? 'border-blue-500 ring-2 ring-blue-300' : 'border-gray-200 hover:border-gray-400' }}">
+                                    
+                                    @if($photo->is_primary)
+                                        <span class="absolute top-2 left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                            Primary
+                                        </span>
+                                    @endif
+                                    
+                                    <!-- Hover overlay -->
+                                    <div class="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-20 transition rounded-lg flex items-center justify-center pointer-events-none">
+                                        <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                    
+                    <p class="text-xs text-gray-500 mt-2">Click on any photo to view full size</p>
+                </div>
+            @elseif($report->photo_url)
+                <!-- Fallback for old single photo format -->
                 <div class="bg-gray-50 rounded-lg p-4">
                     <h4 class="text-sm font-semibold text-gray-900 mb-3">Report Photo</h4>
                     <img src="{{ Storage::url($report->photo_url) }}" 
                          alt="Report photo" 
-                         class="w-full max-h-96 object-contain rounded-lg border-2 border-gray-200">
+                         wire:click="openLightbox('{{ $report->photo_url }}', 0, 'report')"
+                         class="w-full max-h-96 object-contain rounded-lg border-2 border-gray-200 cursor-pointer hover:border-gray-400 transition">
                 </div>
             @endif
 
@@ -125,7 +167,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Phone</label>
-                            <p class="text-sm text-gray-900">{{ $report->reporter_phone_number ?? 'N/A' }}</p>
+                            <p class="text-sm text-gray-900">{{ $report->reporter_phone ?? 'N/A' }}</p>
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Email</label>
@@ -181,13 +223,22 @@
                     <!-- Item Photos -->
                     @if($report->item->photos && $report->item->photos->count() > 0)
                         <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-600 mb-2">Item Photos</label>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Item Photos ({{ $report->item->photos->count() }})</label>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 @foreach($report->item->photos as $photo)
-                                    <img src="{{ Storage::url($photo->photo_url) }}" 
-                                         alt="Item photo" 
-                                         class="w-full h-32 object-cover rounded-lg border-2 border-indigo-200 hover:border-indigo-400 transition cursor-pointer"
-                                         onclick="window.open('{{ Storage::url($photo->photo_url) }}', '_blank')">
+                                    <div class="relative group">
+                                        <img src="{{ Storage::url($photo->photo_url) }}" 
+                                             alt="Item photo {{ $loop->iteration }}" 
+                                             wire:click="openLightbox('{{ $photo->photo_url }}', {{ $loop->index }}, 'item')"
+                                             class="w-full h-32 object-cover rounded-lg border-2 border-indigo-200 hover:border-indigo-400 transition cursor-pointer">
+                                        
+                                        <!-- Hover overlay -->
+                                        <div class="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-20 transition rounded-lg flex items-center justify-center pointer-events-none">
+                                            <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
                                 @endforeach
                             </div>
                         </div>
@@ -233,6 +284,31 @@
                     @endif
                 </div>
             </div>
+
+            <!-- Quick Match Section -->
+            @if(in_array($report->report_status, ['OPEN', 'STORED']))
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border-2 border-blue-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <svg class="w-8 h-8 text-blue-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-900">Quick Match</h4>
+                                <p class="text-xs text-gray-600">Find and match with {{ $report->report_type === 'LOST' ? 'found' : 'lost' }} items</p>
+                            </div>
+                        </div>
+                        <button 
+                            wire:click="openQuickMatch"
+                            class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            Match Report
+                        </button>
+                    </div>
+                </div>
+            @endif
         </div>
 
         <!-- Footer -->
@@ -246,4 +322,61 @@
         </div>
     </div>
 </div>
+
+<!-- Lightbox Modal -->
+@if($showLightbox)
+<div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black bg-opacity-90" 
+     wire:click="closeLightbox">
+    
+    <!-- Close Button -->
+    <button 
+        wire:click="closeLightbox"
+        class="absolute top-4 right-4 z-10 p-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition">
+        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </button>
+
+    <!-- Previous Button -->
+    @if(count($allPhotos) > 1 && $currentPhotoIndex > 0)
+    <button 
+        wire:click.stop="previousPhoto"
+        class="absolute left-4 z-10 p-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition">
+        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+    </button>
+    @endif
+
+    <!-- Image Container -->
+    <div class="relative max-w-6xl max-h-[90vh] flex items-center justify-center" 
+         wire:click.stop>
+        <img src="{{ Storage::url($currentPhotoUrl) }}" 
+             alt="Full size photo" 
+             class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl">
+        
+        <!-- Photo Counter -->
+        @if(count($allPhotos) > 1)
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm font-medium">
+            {{ $currentPhotoIndex + 1 }} / {{ count($allPhotos) }}
+        </div>
+        @endif
+    </div>
+
+    <!-- Next Button -->
+    @if(count($allPhotos) > 1 && $currentPhotoIndex < count($allPhotos) - 1)
+    <button 
+        wire:click.stop="nextPhoto"
+        class="absolute right-4 z-10 p-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition">
+        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+    </button>
+    @endif
+</div>
+@endif
+
+<!-- Include QuickMatch Component -->
+@livewire('admin.lost-and-found.quick-match')
+@livewire('admin.lost-and-found.create-item')
 </div>

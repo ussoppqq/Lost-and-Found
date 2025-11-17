@@ -1,78 +1,109 @@
 <div>
-<!-- Backdrop Blur -->
-<div class="fixed inset-0 bg-transparent backdrop-blur-sm transition-opacity z-40"></div>
+    <!-- Backdrop Blur -->
+    <div class="fixed inset-0 bg-transparent backdrop-blur-sm transition-opacity z-40"></div>
 
-<!-- Modal Container -->
-<div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
-    
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8 transform transition-all max-h-[90vh] overflow-y-auto">
+    <!-- Modal Container -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
         
-        <!-- Header -->
-        <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-blue-50 sticky top-0 z-10">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-2xl font-bold text-gray-900">Create New Match</h3>
-                    <p class="mt-1 text-sm text-gray-600">Connect lost item report with found item report</p>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8 transform transition-all max-h-[90vh] overflow-y-auto">
+            
+            <!-- Header -->
+            <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-blue-50 sticky top-0 z-10">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900">Create New Match</h3>
+                        <p class="mt-1 text-sm text-gray-600">Connect lost item report with found item report</p>
+                    </div>
+                    <button 
+                        type="button"
+                        wire:click="$parent.closeCreateModal"
+                        class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-white rounded-lg">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
                 </div>
-                <button 
-                    type="button"
-                    wire:click="$parent.closeCreateModal"
-                    class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-white rounded-lg">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            </div>
+
+            <!-- Flash Message -->
+            @if (session()->has('success'))
+                <div class="mx-6 mt-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center">
+                    <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if (session()->has('error'))
+                <div class="mx-6 mt-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center">
+                    <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
-                </button>
-            </div>
-        </div>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
 
-        <!-- Flash Message -->
-        @if (session()->has('success'))
-            <div class="mx-6 mt-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center">
-                <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                <span>{{ session('success') }}</span>
-            </div>
-        @endif
-
-        @if (session()->has('error'))
-            <div class="mx-6 mt-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center">
-                <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-                <span>{{ session('error') }}</span>
-            </div>
-        @endif
-
-        <!-- Body -->
-        <form wire:submit.prevent="createMatch">
-            <div class="px-6 py-6 space-y-6">
-                
-                <!-- Lost Report Selection -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">
-                        Lost Item Report
-                        <span class="text-red-500">*</span>
-                    </label>
+            <!-- Body -->
+            <form wire:submit.prevent="createMatch">
+                <div class="px-6 py-6 space-y-6">
                     
-                    @if($lostReports->isEmpty())
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start">
-                            <svg class="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                            <p class="text-sm text-yellow-800">No LOST reports available for matching.</p>
+                    <!-- Lost Report Selection -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-900 mb-2">
+                            Lost Item Report
+                            <span class="text-red-500">*</span>
+                        </label>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <input 
+                                    type="text"
+                                    wire:model.live="lostSearch"
+                                    placeholder="Search by report number or item name..."
+                                    class="flex-1 px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                @if($lostReportId)
+                                    <button
+                                        type="button"
+                                        wire:click="$set('lostReportId', '')"
+                                        class="px-3 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+                                        Change
+                                    </button>
+                                @endif
+                            </div>
+                            
+                            <!-- Lost Reports Dropdown -->
+                            @if(!$lostReportId)
+                                @if(!$lostReports->isEmpty())
+                                    <div class="bg-white border border-gray-300 rounded-lg shadow-xl max-h-40 overflow-y-auto">
+                                        @foreach($lostReports as $report)
+                                            <button
+                                                type="button"
+                                                wire:click="$set('lostReportId', '{{ $report->report_id }}')"
+                                                class="w-full text-left px-4 py-2.5 hover:bg-indigo-50 border-b border-gray-100 last:border-b-0 transition flex items-start space-x-3">
+                                                <div class="flex-1">
+                                                    <div class="flex items-center gap-2 mb-1">
+                                                        <span class="text-xs font-bold bg-gray-800 text-white px-2 py-0.5 rounded">{{ $report->formatted_report_number }}</span>
+                                                        <span class="text-xs font-semibold text-gray-600">{{ $report->item_name }}</span>
+                                                    </div>
+                                                    <div class="text-xs text-gray-500">
+                                                        {{ $report->report_datetime->format('d M Y') }} • {{ $report->report_location }}
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start">
+                                        <svg class="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                        <p class="text-sm text-yellow-800">No LOST reports available for matching.</p>
+                                    </div>
+                                @endif
+                            @endif
                         </div>
-                    @else
-                        <select 
-                            wire:model.live="lostReportId"
-                            class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition @error('lostReportId') border-red-500 @enderror">
-                            <option value="">-- Select Lost Report --</option>
-                            @foreach($lostReports as $report)
-                                <option value="{{ $report->report_id }}">
-                                    {{ $report->formatted_report_number }} - {{ $report->item_name }} - {{ $report->report_datetime->format('d M Y') }} - {{ $report->report_location }}
-                                </option>
-                            @endforeach
-                        </select>
+
                         @error('lostReportId')
                             <p class="mt-2 text-sm text-red-600 flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -136,34 +167,64 @@
                                 </div>
                             @endif
                         @endif
-                    @endif
-                </div>
+                    </div>
 
-                <!-- Found Report Selection -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">
-                        Found Item Report
-                        <span class="text-red-500">*</span>
-                    </label>
-                    
-                    @if($foundReports->isEmpty())
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start">
-                            <svg class="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                            <p class="text-sm text-yellow-800">No FOUND reports available for matching.</p>
+                    <!-- Found Report Selection -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-900 mb-2">
+                            Found Item Report
+                            <span class="text-red-500">*</span>
+                        </label>
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <input 
+                                    type="text"
+                                    wire:model.live="foundSearch"
+                                    placeholder="Search by report number or item name..."
+                                    class="flex-1 px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                @if($foundReportId)
+                                    <button
+                                        type="button"
+                                        wire:click="$set('foundReportId', '')"
+                                        class="px-3 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+                                        Change
+                                    </button>
+                                @endif
+                            </div>
+                            
+                            <!-- Found Reports Dropdown -->
+                            @if(!$foundReportId)
+                                @if(!$foundReports->isEmpty())
+                                    <div class="bg-white border border-gray-300 rounded-lg shadow-xl max-h-40 overflow-y-auto">
+                                        @foreach($foundReports as $report)
+                                            <button
+                                                type="button"
+                                                wire:click="$set('foundReportId', '{{ $report->report_id }}')"
+                                                class="w-full text-left px-4 py-2.5 hover:bg-green-50 border-b border-gray-100 last:border-b-0 transition flex items-start space-x-3">
+                                                <div class="flex-1">
+                                                    <div class="flex items-center gap-2 mb-1">
+                                                        <span class="text-xs font-bold bg-gray-800 text-white px-2 py-0.5 rounded">{{ $report->formatted_report_number }}</span>
+                                                        <span class="text-xs font-semibold text-gray-600">{{ $report->item_name }}</span>
+                                                    </div>
+                                                    <div class="text-xs text-gray-500">
+                                                        {{ $report->report_datetime->format('d M Y') }} • {{ $report->report_location }}
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start">
+                                        <svg class="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                        <p class="text-sm text-yellow-800">No FOUND reports available for matching.</p>
+                                    </div>
+                                @endif
+                            @endif
                         </div>
-                    @else
-                        <select 
-                            wire:model.live="foundReportId"
-                            class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition @error('foundReportId') border-red-500 @enderror">
-                            <option value="">-- Select Found Report --</option>
-                            @foreach($foundReports as $report)
-                                <option value="{{ $report->report_id }}">
-                                    {{ $report->formatted_report_number }} - {{ $report->item_name }} - {{ $report->report_datetime->format('d M Y') }} - {{ $report->report_location }}
-                                </option>
-                            @endforeach
-                        </select>
+
                         @error('foundReportId')
                             <p class="mt-2 text-sm text-red-600 flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -227,50 +288,49 @@
                                 </div>
                             @endif
                         @endif
-                    @endif
+                    </div>
+
+                    <!-- Match Notes -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-900 mb-2">
+                            Match Notes <span class="text-gray-500 font-normal">(Optional)</span>
+                        </label>
+                        <textarea 
+                            wire:model="matchNotes"
+                            rows="4"
+                            placeholder="Add notes about why these items match, similarities found, or any important information..."
+                            class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none @error('matchNotes') border-red-500 @enderror"></textarea>
+                        <p class="mt-2 text-xs text-gray-500 flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Provide any additional context that helps validate this match
+                        </p>
+                        @error('matchNotes')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
-                <!-- Match Notes -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">
-                        Match Notes <span class="text-gray-500 font-normal">(Optional)</span>
-                    </label>
-                    <textarea 
-                        wire:model="matchNotes"
-                        rows="4"
-                        placeholder="Add notes about why these items match, similarities found, or any important information..."
-                        class="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none @error('matchNotes') border-red-500 @enderror"></textarea>
-                    <p class="mt-2 text-xs text-gray-500 flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <!-- Footer -->
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3 sticky bottom-0">
+                    <button 
+                        type="button"
+                        wire:click="$parent.closeCreateModal"
+                        class="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                        Cancel
+                    </button>
+                    <button 
+                        type="submit"
+                        @disabled(!$lostReportId || !$foundReportId)
+                        class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
-                        Provide any additional context that helps validate this match
-                    </p>
-                    @error('matchNotes')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                        Create Match
+                    </button>
                 </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3 sticky bottom-0">
-                <button 
-                    type="button"
-                    wire:click="$parent.closeCreateModal"
-                    class="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
-                    Cancel
-                </button>
-                <button 
-                    type="submit"
-                    @disabled(!$lostReportId || !$foundReportId)
-                    class="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
-                    Create Match
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 </div>

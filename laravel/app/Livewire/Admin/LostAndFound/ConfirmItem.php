@@ -33,7 +33,15 @@ class ConfirmItem extends Component
 
     // Photos
     public $photos = [];
+    public $newPhotos = [];
+    public $uploadKey = 0;
     public $reportPhotos = [];
+
+    // Lightbox state
+    public $showLightbox = false;
+    public $currentPhotoUrl = '';
+    public $currentPhotoIndex = 0;
+    public $lightboxPhotos = [];
 
     protected $listeners = [
         'open-confirm-item-modal' => 'openModal',
@@ -49,8 +57,10 @@ class ConfirmItem extends Component
             'sensitivity_level' => 'required|in:NORMAL,RESTRICTED',
             'post_id' => 'required|exists:posts,post_id',
             'item_description' => 'nullable|string',
-            'photos' => 'nullable|array',
-            'photos.*' => 'nullable|image|max:2048',
+            'photos' => 'nullable|array|max:5',
+            'photos.*' => 'nullable|image|max:25600',
+            'newPhotos' => 'nullable|array',
+            'newPhotos.*' => 'nullable|image|max:25600',
         ];
     }
 
@@ -58,16 +68,70 @@ class ConfirmItem extends Component
     {
         return [
             'photos.*.image' => 'All files must be valid images (jpg, png, jpeg, gif).',
-            'photos.*.max' => 'Each photo must not exceed 2MB.',
+            'photos.*.max' => 'Each photo must not exceed 25MB.',
+            'photos.max' => 'You can upload a maximum of 5 photos.',
+            'newPhotos.*.image' => 'All files must be valid images.',
+            'newPhotos.*.max' => 'Each photo must not exceed 25MB.',
             'post_id.required' => 'Please select a storage location.',
             'item_status.required' => 'Please select an item status.',
         ];
     }
 
+    public function updatedNewPhotos(): void
+    {
+        $this->validateOnly('newPhotos.*');
+
+        $allowed = max(0, 5 - count($this->photos));
+        foreach (array_slice($this->newPhotos, 0, $allowed) as $file) {
+            $this->photos[] = $file;
+        }
+
+        $this->newPhotos = [];
+        $this->uploadKey++;
+
+        Log::info('Photos updated in ConfirmItem', [
+            'total_photos' => count($this->photos),
+            'upload_key' => $this->uploadKey
+        ]);
+    }
+
+    // Lightbox methods
+    public function openLightbox($photoUrl, $index = 0)
+    {
+        $this->currentPhotoUrl = $photoUrl;
+        $this->currentPhotoIndex = $index;
+        $this->lightboxPhotos = $this->reportPhotos;
+        $this->showLightbox = true;
+    }
+
+    public function closeLightbox()
+    {
+        $this->showLightbox = false;
+        $this->currentPhotoUrl = '';
+        $this->currentPhotoIndex = 0;
+        $this->lightboxPhotos = [];
+    }
+
+    public function nextPhoto()
+    {
+        if ($this->currentPhotoIndex < count($this->lightboxPhotos) - 1) {
+            $this->currentPhotoIndex++;
+            $this->currentPhotoUrl = $this->lightboxPhotos[$this->currentPhotoIndex];
+        }
+    }
+
+    public function previousPhoto()
+    {
+        if ($this->currentPhotoIndex > 0) {
+            $this->currentPhotoIndex--;
+            $this->currentPhotoUrl = $this->lightboxPhotos[$this->currentPhotoIndex];
+        }
+    }
+
     public function openModal($reportId)
     {
         $this->reportId = $reportId;
-        $this->report = Report::with(['user', 'category'])->findOrFail($reportId);
+        $this->report = Report::with(['user', 'category', 'photos'])->findOrFail($reportId);
 
         // Validate that this is a FOUND report without item
         if ($this->report->report_type !== 'FOUND' || $this->report->item_id) {
@@ -75,15 +139,13 @@ class ConfirmItem extends Component
             return;
         }
 
-        // Load report photos
+        // Load report photos dari relasi photos
         $this->reportPhotos = [];
-        if ($this->report->photo_url) {
-            if (is_string($this->report->photo_url) && str_starts_with($this->report->photo_url, '[')) {
-                $photosArray = json_decode($this->report->photo_url, true);
-                $this->reportPhotos = is_array($photosArray) ? $photosArray : [$this->report->photo_url];
-            } else {
-                $this->reportPhotos = [$this->report->photo_url];
-            }
+        if ($this->report->photos && $this->report->photos->count() > 0) {
+            $this->reportPhotos = $this->report->photos->pluck('photo_url')->toArray();
+        } elseif ($this->report->photo_url) {
+            // Fallback untuk format lama
+            $this->reportPhotos = [$this->report->photo_url];
         }
 
         // Reset form
@@ -93,12 +155,14 @@ class ConfirmItem extends Component
         Log::info('Confirm Item modal opened', [
             'reportId' => $reportId,
             'report_type' => $this->report->report_type,
+            'report_photos_count' => count($this->reportPhotos),
         ]);
     }
 
     public function closeModal()
     {
         $this->showModal = false;
+        $this->closeLightbox(); // Close lightbox if open
         $this->resetForm();
     }
 
@@ -106,18 +170,27 @@ class ConfirmItem extends Component
     {
         $this->reset([
             'brand', 'color', 'storage', 'post_id', 
-            'item_description', 'photos'
+            'item_description', 'photos', 'newPhotos'
         ]);
 
         $this->item_status = 'STORED';
         $this->sensitivity_level = 'NORMAL';
+        $this->uploadKey++;
         $this->resetErrorBag();
     }
 
     public function removePhoto($index)
     {
-        unset($this->photos[$index]);
-        $this->photos = array_values($this->photos);
+        if (isset($this->photos[$index])) {
+            unset($this->photos[$index]);
+            $this->photos = array_values($this->photos);
+            $this->uploadKey++;
+            
+            Log::info('Photo removed from ConfirmItem', [
+                'index' => $index,
+                'remaining_photos' => count($this->photos)
+            ]);
+        }
     }
 
     public function confirmItem()
@@ -125,6 +198,7 @@ class ConfirmItem extends Component
         Log::info('Confirm Item method called', [
             'reportId' => $this->reportId,
             'photos_count' => count($this->photos),
+            'report_photos_count' => count($this->reportPhotos),
         ]);
 
         try {
@@ -173,7 +247,7 @@ class ConfirmItem extends Component
             if (!empty($this->photos)) {
                 foreach ($this->photos as $photo) {
                     $filename = Str::uuid() . '.' . $photo->getClientOriginalExtension();
-                    $path = $photo->storeAs('reports/found', $filename, 'public');
+                    $path = $photo->storeAs('items/' . $itemId, $filename, 'public');
 
                     ItemPhoto::create([
                         'photo_id' => (string) Str::uuid(),
@@ -184,6 +258,11 @@ class ConfirmItem extends Component
                         'display_order' => $photoOrder++,
                     ]);
                 }
+                
+                Log::info('New photos uploaded for item', [
+                    'count' => count($this->photos),
+                    'item_id' => $itemId
+                ]);
             }
 
             // Copy report photos to item
@@ -200,6 +279,11 @@ class ConfirmItem extends Component
                         ]);
                     }
                 }
+                
+                Log::info('Report photos copied to item', [
+                    'count' => count($this->reportPhotos),
+                    'item_id' => $itemId
+                ]);
             }
 
             // Update report with item_id and status
@@ -216,7 +300,10 @@ class ConfirmItem extends Component
             $this->resetForm();
             $this->dispatch('item-confirmed');
 
-            Log::info('Item confirmation completed successfully');
+            Log::info('Item confirmation completed successfully', [
+                'item_id' => $itemId,
+                'total_photos' => $photoOrder
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();

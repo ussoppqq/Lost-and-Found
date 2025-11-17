@@ -15,6 +15,9 @@ class MatchCreate extends Component
     
     public $lostReports = [];
     public $foundReports = [];
+    
+    public $lostSearch = '';
+    public $foundSearch = '';
 
     protected $rules = [
         'lostReportId' => 'required|exists:reports,report_id',
@@ -28,6 +31,32 @@ class MatchCreate extends Component
         'foundReportId.different' => 'Lost and Found reports must be different',
     ];
 
+    #[\Livewire\Attributes\On('updated.lostSearch')]
+    public function updatedLostSearch()
+    {
+        $this->filterLostReports();
+    }
+
+    #[\Livewire\Attributes\On('updated.foundSearch')]
+    public function updatedFoundSearch()
+    {
+        $this->filterFoundReports();
+    }
+
+    public function updatedLostReportId()
+    {
+        // Reset search saat item dipilih
+        $this->lostSearch = '';
+        $this->loadReports();
+    }
+
+    public function updatedFoundReportId()
+    {
+        // Reset search saat item dipilih
+        $this->foundSearch = '';
+        $this->loadReports();
+    }
+
     public function mount()
     {
         $this->loadReports();
@@ -35,25 +64,52 @@ class MatchCreate extends Component
 
     public function loadReports()
     {
-        // Load LOST reports that haven't been matched with eager loading category
-        $this->lostReports = Report::with('category')
+        // Load LOST reports
+        $this->lostReports = $this->getLostReportsQuery()->get();
+        // Load FOUND reports
+        $this->foundReports = $this->getFoundReportsQuery()->get();
+    }
+
+    public function filterLostReports()
+    {
+        $this->lostReports = $this->getLostReportsQuery()
+            ->where(function($query) {
+                $query->where('report_number', 'like', '%' . $this->lostSearch . '%')
+                      ->orWhere('item_name', 'like', '%' . $this->lostSearch . '%');
+            })
+            ->get();
+    }
+
+    public function filterFoundReports()
+    {
+        $this->foundReports = $this->getFoundReportsQuery()
+            ->where(function($query) {
+                $query->where('report_number', 'like', '%' . $this->foundSearch . '%')
+                      ->orWhere('item_name', 'like', '%' . $this->foundSearch . '%');
+            })
+            ->get();
+    }
+
+    private function getLostReportsQuery()
+    {
+        return Report::with('category')
             ->where('report_type', 'LOST')
             ->whereIn('report_status', ['OPEN', 'STORED'])
             ->whereDoesntHave('matchesAsLost', function($query) {
                 $query->where('match_status', 'CONFIRMED');
             })
-            ->orderBy('report_number', 'desc')
-            ->get();
+            ->orderBy('report_number', 'desc');
+    }
 
-        // Load FOUND reports that haven't been matched with eager loading category
-        $this->foundReports = Report::with('category')
+    private function getFoundReportsQuery()
+    {
+        return Report::with('category')
             ->where('report_type', 'FOUND')
             ->whereIn('report_status', ['OPEN', 'STORED'])
             ->whereDoesntHave('matchesAsFound', function($query) {
                 $query->where('match_status', 'CONFIRMED');
             })
-            ->orderBy('report_number', 'desc')
-            ->get();
+            ->orderBy('report_number', 'desc');
     }
 
     public function createMatch()
@@ -88,7 +144,7 @@ class MatchCreate extends Component
             $this->dispatch('match-created');
             
             // Reset form
-            $this->reset(['lostReportId', 'foundReportId', 'matchNotes']);
+            $this->reset(['lostReportId', 'foundReportId', 'matchNotes', 'lostSearch', 'foundSearch']);
             $this->loadReports();
             
         } catch (\Exception $e) {

@@ -11,407 +11,399 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class StatisticPdfController extends Controller
 {
     public function export(Request $request)
     {
-        $tz = 'Asia/Jakarta';
-        $companyId = auth()->user()->company_id;
+        try {
+            $tz = 'Asia/Jakarta';
+            $companyId = auth()->user()->company_id;
 
-        // Parse dates based on period type
-        $periodType = $request->get('period_type', 'weekly');
-        $selectedDate = Carbon::parse($request->get('selected_date', now($tz)), $tz);
+            $periodType = $request->get('period_type', 'weekly');
+            $selectedDate = $request->get('selected_date', now($tz)->format('Y-m-d'));
+
+            $dateRange = $this->getDateRange($periodType, $selectedDate, $tz);
+            $start = $dateRange['start'];
+            $end = $dateRange['end'];
+
+            Log::info('PDF Export Started', [
+                'period_type' => $periodType,
+                'selected_date' => $selectedDate,
+                'start' => $start->toDateTimeString(),
+                'end' => $end->toDateTimeString(),
+                'company_id' => $companyId,
+                'user' => auth()->user()->email,
+            ]);
+
+            // Query reports
+            $reports = Report::where('company_id', $companyId)
+                ->whereBetween('created_at', [$start, $end])
+                ->get(['report_type', 'report_status', 'created_at', 'item_name', 'category_id']);
+
+            $totalLost = $reports->where('report_type', 'LOST')->count();
+            $totalFound = $reports->where('report_type', 'FOUND')->count();
+            $openLost = $reports->where('report_type', 'LOST')->where('report_status', 'OPEN')->count();
+            $matched = $reports->where('report_status', 'MATCHED')->count();
+
+            // Query items
+            $items = Item::where('company_id', $companyId)
+                ->whereBetween('created_at', [$start, $end])
+                ->get(['item_status']);
+
+            $totalStored = $items->where('item_status', 'STORED')->count();
+            $totalRegistered = $items->where('item_status', 'REGISTERED')->count();
+            $totalClaimed = $items->where('item_status', 'CLAIMED')->count();
+            $totalReturned = $items->where('item_status', 'RETURNED')->count();
+            $totalDisposed = $items->where('item_status', 'DISPOSED')->count();
+            $totalItemsAll = $totalStored + $totalRegistered + $totalClaimed + $totalDisposed + $totalReturned;
+            $successRate = $totalItemsAll > 0 ? round(($totalClaimed / $totalItemsAll) * 100, 1) : 0;
+
+            // Item status distribution
+            $itemStatusData = [
+                'STORED' => $totalStored,
+                'REGISTERED' => $totalRegistered,
+                'CLAIMED' => $totalClaimed,
+                'RETURNED' => $totalReturned,
+                'DISPOSED' => $totalDisposed,
+            ];
+            $itemStatusData = array_filter($itemStatusData);
+
+            // Category distribution
+            $catRows = Report::where('company_id', $companyId)
+                ->whereBetween('created_at', [$start, $end])
+                ->whereNotNull('category_id')
+                ->select('category_id', DB::raw('COUNT(*) as count'))
+                ->groupBy('category_id')
+                ->orderByDesc('count')
+                ->limit(7)
+                ->get();
+
+            $cats = Category::whereIn('category_id', $catRows->pluck('category_id')->filter())
+                ->get(['category_id', 'category_name'])
+                ->keyBy('category_id');
+
+            $categoryDistribution = $catRows->map(fn ($r) => [
+                'name' => $cats[$r->category_id]->category_name ?? 'Uncategorized',
+                'count' => (int) $r->count,
+            ])->values()->toArray();
+
+            // Trend data
+            $trendData = Report::where('company_id', $companyId)
+                ->whereBetween('created_at', [$start, $end])
+                ->select(
+                    DB::raw('DATE(created_at) as date'),
+                    DB::raw('SUM(CASE WHEN report_type = "LOST" THEN 1 ELSE 0 END) as lost'),
+                    DB::raw('SUM(CASE WHEN report_type = "FOUND" THEN 1 ELSE 0 END) as found')
+                )
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get()
+                ->map(fn ($item) => [
+                    'date' => Carbon::parse($item->date)->format('M d'),
+                    'lost' => (int) $item->lost,
+                    'found' => (int) $item->found,
+                ])->toArray();
+
+            // Claims data
+            $claims = Claim::where('company_id', $companyId)
+                ->whereBetween('created_at', [$start, $end])
+                ->get(['claim_status']);
+
+            $claimStatusData = [
+                'PENDING' => $claims->where('claim_status', 'PENDING')->count(),
+                'APPROVED' => $claims->where('claim_status', 'APPROVED')->count(),
+                'REJECTED' => $claims->where('claim_status', 'REJECTED')->count(),
+                'RELEASED' => $claims->where('claim_status', 'RELEASED')->count(),
+            ];
+
+            // Recent activities
+            $recent = Report::with('user')
+                ->where('company_id', $companyId)
+                ->whereBetween('created_at', [$start, $end])
+                ->latest('created_at')
+                ->limit(15)
+                ->get();
+
+            // Generate charts - Always generate if there's any data
+            $hasData = ($totalLost + $totalFound) > 0;
+            $chartUrls = null;
+
+            if ($hasData) {
+                try {
+                    $chartUrls = $this->generateChartUrls([
+                        'reportType' => ['Lost' => max($totalLost, 0), 'Found' => max($totalFound, 0)],
+                        'itemStatus' => $itemStatusData ?: [],
+                        'categoryDist' => $categoryDistribution ?: [],
+                        'trendData' => $trendData ?: [],
+                        'claimStatus' => $claimStatusData ?: [],
+                    ]);
+                    Log::info('Chart URLs generated', ['urls' => array_keys($chartUrls)]);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to generate charts: '.$e->getMessage());
+                }
+            }
+
+            $data = [
+                'range' => [$start->format('d M Y'), $end->format('d M Y')],
+                'periodType' => ucfirst($periodType),
+                'totalLost' => $totalLost,
+                'totalFound' => $totalFound,
+                'openLost' => $openLost,
+                'matched' => $matched,
+                'totalStored' => $totalStored,
+                'totalRegistered' => $totalRegistered,
+                'totalClaimed' => $totalClaimed,
+                'totalReturned' => $totalReturned,
+                'totalDisposed' => $totalDisposed,
+                'successRate' => $successRate,
+                'categoryDistribution' => $categoryDistribution,
+                'recent' => $recent,
+                'chartUrls' => $chartUrls,
+                'hasData' => $hasData,
+            ];
+
+            Log::info('Generating PDF with data', [
+                'hasData' => $hasData,
+                'totalLost' => $totalLost,
+                'totalFound' => $totalFound,
+                'totalReports' => $totalLost + $totalFound,
+                'categoriesCount' => count($categoryDistribution),
+                'recentActivitiesCount' => count($recent),
+                'chartUrls' => $chartUrls ? array_keys($chartUrls) : null,
+            ]);
+
+            // Generate PDF
+            $pdf = Pdf::loadView('pdf.statistic', $data)
+                ->setPaper('a4', 'portrait')
+                ->setOption('isRemoteEnabled', true)
+                ->setOption('enable_local_file_access', true)
+                ->setOption('isPhpEnabled', false)
+                ->setOption('isHtml5ParserEnabled', true);
+
+            $filename = 'statistics_'.$start->format('Ymd').'-'.$end->format('Ymd').'.pdf';
+
+            Log::info('PDF Generated Successfully', ['filename' => $filename]);
+
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            Log::error('PDF Generation Failed', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            // Return error response instead of redirect
+            return response()->json([
+                'error' => 'Failed to generate PDF',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], 500);
+        }
+    }
+
+    private function getDateRange($periodType, $selectedDate, $tz)
+    {
+        $date = Carbon::parse($selectedDate, $tz);
 
         switch ($periodType) {
+            case 'weekly':
+                return [
+                    'start' => $date->copy()->startOfWeek()->startOfDay(),
+                    'end' => $date->copy()->endOfWeek()->endOfDay(),
+                ];
             case 'monthly':
-                $start = $selectedDate->copy()->startOfMonth();
-                $end = $selectedDate->copy()->endOfMonth();
-                break;
+                return [
+                    'start' => $date->copy()->startOfMonth()->startOfDay(),
+                    'end' => $date->copy()->endOfMonth()->endOfDay(),
+                ];
             case 'yearly':
-                $start = $selectedDate->copy()->startOfYear();
-                $end = $selectedDate->copy()->endOfYear();
-                break;
-            default: // weekly
-                $start = $selectedDate->copy()->startOfWeek();
-                $end = $selectedDate->copy()->endOfWeek();
+                return [
+                    'start' => $date->copy()->startOfYear()->startOfDay(),
+                    'end' => $date->copy()->endOfYear()->endOfDay(),
+                ];
+            default:
+                return [
+                    'start' => $date->copy()->startOfWeek()->startOfDay(),
+                    'end' => $date->copy()->endOfWeek()->endOfDay(),
+                ];
+        }
+    }
+
+    private function generateChartUrls($data)
+    {
+        $baseUrl = 'https://quickchart.io/chart';
+
+        // Ensure we have at least some data
+        $totalReports = ($data['reportType']['Lost'] ?? 0) + ($data['reportType']['Found'] ?? 0);
+        if ($totalReports === 0) {
+            return null;
         }
 
-        // Clamp to today
-        $today = now($tz)->endOfDay();
-        if ($end->gt($today)) $end = $today;
+        $urls = [];
 
-        // ===== STATISTICS DATA =====
-        
-        // Reports Statistics
-        $reports = Report::where('company_id', $companyId)
-            ->whereBetween('created_at', [$start, $end])
-            ->get();
-
-        $totalReports = $reports->count();
-        $lostReports = $reports->where('report_type', 'LOST')->count();
-        $foundReports = $reports->where('report_type', 'FOUND')->count();
-        $matchedReports = $reports->where('report_status', 'MATCHED')->count();
-        $openReports = $reports->where('report_status', 'OPEN')->count();
-        $closedReports = $reports->where('report_status', 'CLOSED')->count();
-
-        // Items Statistics
-        $items = Item::where('company_id', $companyId)
-            ->whereBetween('created_at', [$start, $end])
-            ->get();
-
-        $totalItems = $items->count();
-        $registeredItems = $items->where('item_status', 'REGISTERED')->count();
-        $storedItems = $items->where('item_status', 'STORED')->count();
-        $claimedItems = $items->where('item_status', 'CLAIMED')->count();
-        $disposedItems = $items->where('item_status', 'DISPOSED')->count();
-        $returnedItems = $items->where('item_status', 'RETURNED')->count();
-
-        // Claims Statistics
-        $claims = Claim::where('company_id', $companyId)
-            ->whereBetween('created_at', [$start, $end])
-            ->get();
-
-        $totalClaims = $claims->count();
-        $pendingClaims = $claims->where('claim_status', 'PENDING')->count();
-        $approvedClaims = $claims->where('claim_status', 'APPROVED')->count();
-        $rejectedClaims = $claims->where('claim_status', 'REJECTED')->count();
-        $releasedClaims = $claims->where('claim_status', 'RELEASED')->count();
-
-        // Category Distribution
-        $topCategories = Item::where('company_id', $companyId)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNotNull('category_id')
-            ->select('category_id', DB::raw('COUNT(*) as total'))
-            ->with('category:category_id,category_name')
-            ->groupBy('category_id')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->get();
-
-        $categoryDistribution = $topCategories->map(function($item) {
-            return [
-                'name' => $item->category->category_name ?? 'Unknown',
-                'count' => $item->total
+        // 1. Report Type Donut Chart
+        if ($totalReports > 0) {
+            $reportTypeChart = [
+                'type' => 'doughnut',
+                'data' => [
+                    'labels' => ['Lost Reports', 'Found Reports'],
+                    'datasets' => [[
+                        'data' => [
+                            $data['reportType']['Lost'] ?? 0,
+                            $data['reportType']['Found'] ?? 0,
+                        ],
+                        'backgroundColor' => ['#EF4444', '#10B981'],
+                    ]],
+                ],
+                'options' => [
+                    'plugins' => [
+                        'legend' => [
+                            'position' => 'bottom',
+                            'labels' => ['fontSize' => 12],
+                        ],
+                        'datalabels' => [
+                            'color' => '#fff',
+                            'font' => ['weight' => 'bold', 'size' => 14],
+                        ],
+                    ],
+                ],
             ];
-        })->toArray();
-
-        // Daily Trend Data
-        $reportsByDay = Report::where('company_id', $companyId)
-            ->whereBetween('created_at', [$start, $end])
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as total'),
-                DB::raw('SUM(CASE WHEN report_type = "LOST" THEN 1 ELSE 0 END) as lost'),
-                DB::raw('SUM(CASE WHEN report_type = "FOUND" THEN 1 ELSE 0 END) as found')
-            )
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
-
-        $trendData = $reportsByDay->map(function($item) {
-            return [
-                'date' => Carbon::parse($item->date)->format('M d'),
-                'total' => $item->total,
-                'lost' => $item->lost,
-                'found' => $item->found,
-            ];
-        })->toArray();
-
-        // Recent Activities
-        $recent = Report::with('user')
-            ->where('company_id', $companyId)
-            ->whereBetween('created_at', [$start, $end])
-            ->latest('created_at')
-            ->limit(15)
-            ->get();
-
-        // ===== CHART URLs using Google Charts API =====
-        
-        // 1. Report Types Donut Chart
-        $reportTypeChartUrl = $this->generateDonutChart(
-            $lostReports,
-            $foundReports
-        );
+            $urls['reportType'] = $baseUrl.'?width=350&height=250&c='.urlencode(json_encode($reportTypeChart));
+        }
 
         // 2. Item Status Pie Chart
-        $itemStatusChartUrl = $this->generateItemStatusPieChart(
-            $registeredItems,
-            $storedItems,
-            $claimedItems,
-            $disposedItems,
-            $returnedItems
-        );
+        if (! empty($data['itemStatus'])) {
+            $itemLabels = array_keys($data['itemStatus']);
+            $itemValues = array_values($data['itemStatus']);
+            $itemColors = ['#3B82F6', '#10B981', '#8B5CF6', '#EF4444', '#F59E0B'];
 
-        // 3. Claim Status Bar Chart
-        $claimStatusChartUrl = $this->generateClaimBarChart(
-            $pendingClaims,
-            $approvedClaims,
-            $rejectedClaims,
-            $releasedClaims
-        );
-
-        // 4. Top Categories Bar Chart
-        $categoryChartUrl = $this->generateCategoryBarChart($categoryDistribution);
-
-        // 5. Trend Line Chart
-        $trendChartUrl = $this->generateTrendLineChart($trendData);
-
-        // Calculate success rate
-        $totalItemsAll = $storedItems + $claimedItems + $disposedItems + $returnedItems + $registeredItems;
-        $successRate = $totalItemsAll > 0 ? round(($claimedItems / $totalItemsAll) * 100, 1) : 0;
-
-        $data = [
-            'range' => [$start->format('d M Y'), $end->format('d M Y')],
-            'periodType' => ucfirst($periodType),
-            
-            // Reports
-            'totalReports' => $totalReports,
-            'lostReports' => $lostReports,
-            'foundReports' => $foundReports,
-            'matchedReports' => $matchedReports,
-            'openReports' => $openReports,
-            'closedReports' => $closedReports,
-            
-            // Items
-            'totalItems' => $totalItems,
-            'registeredItems' => $registeredItems,
-            'storedItems' => $storedItems,
-            'claimedItems' => $claimedItems,
-            'disposedItems' => $disposedItems,
-            'returnedItems' => $returnedItems,
-            
-            // Claims
-            'totalClaims' => $totalClaims,
-            'pendingClaims' => $pendingClaims,
-            'approvedClaims' => $approvedClaims,
-            'rejectedClaims' => $rejectedClaims,
-            'releasedClaims' => $releasedClaims,
-            
-            'successRate' => $successRate,
-            'categoryDistribution' => $categoryDistribution,
-            'trendChartData' => $trendData,
-            'recent' => $recent,
-            
-            // Chart URLs
-            'reportTypeChartUrl' => $reportTypeChartUrl,
-            'itemStatusChartUrl' => $itemStatusChartUrl,
-            'claimStatusChartUrl' => $claimStatusChartUrl,
-            'categoryChartUrl' => $categoryChartUrl,
-            'trendChartUrl' => $trendChartUrl,
-        ];
-
-        $pdf = Pdf::loadView('pdf.statistic', $data)
-            ->setPaper('a4', 'portrait')
-            ->setOption('enable-local-file-access', true);
-            
-        $filename = 'statistics_' . $start->format('Ymd') . '-' . $end->format('Ymd') . '.pdf';
-
-        return $pdf->download($filename);
-    }
-
-    /**
-     * Generate Report Types Donut Chart
-     */
-    private function generateDonutChart($lostCount, $foundCount)
-    {
-        if ($lostCount == 0 && $foundCount == 0) {
-            return $this->generateEmptyChart('No Report Data');
+            $itemStatusChart = [
+                'type' => 'pie',
+                'data' => [
+                    'labels' => $itemLabels,
+                    'datasets' => [[
+                        'data' => $itemValues,
+                        'backgroundColor' => array_slice($itemColors, 0, count($itemLabels)),
+                    ]],
+                ],
+                'options' => [
+                    'plugins' => [
+                        'legend' => [
+                            'position' => 'bottom',
+                            'labels' => ['fontSize' => 10],
+                        ],
+                        'datalabels' => [
+                            'color' => '#fff',
+                            'font' => ['weight' => 'bold', 'size' => 12],
+                        ],
+                    ],
+                ],
+            ];
+            $urls['itemStatus'] = $baseUrl.'?width=350&height=250&c='.urlencode(json_encode($itemStatusChart));
         }
 
-        $total = $lostCount + $foundCount;
-        $lostPercent = round(($lostCount / $total) * 100, 1);
-        $foundPercent = round(($foundCount / $total) * 100, 1);
-
-        $chart = [
-            'cht' => 'pd',  // pie donut
-            'chs' => '350x250',
-            'chd' => "t:{$lostCount},{$foundCount}",
-            'chl' => "Lost ({$lostPercent}%)|Found ({$foundPercent}%)",
-            'chco' => 'EF4444,10B981',
-            'chf' => 'bg,s,FFFFFF',
-            'chdl' => "Lost Reports|Found Reports",
-            'chdlp' => 'b',
-            'chds' => 'a',
-        ];
-
-        return 'https://chart.googleapis.com/chart?' . http_build_query($chart);
-    }
-
-    /**
-     * Generate Item Status Pie Chart
-     */
-    private function generateItemStatusPieChart($registered, $stored, $claimed, $disposed, $returned)
-    {
-        $values = array_filter([$registered, $stored, $claimed, $disposed, $returned]);
-        
-        if (empty($values)) {
-            return $this->generateEmptyChart('No Item Data');
+        // 3. Category Horizontal Bar Chart
+        if (! empty($data['categoryDist'])) {
+            $categoryChart = [
+                'type' => 'horizontalBar',
+                'data' => [
+                    'labels' => array_column($data['categoryDist'], 'name'),
+                    'datasets' => [[
+                        'label' => 'Reports',
+                        'data' => array_column($data['categoryDist'], 'count'),
+                        'backgroundColor' => '#8B5CF6',
+                    ]],
+                ],
+                'options' => [
+                    'plugins' => [
+                        'legend' => ['display' => false],
+                    ],
+                    'scales' => [
+                        'xAxes' => [[
+                            'ticks' => ['beginAtZero' => true],
+                        ]],
+                    ],
+                ],
+            ];
+            $urls['category'] = $baseUrl.'?width=350&height=250&c='.urlencode(json_encode($categoryChart));
         }
 
-        $labels = [];
-        $data = [];
-        $colors = [];
-
-        if ($registered > 0) {
-            $labels[] = "Registered ({$registered})";
-            $data[] = $registered;
-            $colors[] = '3B82F6';
-        }
-        if ($stored > 0) {
-            $labels[] = "Stored ({$stored})";
-            $data[] = $stored;
-            $colors[] = '10B981';
-        }
-        if ($claimed > 0) {
-            $labels[] = "Claimed ({$claimed})";
-            $data[] = $claimed;
-            $colors[] = '8B5CF6';
-        }
-        if ($disposed > 0) {
-            $labels[] = "Disposed ({$disposed})";
-            $data[] = $disposed;
-            $colors[] = 'EF4444';
-        }
-        if ($returned > 0) {
-            $labels[] = "Returned ({$returned})";
-            $data[] = $returned;
-            $colors[] = 'F59E0B';
-        }
-
-        $chart = [
-            'cht' => 'p3',  // 3D pie
-            'chs' => '350x250',
-            'chd' => 't:' . implode(',', $data),
-            'chl' => implode('|', $labels),
-            'chco' => implode('|', $colors),
-            'chf' => 'bg,s,FFFFFF',
-        ];
-
-        return 'https://chart.googleapis.com/chart?' . http_build_query($chart);
-    }
-
-    /**
-     * Generate Claim Status Bar Chart
-     */
-    private function generateClaimBarChart($pending, $approved, $rejected, $released)
-    {
-        if ($pending == 0 && $approved == 0 && $rejected == 0 && $released == 0) {
-            return $this->generateEmptyChart('No Claim Data');
+        // 4. Trend Line Chart
+        if (! empty($data['trendData'])) {
+            $trendChart = [
+                'type' => 'line',
+                'data' => [
+                    'labels' => array_column($data['trendData'], 'date'),
+                    'datasets' => [
+                        [
+                            'label' => 'Lost',
+                            'data' => array_column($data['trendData'], 'lost'),
+                            'borderColor' => '#EF4444',
+                            'backgroundColor' => 'rgba(239, 68, 68, 0.1)',
+                            'fill' => true,
+                            'tension' => 0.3,
+                            'borderWidth' => 2,
+                        ],
+                        [
+                            'label' => 'Found',
+                            'data' => array_column($data['trendData'], 'found'),
+                            'borderColor' => '#10B981',
+                            'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
+                            'fill' => true,
+                            'tension' => 0.3,
+                            'borderWidth' => 2,
+                        ],
+                    ],
+                ],
+                'options' => [
+                    'plugins' => [
+                        'legend' => [
+                            'position' => 'top',
+                            'labels' => ['fontSize' => 11],
+                        ],
+                    ],
+                    'scales' => [
+                        'yAxes' => [[
+                            'ticks' => ['beginAtZero' => true],
+                        ]],
+                    ],
+                ],
+            ];
+            $urls['trend'] = $baseUrl.'?width=700&height=200&c='.urlencode(json_encode($trendChart));
         }
 
-        $maxValue = max($pending, $approved, $rejected, $released) + 5;
-        
-        $chart = [
-            'cht' => 'bvs',  // vertical bar
-            'chs' => '350x250',
-            'chd' => "t:{$pending},{$approved},{$rejected},{$released}",
-            'chds' => "0,{$maxValue}",
-            'chco' => 'F59E0B,10B981,EF4444,8B5CF6',
-            'chbh' => '40,15',
-            'chxt' => 'x,y',
-            'chxl' => '0:|Pending|Approved|Rejected|Released',
-            'chf' => 'bg,s,FFFFFF',
-            'chm' => 'N,000000,0,-1,11',
-        ];
-
-        return 'https://chart.googleapis.com/chart?' . http_build_query($chart);
-    }
-
-    /**
-     * Generate Category Bar Chart
-     */
-    private function generateCategoryBarChart($categories)
-    {
-        if (empty($categories)) {
-            return $this->generateEmptyChart('No Category Data');
+        // 5. Claim Status Bar Chart
+        $claimTotal = array_sum($data['claimStatus'] ?? []);
+        if ($claimTotal > 0) {
+            $claimChart = [
+                'type' => 'bar',
+                'data' => [
+                    'labels' => ['Pending', 'Approved', 'Rejected', 'Released'],
+                    'datasets' => [[
+                        'label' => 'Claims',
+                        'data' => array_values($data['claimStatus']),
+                        'backgroundColor' => '#3B82F6',
+                    ]],
+                ],
+                'options' => [
+                    'plugins' => [
+                        'legend' => ['display' => false],
+                    ],
+                    'scales' => [
+                        'yAxes' => [[
+                            'ticks' => ['beginAtZero' => true],
+                        ]],
+                    ],
+                ],
+            ];
+            $urls['claim'] = $baseUrl.'?width=350&height=250&c='.urlencode(json_encode($claimChart));
         }
 
-        $names = array_column($categories, 'name');
-        $counts = array_column($categories, 'count');
-        
-        // Limit to top 8 for better visibility
-        $names = array_slice($names, 0, 8);
-        $counts = array_slice($counts, 0, 8);
-        
-        $maxValue = max($counts) + 5;
-
-        // Reverse for horizontal bar (bottom to top)
-        $names = array_reverse($names);
-        $counts = array_reverse($counts);
-
-        $chart = [
-            'cht' => 'bhg',  // horizontal bar grouped
-            'chs' => '350x250',
-            'chd' => 't:' . implode(',', $counts),
-            'chds' => "0,{$maxValue}",
-            'chco' => '8B5CF6',
-            'chbh' => '20,5',
-            'chxt' => 'x,y',
-            'chxl' => '1:|' . implode('|', $names),
-            'chf' => 'bg,s,FFFFFF',
-            'chm' => 'N,000000,0,-1,11',
-        ];
-
-        return 'https://chart.googleapis.com/chart?' . http_build_query($chart);
-    }
-
-    /**
-     * Generate Trend Line Chart
-     */
-    private function generateTrendLineChart($trendData)
-    {
-        if (empty($trendData)) {
-            return $this->generateEmptyChart('No Trend Data');
-        }
-
-        $dates = array_column($trendData, 'date');
-        $totals = array_column($trendData, 'total');
-        $losts = array_column($trendData, 'lost');
-        $founds = array_column($trendData, 'found');
-
-        $maxValue = max(array_merge($totals, $losts, $founds)) + 3;
-
-        // Limit dates for readability (show every nth date)
-        $showEveryNth = max(1, floor(count($dates) / 10));
-        $dateLabels = [];
-        foreach ($dates as $i => $date) {
-            $dateLabels[] = ($i % $showEveryNth == 0) ? $date : '';
-        }
-
-        $chart = [
-            'cht' => 'lc',  // line chart
-            'chs' => '550x250',
-            'chd' => 't:' . implode(',', $totals) . '|' . implode(',', $losts) . '|' . implode(',', $founds),
-            'chds' => "0,{$maxValue}",
-            'chco' => '3B82F6,EF4444,10B981',
-            'chxt' => 'x,y',
-            'chxl' => '0:|' . implode('|', $dateLabels),
-            'chdl' => 'Total|Lost|Found',
-            'chdlp' => 't',
-            'chls' => '3|3|3',
-            'chm' => 'o,3B82F6,0,-1,6|o,EF4444,1,-1,6|o,10B981,2,-1,6',
-            'chf' => 'bg,s,FFFFFF',
-            'chg' => '10,10,1,5',
-        ];
-
-        return 'https://chart.googleapis.com/chart?' . http_build_query($chart);
-    }
-
-    /**
-     * Generate Empty Chart Placeholder
-     */
-    private function generateEmptyChart($message)
-    {
-        $chart = [
-            'cht' => 'p',
-            'chs' => '350x250',
-            'chd' => 't:1',
-            'chl' => $message,
-            'chco' => 'E5E7EB',
-            'chf' => 'bg,s,F9FAFB',
-        ];
-
-        return 'https://chart.googleapis.com/chart?' . http_build_query($chart);
+        return ! empty($urls) ? $urls : null;
     }
 }
