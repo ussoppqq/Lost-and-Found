@@ -5,13 +5,11 @@ use Illuminate\Support\Facades\Route;
 // Controllers
 use App\Http\Controllers\ReportPdfController;
 use App\Http\Controllers\Admin\StatisticPdfController;
-use App\Http\Controllers\LostPdfController;              // kalau dipakai
-use App\Http\Controllers\ReportReceiptController;
 
-// Livewire (pastikan nama class sesuai file)
+use App\Http\Controllers\ReportReceiptController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\RegisterExtra;
-use App\Livewire\Auth\ForgotPassword;      // ← huruf besar "P"
+use App\Livewire\Auth\ForgotPassword;      
 use App\Livewire\Auth\ResetPassword;
 
 use App\Livewire\Profile;
@@ -30,17 +28,6 @@ use App\Livewire\TrackingIndex;
 use App\Livewire\TrackingDetail;
 
 
-/*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-*/
-
-/*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-*/
 
 Route::get('/', fn() => view('home'))->name('home');
 Route::get('/categories', fn() => view('categories'))->name('categories');

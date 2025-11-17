@@ -118,8 +118,8 @@ class Index extends Component
             'categories' => $categories,
             'stats' => $stats,
         ])->layout('components.layouts.admin', [
-            'title' => 'Items Management',
-            'pageTitle' => 'Items Management',
+            'title' => 'Storage Management',
+            'pageTitle' => 'Storage Management',
             'pageDescription' => 'Manage all physical items in storage'
         ]);
     }

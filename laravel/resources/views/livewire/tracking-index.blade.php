@@ -54,7 +54,7 @@
                             </svg>
                             <div class="text-xs text-blue-800">
                                 <p class="font-semibold mb-1">Di mana menemukan Report ID?</p>
-                                <p>Cek PDF receipt yang diunduh setelah submit laporan. Report ID ada di kotak bertuliskan "Tracking ID".</p>
+                                <p>Cek PDF yang diunduh setelah submit laporan. Report ID ada di kotak bertuliskan "Tracking ID".</p>
                             </div>
                         </div>
                     </div>

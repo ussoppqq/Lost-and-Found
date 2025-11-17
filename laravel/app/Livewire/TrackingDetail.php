@@ -73,6 +73,6 @@ class TrackingDetail extends Component
     public function render()
     {
         return view('livewire.tracking-detail')
-            ->layout('components.layouts.app');
+            ->layout('components.layouts.user');
     }
 }

@@ -146,12 +146,12 @@
 </head>
 <body>
     <div class="header">
-        <h1>📋 REPORT RECEIPT</h1>
+        <h1>📋 REPORT ID</h1>
         <p>{{ $reportType }} Report Confirmation</p>
     </div>
 
     <div class="tracking-box">
-        <div class="label">🔍 Your Tracking ID</div>
+        <div class="label">🔍 Your Report ID</div>
         <div class="id">{{ $report->report_id }}</div>
     </div>
 
