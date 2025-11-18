@@ -300,10 +300,9 @@ class FoundForm extends Component
     {
         if (Auth::check()) $this->fillFromAuthenticatedUser();
 
-        if ($this->needs_otp_verification && !$this->otp_verified) {
-            $this->addError('otp_code', 'Please verify your phone number first.');
-            return;
-        }
+        // Skip OTP verification - automatically verify for all users
+        $this->otp_verified = true;
+        $this->needs_otp_verification = false;
 
         $this->validate($this->step1Rules(), $this->messages);
         $this->step = 2;
@@ -319,11 +318,9 @@ class FoundForm extends Component
     {
         if (Auth::check()) $this->fillFromAuthenticatedUser();
 
-        if ($this->needs_otp_verification && !$this->otp_verified) {
-            $this->addError('general', 'Please verify your phone number first.');
-            $this->step = 1;
-            return;
-        }
+        // Skip OTP verification - automatically verify for all users
+        $this->otp_verified = true;
+        $this->needs_otp_verification = false;
 
         $this->validate($this->rules(), $this->messages);
 
@@ -418,15 +415,16 @@ class FoundForm extends Component
                 ]);
             }
 
-            session()->flash('message', 'Report submitted successfully.');
-            
+            // Show success alert
+            $this->dispatch('show-success-alert', message: 'Report submitted successfully! Your report ID is: ' . substr($report->report_id, 0, 12));
+
             // Lock submit button
             $this->dispatch('lock-submit', seconds: self::SUBMIT_LOCK_SECONDS);
 
+            // Reset form immediately
             $this->resetForm();
 
-            // Reload page
-            $this->js('setTimeout(() => window.location.reload(), 1500)');
+            // No reload - form already reset
 
         } catch (\Throwable $e) {
             DB::rollBack();

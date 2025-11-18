@@ -354,16 +354,26 @@
 
         {{-- Submit (desktop only) --}}
         <div class="hidden lg:block pt-2">
-          <button type="submit" wire:loading.attr="disabled" wire:target="submit" id="btnSubmitReport"
-            class="w-full flex items-center justify-center gap-2 bg-gray-800 text-white rounded-xl px-6 py-4 text-base font-semibold hover:bg-gray-900 active:scale-[0.98] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
-            <svg wire:loading wire:target="submit" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-              <path class="opacity-75" fill="currentColor"
-                d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            <span wire:loading.remove wire:target="submit">Submit Report</span>
-            <span wire:loading wire:target="submit">Submitting...</span>
-          </button>
+          <div class="relative">
+            <button type="submit" wire:loading.attr="disabled" wire:target="submit" id="btnSubmitReport"
+              class="w-full flex items-center justify-center gap-2 bg-gray-800 text-white rounded-xl px-6 py-4 text-base font-semibold hover:bg-gray-900 active:scale-[0.98] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg wire:loading wire:target="submit" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor"
+                  d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              <span wire:loading.remove wire:target="submit">Submit Report</span>
+              <span wire:loading wire:target="submit">Submitting...</span>
+            </button>
+            <div id="submitSuccessDesktop" class="hidden mt-3 p-3 bg-green-50 border-2 border-green-500 rounded-xl">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <p id="submitSuccessMessageDesktop" class="text-sm font-semibold text-green-800"></p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {{-- ===== MOBILE/TABLET: Step 1 ===== --}}
@@ -682,17 +692,27 @@
 
             {{-- Actions --}}
             <div class="pt-2 space-y-3">
-              <button type="submit" wire:loading.attr="disabled" wire:target="submit" id="btnSubmitReportMobile"
-                class="w-full flex items-center justify-center gap-2 bg-gray-800 text-white rounded-xl px-6 py-4 text-base font-semibold hover:bg-gray-900 active:scale-[0.98] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg wire:loading wire:target="submit" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                    stroke-width="4" />
-                  <path class="opacity-75" fill="currentColor"
-                    d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                <span wire:loading.remove wire:target="submit">Submit Report</span>
-                <span wire:loading wire:target="submit">Submitting...</span>
-              </button>
+              <div>
+                <button type="submit" wire:loading.attr="disabled" wire:target="submit" id="btnSubmitReportMobile"
+                  class="w-full flex items-center justify-center gap-2 bg-gray-800 text-white rounded-xl px-6 py-4 text-base font-semibold hover:bg-gray-900 active:scale-[0.98] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                  <svg wire:loading wire:target="submit" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                      stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor"
+                      d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  <span wire:loading.remove wire:target="submit">Submit Report</span>
+                  <span wire:loading wire:target="submit">Submitting...</span>
+                </button>
+                <div id="submitSuccessMobile" class="hidden mt-3 p-3 bg-green-50 border-2 border-green-500 rounded-xl">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <p id="submitSuccessMessageMobile" class="text-sm font-semibold text-green-800"></p>
+                  </div>
+                </div>
+              </div>
 
               <button type="button" wire:click="previousStep"
                 class="w-full flex items-center justify-center gap-2 bg-white text-gray-700 rounded-xl px-6 py-3.5 text-base font-semibold border border-gray-200 hover:bg-gray-50 active:scale-[0.98] transition-all">
@@ -857,6 +877,37 @@
   window.addEventListener('lock-submit', (e) => {
     const sec = e?.detail?.seconds ?? 3;
     lockSubmit(sec);
+  });
+
+  // --- Show success alert ---
+  window.addEventListener('show-success-alert', (e) => {
+    const message = e?.detail?.message ?? 'Report submitted successfully!';
+
+    // Desktop success
+    const desktopBox = document.getElementById('submitSuccessDesktop');
+    const desktopMsg = document.getElementById('submitSuccessMessageDesktop');
+
+    // Mobile success
+    const mobileBox = document.getElementById('submitSuccessMobile');
+    const mobileMsg = document.getElementById('submitSuccessMessageMobile');
+
+    if (desktopBox && desktopMsg) {
+      desktopMsg.textContent = message;
+      desktopBox.classList.remove('hidden');
+
+      setTimeout(() => {
+        desktopBox.classList.add('hidden');
+      }, 5000);
+    }
+
+    if (mobileBox && mobileMsg) {
+      mobileMsg.textContent = message;
+      mobileBox.classList.remove('hidden');
+
+      setTimeout(() => {
+        mobileBox.classList.add('hidden');
+      }, 5000);
+    }
   });
 
   // --- Cegah Enter memicu submit tak sengaja di input text (kecuali textarea) ---
