@@ -17,7 +17,7 @@ return [
         'allowed_protocols' => [
             'file://' => ['rules' => []],
             'http://' => ['rules' => []],
-            'https://' => ['rules' => []], // PENTING: Enable HTTPS
+            'https://' => ['rules' => []], 
         ],
         'log_output_file' => null,
         'enable_font_subsetting' => false,
@@ -29,7 +29,7 @@ return [
         'dpi' => 96,
         'enable_php' => false,
         'enable_javascript' => true,
-        'enable_remote' => true, // PENTING: Enable remote images (untuk QuickChart)
+        'enable_remote' => true, 
         'font_height_ratio' => 1.1,
         'enable_html5_parser' => true,
     ],
