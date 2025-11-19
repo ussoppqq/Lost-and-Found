@@ -3,9 +3,11 @@
 namespace App\Livewire\Admin\Matches;
 
 use App\Models\MatchedItem;
+use App\Models\Claim;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class MatchList extends Component
 {
@@ -85,18 +87,31 @@ class MatchList extends Component
             }
 
             DB::transaction(function () use ($match) {
+                // Update match status
                 $match->update([
                     'match_status' => 'CONFIRMED',
                     'confirmed_at' => now(),
                     'confirmed_by' => auth()->id(),
                 ]);
 
-                // Update report status
+                // Update report status ke MATCHED
                 $match->lostReport->update(['report_status' => 'MATCHED']);
                 $match->foundReport->update(['report_status' => 'MATCHED']);
+
+                // ✨ AUTO CREATE CLAIM dengan status PENDING
+                Claim::create([
+                    'claim_id' => Str::uuid(),
+                    'company_id' => auth()->user()->company_id,
+                    'user_id' => $match->lostReport->user_id,
+                    'match_id' => $match->match_id,
+                    'item_id' => $match->foundReport->item_id,
+                    'report_id' => $match->lostReport->report_id,
+                    'claim_status' => 'PENDING',
+                    'pickup_schedule' => now()->addDays(3), // Default 3 hari dari sekarang
+                ]);
             });
 
-            session()->flash('success', 'Match confirmed successfully! You can now process the claim.');
+            session()->flash('success', 'Match confirmed successfully! A claim has been created and ready to process.');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to confirm match: ' . $e->getMessage());
         }
@@ -129,15 +144,17 @@ class MatchList extends Component
 
     public function processClaim($matchId)
     {
-        $match = MatchedItem::with(['foundReport'])->findOrFail($matchId);
+        $match = MatchedItem::with(['foundReport', 'claim'])->findOrFail($matchId);
 
-        if (!$match->foundReport->item_id) {
-            session()->flash('error', 'Cannot process claim: Found report must have a registered item first!');
+        // Cek apakah ada claim
+        if (!$match->claim) {
+            session()->flash('error', 'No claim found for this match!');
             return;
         }
 
-        if ($match->hasClaim()) {
-            session()->flash('error', 'This match already has a claim!');
+        // Cek apakah claim sudah diproses
+        if ($match->claim->isReleased() || $match->claim->isRejected()) {
+            session()->flash('error', 'This claim has already been processed!');
             return;
         }
 
@@ -177,14 +194,20 @@ class MatchList extends Component
     public function deleteMatch($matchId)
     {
         try {
-            $match = MatchedItem::withTrashed()->with(['lostReport', 'foundReport'])->findOrFail($matchId);
+            $match = MatchedItem::withTrashed()->with(['lostReport', 'foundReport', 'claim'])->findOrFail($matchId);
 
-            if ($match->hasClaim()) {
-                session()->flash('error', 'Cannot delete match with existing claim!');
+            // Cek apakah ada claim yang sudah RELEASED
+            if ($match->hasClaim() && $match->claim->isReleased()) {
+                session()->flash('error', 'Cannot delete match with released claim!');
                 return;
             }
 
             DB::transaction(function () use ($match) {
+                // Hapus claim jika ada dan masih pending/rejected
+                if ($match->hasClaim()) {
+                    $match->claim->delete();
+                }
+
                 // Kembalikan status reports ke STORED
                 $match->lostReport->update(['report_status' => 'STORED']);
                 $match->foundReport->update(['report_status' => 'STORED']);

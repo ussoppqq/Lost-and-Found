@@ -6,7 +6,6 @@ use App\Models\Claim;
 use App\Models\MatchedItem;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
@@ -16,39 +15,61 @@ class ProcessClaim extends Component
 
     public $matchId;
     public $match;
+    public $claim;
     public $brand = '';
     public $color = '';
     public $claimNotes = '';
+    public $rejectionReason = '';
     public $tempPhotos = [];
+    public $showRejectModal = false;
 
-    protected $rules = [
-        'brand' => 'nullable|string|max:255',
-        'color' => 'nullable|string|max:255',
-        'claimNotes' => 'nullable|string|max:1000',
-        'tempPhotos.*' => 'nullable|image|max:2048',
-    ];
+    protected function rules()
+    {
+        return [
+            'brand' => 'nullable|string|max:255',
+            'color' => 'nullable|string|max:255',
+            'claimNotes' => 'nullable|string|max:1000',
+            'tempPhotos.*' => 'nullable|image|max:2048',
+            'rejectionReason' => $this->showRejectModal ? 'required|string|min:10|max:500' : 'nullable',
+        ];
+    }
 
     protected $messages = [
         'tempPhotos.*.image' => 'Each file must be an image',
         'tempPhotos.*.max' => 'Each photo must not exceed 2MB',
+        'rejectionReason.required' => 'Rejection reason is required',
+        'rejectionReason.min' => 'Rejection reason must be at least 10 characters',
     ];
 
     public function mount($matchId)
     {
         $this->matchId = $matchId;
-        $this->match = MatchedItem::with(['lostReport.user', 'foundReport.item'])->findOrFail($matchId);
+        $this->match = MatchedItem::with([
+            'lostReport.user', 
+            'foundReport.item', 
+            'claim'
+        ])->findOrFail($matchId);
         
-        // VALIDASI: Found report HARUS punya item
-        if (!$this->match->foundReport->item_id) {
-            session()->flash('error', 'Cannot process claim: Found report must have a registered item!');
+        // Load existing claim
+        $this->claim = $this->match->claim;
+        
+        if (!$this->claim) {
+            session()->flash('error', 'No claim found for this match!');
             $this->closeModal();
             return;
         }
 
-        // Pre-fill data dari found item jika ada
-        if ($this->match->foundReport->item) {
-            $this->brand = $this->match->foundReport->item->item_name ?? '';
+        // Cek apakah claim masih PENDING
+        if (!$this->claim->isPending()) {
+            session()->flash('error', 'This claim has already been processed!');
+            $this->closeModal();
+            return;
         }
+
+        // Pre-fill data dari existing claim atau item
+        $this->brand = $this->claim->brand ?? $this->match->foundReport->item->item_name ?? '';
+        $this->color = $this->claim->color ?? '';
+        $this->claimNotes = $this->claim->claim_notes ?? '';
     }
 
     public function updatedTempPhotos()
@@ -63,62 +84,112 @@ class ProcessClaim extends Component
         array_splice($this->tempPhotos, $index, 1);
     }
 
-    public function processClaim()
+    public function releaseClaim()
     {
-        $this->validate();
+        $this->validate([
+            'brand' => 'nullable|string|max:255',
+            'color' => 'nullable|string|max:255',
+            'claimNotes' => 'nullable|string|max:1000',
+            'tempPhotos.*' => 'nullable|image|max:2048',
+        ]);
 
         try {
             DB::beginTransaction();
 
             // Upload photos
-            $uploadedPhotos = [];
+            $existingPhotos = $this->claim->claim_photos ?? [];
+            $uploadedPhotos = $existingPhotos;
+            
             foreach ($this->tempPhotos as $photo) {
                 $path = $photo->store('claims', 'public');
                 $uploadedPhotos[] = $path;
             }
 
-            // Create claim dengan status RELEASED (langsung approved)
-            Claim::create([
-                'claim_id' => Str::uuid(),
-                'company_id' => auth()->user()->company_id,
-                'user_id' => $this->match->lostReport->user_id, 
-                'match_id' => $this->matchId,
-                'item_id' => $this->match->foundReport->item_id, 
-                'report_id' => $this->match->lostReport->report_id, 
-                'claim_status' => 'RELEASED', 
+            // Update claim ke RELEASED
+            $this->claim->update([
+                'claim_status' => 'RELEASED',
                 'brand' => $this->brand,
                 'color' => $this->color,
                 'claim_notes' => $this->claimNotes,
                 'claim_photos' => $uploadedPhotos,
-                'pickup_schedule' => now(), 
+                'processed_by' => auth()->id(),
+                'processed_at' => now(),
             ]);
 
-            // Update report status ke CLOSED
+            // Update reports ke CLOSED
             $this->match->lostReport->update(['report_status' => 'CLOSED']);
             $this->match->foundReport->update(['report_status' => 'CLOSED']);
 
-            // Update item status ke CLAIMED (bukan RETURNED karena sudah diserahkan)
+            // Update item ke CLAIMED
             if ($this->match->foundReport->item) {
                 $this->match->foundReport->item->update(['item_status' => 'CLAIMED']);
             }
 
             DB::commit();
 
-            session()->flash('success', 'Claim processed successfully! Item has been released to the owner.');
-            
-            // Emit event untuk refresh parent dan tutup modal
+            session()->flash('success', 'Claim released successfully! Item has been returned to the owner.');
             $this->dispatch('claim-processed');
             $this->closeModal();
 
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Failed to process claim: ' . $e->getMessage());
+            session()->flash('error', 'Failed to release claim: ' . $e->getMessage());
+        }
+    }
+
+    public function openRejectModal()
+    {
+        $this->showRejectModal = true;
+        $this->rejectionReason = '';
+    }
+
+    public function closeRejectModal()
+    {
+        $this->showRejectModal = false;
+        $this->rejectionReason = '';
+        $this->resetValidation('rejectionReason');
+    }
+
+    public function rejectClaim()
+    {
+        $this->validate([
+            'rejectionReason' => 'required|string|min:10|max:500',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Update claim ke REJECTED
+            $this->claim->update([
+                'claim_status' => 'REJECTED',
+                'rejection_reason' => $this->rejectionReason,
+                'processed_by' => auth()->id(),
+                'processed_at' => now(),
+            ]);
+
+            // Update reports ke CLOSED (case selesai, tidak bisa match/claim lagi)
+            $this->match->lostReport->update(['report_status' => 'CLOSED']);
+            $this->match->foundReport->update(['report_status' => 'CLOSED']);
+
+            // Item kembali ke STORED (bisa di-match ke user lain)
+            if ($this->match->foundReport->item) {
+                $this->match->foundReport->item->update(['item_status' => 'STORED']);
+            }
+
+            DB::commit();
+
+            session()->flash('success', 'Claim rejected successfully. Reports have been closed and item returned to storage.');
+            $this->dispatch('claim-processed');
+            $this->closeModal();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Failed to reject claim: ' . $e->getMessage());
         }
     }
 
     public function closeModal()
     {
-        // Dispatch event ke parent component untuk menutup modal
         $this->dispatch('closeProcessClaimModal');
     }
 
