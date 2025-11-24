@@ -36,22 +36,66 @@
         <div class="grid lg:grid-cols-3 gap-6">
             <!-- Main Content -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- Item Photos -->
-                @if($this->report && $this->report->item && $this->report->item->photos->isNotEmpty())
+                <!-- Photos Section - FIXED untuk handle report_photos -->
+                @php
+                    // Prioritas: report->photos > item->photos > report->photo_url
+                    $displayPhotos = null;
+                    $photoTitle = '';
+                    
+                    if($this->report->photos && $this->report->photos->isNotEmpty()) {
+                        $displayPhotos = $this->report->photos;
+                        $photoTitle = 'Foto Laporan';
+                    } elseif($this->report->item && $this->report->item->photos && $this->report->item->photos->isNotEmpty()) {
+                        $displayPhotos = $this->report->item->photos;
+                        $photoTitle = 'Foto Barang';
+                    }
+                @endphp
+
+                @if($displayPhotos && $displayPhotos->isNotEmpty())
                 <div class="bg-white rounded-2xl shadow-lg p-6 avoid-break">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Foto Barang</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        @foreach($this->report->item->photos as $photo)
-                        <img 
-                            src="{{ asset('storage/' . $photo->photo_url) }}" 
-                            alt="{{ $photo->alt_text ?? 'Item photo' }}"
-                            class="w-full h-64 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                            wire:click="openImageModal('{{ asset('storage/' . $photo->photo_url) }}')"
-                        >
-                        @endforeach
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">{{ $photoTitle }} ({{ $displayPhotos->count() }})</h2>
+
+                    <div class="relative">
+                        <!-- Carousel Container -->
+                        <div class="overflow-hidden rounded-xl">
+                            <div id="photoCarouselTracking" class="flex transition-transform duration-300 ease-in-out">
+                                @foreach($displayPhotos as $index => $photo)
+                                <div class="min-w-full">
+                                    <img
+                                        src="{{ asset('storage/' . $photo->photo_url) }}"
+                                        alt="{{ $photo->alt_text ?? 'Photo ' . ($index + 1) }}"
+                                        class="w-full h-96 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                        wire:click="openImageModal('{{ asset('storage/' . $photo->photo_url) }}')"
+                                    >
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Navigation Buttons (only show if more than 1 photo) -->
+                        @if($displayPhotos->count() > 1)
+                        <button onclick="previousPhotoTracking()" class="no-print absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button onclick="nextPhotoTracking()" class="no-print absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+
+                        <!-- Indicators -->
+                        <div class="no-print flex justify-center gap-2 mt-4">
+                            @foreach($displayPhotos as $index => $photo)
+                            <button onclick="goToPhotoTracking({{ $index }})" class="photo-indicator-tracking w-2 h-2 rounded-full bg-gray-300 transition-all hover:bg-gray-400 {{ $index === 0 ? 'active bg-gray-800 w-6' : '' }}"></button>
+                            @endforeach
+                        </div>
+                        @endif
                     </div>
                 </div>
-                @elseif($this->report && $this->report->photo_url)
+                @elseif($this->report->photo_url)
+                {{-- Fallback untuk single photo_url --}}
                 <div class="bg-white rounded-2xl shadow-lg p-6 avoid-break">
                     <h2 class="text-xl font-bold text-gray-900 mb-4">Foto Laporan</h2>
                     <img 
@@ -457,3 +501,45 @@
     </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+let currentPhotoTracking = 0;
+
+function updateCarouselTracking() {
+    const carousel = document.getElementById('photoCarouselTracking');
+    const indicators = document.querySelectorAll('.photo-indicator-tracking');
+    
+    if (carousel) {
+        carousel.style.transform = `translateX(-${currentPhotoTracking * 100}%)`;
+        
+        indicators.forEach((indicator, index) => {
+            if (index === currentPhotoTracking) {
+                indicator.classList.add('active', 'bg-gray-800', 'w-6');
+                indicator.classList.remove('bg-gray-300');
+            } else {
+                indicator.classList.remove('active', 'bg-gray-800', 'w-6');
+                indicator.classList.add('bg-gray-300');
+            }
+        });
+    }
+}
+
+function previousPhotoTracking() {
+    const totalPhotos = document.querySelectorAll('#photoCarouselTracking > div').length;
+    currentPhotoTracking = (currentPhotoTracking - 1 + totalPhotos) % totalPhotos;
+    updateCarouselTracking();
+}
+
+function nextPhotoTracking() {
+    const totalPhotos = document.querySelectorAll('#photoCarouselTracking > div').length;
+    currentPhotoTracking = (currentPhotoTracking + 1) % totalPhotos;
+    updateCarouselTracking();
+}
+
+function goToPhotoTracking(index) {
+    currentPhotoTracking = index;
+    updateCarouselTracking();
+}
+</script>
+@endpush
