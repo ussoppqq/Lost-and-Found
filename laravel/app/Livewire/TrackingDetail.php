@@ -24,7 +24,8 @@ class TrackingDetail extends Component
     {
         try {
             $this->report = Report::with([
-                'item.photos',
+                'photos',              // Load report photos (from report_photos table)
+                'item.photos',         // Load item photos
                 'item.category',
                 'item.post',
                 'item.claims.user',
