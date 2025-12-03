@@ -34,11 +34,15 @@ class TrackingDetail extends Component
             ])->find($this->reportId);
 
             if (!$this->report) {
-                abort(404, 'Report tidak ditemukan');
+                // Redirect back to tracking page with error message
+                return redirect()->route('tracking.index')
+                    ->with('error', 'Report ID "' . substr($this->reportId, 0, 12) . '..." tidak ditemukan. Pastikan Anda memasukkan Report ID yang benar dari PDF receipt Anda.');
             }
         } catch (\Exception $e) {
             \Log::error('Error loading report: ' . $e->getMessage());
-            abort(404, 'Report tidak ditemukan');
+            // Redirect back to tracking page with error message
+            return redirect()->route('tracking.index')
+                ->with('error', 'Terjadi kesalahan saat mencari laporan. Pastikan Anda memasukkan Report ID yang valid dari PDF receipt Anda.');
         }
     }
 

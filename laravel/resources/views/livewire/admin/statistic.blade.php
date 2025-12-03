@@ -381,30 +381,29 @@
 
             // 5. Claim Status Bar
             charts.claim = new ApexCharts(document.querySelector("#claimStatusChart"), {
-                series: [{ 
-                    name: 'Claims', 
+                series: [{
+                    name: 'Claims',
                     data: [
-                        claimData.pending || 0, 
-                        claimData.approved || 0, 
-                        claimData.rejected || 0, 
+                        claimData.pending || 0,
+                        claimData.rejected || 0,
                         claimData.released || 0
-                    ] 
+                    ]
                 }],
                 chart: { type: 'bar', height: 320, fontFamily: 'Inter, sans-serif' },
-                plotOptions: { 
-                    bar: { 
-                        borderRadius: 6, 
-                        columnWidth: '60%', 
-                        dataLabels: { position: 'top' } 
-                    } 
+                plotOptions: {
+                    bar: {
+                        borderRadius: 6,
+                        columnWidth: '60%',
+                        dataLabels: { position: 'top' }
+                    }
                 },
                 colors: ['#3B82F6'],
-                dataLabels: { 
-                    enabled: true, 
-                    offsetY: -20, 
-                    style: { fontSize: '12px', fontWeight: 'bold' } 
+                dataLabels: {
+                    enabled: true,
+                    offsetY: -20,
+                    style: { fontSize: '12px', fontWeight: 'bold' }
                 },
-                xaxis: { categories: ['Pending', 'Approved', 'Rejected', 'Released'] },
+                xaxis: { categories: ['Pending', 'Rejected', 'Released'] },
                 yaxis: { title: { text: 'Number of Claims' } },
                 grid: { borderColor: '#f1f1f1' }
             });

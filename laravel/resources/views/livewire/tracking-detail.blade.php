@@ -196,8 +196,8 @@
 
                         @if($this->report->report_description)
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Deskripsi</div>
-                            <div class="w-2/3 text-sm text-gray-700">
+                            <div class="w-1/3 text-sm font-medium text-gray-500 flex-shrink-0">Deskripsi</div>
+                            <div class="w-2/3 text-sm text-gray-700 break-words overflow-wrap-anywhere">
                                 {{ $this->report->report_description }}
                             </div>
                         </div>
@@ -205,8 +205,8 @@
 
                         @if($this->report->item && $this->report->item->item_description)
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Detail Item</div>
-                            <div class="w-2/3 text-sm text-gray-700">
+                            <div class="w-1/3 text-sm font-medium text-gray-500 flex-shrink-0">Detail Item</div>
+                            <div class="w-2/3 text-sm text-gray-700 break-words overflow-wrap-anywhere">
                                 {{ $this->report->item->item_description }}
                             </div>
                         </div>

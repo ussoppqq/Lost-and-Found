@@ -31,7 +31,7 @@
                 <button type="submit" class="absolute right-2 lg:right-3 bg-gray-800 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-full 
                            text-sm lg:text-base font-medium hover:bg-gray-900 transition-all duration-300 
                            shadow-lg hover:shadow-xl active:scale-95">
-                    <span class="hidden sm:inline">Search</span>
+                    <span class="hidden sm:inline">Tracking</span>
                     <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
@@ -68,26 +68,66 @@
                 // regex for prefix ID (8–36 hex chars or with hyphen)
                 const isPrefix = (v) => /^[0-9a-f-]{8,36}$/i.test(v);
 
+                // Function to show error alert
+                const showError = (message) => {
+                    // Create alert element if not exists
+                    let alertDiv = document.getElementById('search-error-alert');
+                    if (!alertDiv) {
+                        alertDiv = document.createElement('div');
+                        alertDiv.id = 'search-error-alert';
+                        alertDiv.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-full mx-4 bg-red-50 border-2 border-red-200 rounded-xl p-4 shadow-2xl animate-bounce';
+                        alertDiv.innerHTML = `
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-red-800 mb-1">Invalid Tracking ID</p>
+                                    <p class="text-sm text-red-700" id="error-message"></p>
+                                </div>
+                                <button onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+                        document.body.appendChild(alertDiv);
+                    }
+
+                    document.getElementById('error-message').textContent = message;
+
+                    // Auto remove after 5 seconds
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 5000);
+                };
+
                 form.addEventListener('submit', function (e) {
+                    e.preventDefault(); // Always prevent default
+
                     const raw = input.value;
                     const v = clean(raw);
-                    if (!v) return; // if empty, just submit normally
+
+                    if (!v) {
+                        showError('Masukkan Report ID yang valid dari PDF receipt Anda.');
+                        return;
+                    }
 
                     if (isUUID(v)) {
-                        e.preventDefault();
                         // redirect langsung ke tracking detail
                         window.location.href = "{{ route('tracking.detail', ['reportId' => '__ID__']) }}".replace('__ID__', v);
                         return;
                     }
 
                     if (isPrefix(v)) {
-                        e.preventDefault();
                         // redirect ke halaman tracking dengan prefilled ID
                         window.location.href = "/tracking?reportId=" + encodeURIComponent(v);
                         return;
                     }
 
-                    // kalau bukan ID, biarkan form lanjut ke /search?q=...
+                    // kalau bukan ID yang valid, tampilkan error
+                    showError(`"${raw.substring(0, 20)}${raw.length > 20 ? '...' : ''}" bukan Report ID yang valid. Cek PDF receipt untuk mendapatkan Tracking ID yang benar.`);
                 });
             })();
         </script>

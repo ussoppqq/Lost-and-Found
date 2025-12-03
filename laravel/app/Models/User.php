@@ -16,12 +16,15 @@ class User extends Authenticatable
 
     protected $fillable = [
         'user_id',
-        'company_id', 
-        'role_id', 
-        'full_name', 
-        'email', 
-        'phone_number', 
-        'password', 
+        'company_id',
+        'role_id',
+        'full_name',
+        'email',
+        'email_verification_code',
+        'email_verification_code_expires_at',
+        'email_verified_at',
+        'phone_number',
+        'password',
         'is_verified',
         'phone_verified_at',
     ];
@@ -34,6 +37,8 @@ class User extends Authenticatable
     protected $casts = [
         'is_verified' => 'boolean',
         'phone_verified_at' => 'datetime',
+        'email_verification_code_expires_at' => 'datetime',
+        'email_verified_at' => 'datetime',
     ];
 
     protected static function boot()

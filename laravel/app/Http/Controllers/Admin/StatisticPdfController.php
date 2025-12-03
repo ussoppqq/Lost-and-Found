@@ -113,7 +113,6 @@ class StatisticPdfController extends Controller
 
             $claimStatusData = [
                 'PENDING' => $claims->where('claim_status', 'PENDING')->count(),
-                'APPROVED' => $claims->where('claim_status', 'APPROVED')->count(),
                 'REJECTED' => $claims->where('claim_status', 'REJECTED')->count(),
                 'RELEASED' => $claims->where('claim_status', 'RELEASED')->count(),
             ];
@@ -383,7 +382,7 @@ class StatisticPdfController extends Controller
             $claimChart = [
                 'type' => 'bar',
                 'data' => [
-                    'labels' => ['Pending', 'Approved', 'Rejected', 'Released'],
+                    'labels' => ['Pending', 'Rejected', 'Released'],
                     'datasets' => [[
                         'label' => 'Claims',
                         'data' => array_values($data['claimStatus']),

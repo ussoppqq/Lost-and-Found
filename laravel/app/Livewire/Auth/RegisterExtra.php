@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Services\FonnteService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EmailVerificationMail;
 
 class RegisterExtra extends Component
 {
@@ -21,9 +23,16 @@ class RegisterExtra extends Component
     public $otp;
     public $otpSent = false;
 
+    // Email verification properties
+    public $email_verification_code;
+    public $emailVerificationSent = false;
+    public $step = 1; // 1: phone OTP, 2: email verification, 3: complete registration
+
     public function mount()
     {
         $this->otpSent = false;
+        $this->emailVerificationSent = false;
+        $this->step = 1;
     }
 
     /**
@@ -105,6 +114,94 @@ class RegisterExtra extends Component
     }
 
     /**
+     * Kirim kode verifikasi email
+     */
+    public function sendEmailVerification()
+    {
+        $this->resetErrorBag(['email', 'email_verification_code']);
+
+        // Validate email first
+        $this->validate([
+            'email' => 'required|email|unique:users,email',
+        ]);
+
+        // Generate 6-digit verification code
+        $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        // Store in session
+        session([
+            'email_verification_code' => $verificationCode,
+            'email_verification_email' => $this->email,
+            'email_verification_time' => time(),
+        ]);
+
+        try {
+            // Send email
+            Mail::to($this->email)->send(new EmailVerificationMail($verificationCode, $this->full_name ?? 'User'));
+
+            session()->flash('success', 'Kode verifikasi telah dikirim ke email ' . $this->email);
+            $this->emailVerificationSent = true;
+            $this->step = 2;
+            $this->resetErrorBag(['email_verification_code']);
+            $this->dispatch('email-verification-sent');
+
+        } catch (\Exception $e) {
+            Log::error("Error sending email verification: " . $e->getMessage(), [
+                'exception' => $e,
+                'email' => $this->email,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            if (config('app.debug')) {
+                $this->addError('email', 'Error mengirim email: ' . $e->getMessage());
+            } else {
+                $this->addError('email', 'Terjadi error saat mengirim email verifikasi. Silakan coba lagi.');
+            }
+            $this->emailVerificationSent = false;
+        }
+    }
+
+    /**
+     * Verifikasi kode email
+     */
+    public function verifyEmail()
+    {
+        $this->resetErrorBag(['email_verification_code']);
+
+        $this->validate([
+            'email_verification_code' => 'required|digits:6',
+        ]);
+
+        if (!session('email_verification_code')) {
+            $this->addError('email_verification_code', 'Silakan kirim kode verifikasi terlebih dahulu.');
+            return;
+        }
+
+        if (session('email_verification_email') !== $this->email) {
+            $this->addError('email_verification_code', 'Email tidak sesuai dengan yang digunakan untuk verifikasi.');
+            return;
+        }
+
+        // Check if code expired (10 minutes)
+        if (time() - session('email_verification_time', 0) > 600) {
+            session()->forget(['email_verification_code', 'email_verification_email', 'email_verification_time']);
+            $this->addError('email_verification_code', 'Kode verifikasi sudah kadaluarsa. Silakan kirim ulang.');
+            $this->emailVerificationSent = false;
+            $this->step = 1;
+            return;
+        }
+
+        if ($this->email_verification_code != session('email_verification_code')) {
+            $this->addError('email_verification_code', 'Kode verifikasi salah.');
+            return;
+        }
+
+        // Email verified, move to final step
+        $this->step = 3;
+        session()->flash('success', 'Email berhasil diverifikasi!');
+    }
+
+    /**
      * Register user setelah OTP benar
      */
     public function register()
@@ -160,9 +257,10 @@ class RegisterExtra extends Component
                 'password' => Hash::make($this->password),
                 'is_verified' => true,
                 'phone_verified_at' => now(),
+                'email_verified_at' => $this->email ? now() : null,
             ]);
 
-            session()->forget(['otp_code', 'otp_phone', 'otp_time']);
+            session()->forget(['otp_code', 'otp_phone', 'otp_time', 'email_verification_code', 'email_verification_email', 'email_verification_time']);
 
             Auth::login($user);
 

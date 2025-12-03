@@ -41,7 +41,6 @@ class Statistic extends Component
     
     public $totalClaims = 0;
     public $pendingClaims = 0;
-    public $approvedClaims = 0;
     public $rejectedClaims = 0;
     public $releasedClaims = 0;
     
@@ -179,7 +178,6 @@ class Statistic extends Component
 
         $this->totalClaims = $claims->count();
         $this->pendingClaims = $claims->where('claim_status', 'PENDING')->count();
-        $this->approvedClaims = $claims->where('claim_status', 'APPROVED')->count();
         $this->rejectedClaims = $claims->where('claim_status', 'REJECTED')->count();
         $this->releasedClaims = $claims->where('claim_status', 'RELEASED')->count();
     }
@@ -204,7 +202,6 @@ class Statistic extends Component
         // Claim Status Chart Data
         $this->claimStatusChartData = [
             'pending' => $this->pendingClaims,
-            'approved' => $this->approvedClaims,
             'rejected' => $this->rejectedClaims,
             'released' => $this->releasedClaims,
         ];

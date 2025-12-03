@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Reset</title>
+    <title>Email Verification</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,7 +20,7 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         .header {
-            background-color: #ff6b6b;
+            background-color: #4CAF50;
             color: white;
             padding: 30px;
             text-align: center;
@@ -38,29 +38,17 @@
             color: #333;
             line-height: 1.6;
         }
-        .reset-code {
+        .verification-code {
             display: inline-block;
-            background-color: #fff5f5;
-            border: 2px dashed #ff6b6b;
+            background-color: #f0f0f0;
+            border: 2px dashed #4CAF50;
             padding: 20px 40px;
             font-size: 32px;
             font-weight: bold;
             letter-spacing: 5px;
-            color: #ff6b6b;
+            color: #4CAF50;
             margin: 20px 0;
             border-radius: 5px;
-        }
-        .warning {
-            background-color: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin: 20px 0;
-            text-align: left;
-        }
-        .warning p {
-            margin: 0;
-            font-size: 14px;
-            color: #856404;
         }
         .footer {
             background-color: #f9f9f9;
@@ -81,17 +69,14 @@
         </div>
         <div class="content">
             <h2>Hi {{ $userName }},</h2>
-            <p>We received a request to reset your password. Use the following recovery code to reset your password:</p>
+            <p>Thank you for registering with us. To complete your registration, please use the following verification code:</p>
 
-            <div class="reset-code">
-                {{ $resetCode }}
+            <div class="verification-code">
+                {{ $verificationCode }}
             </div>
 
             <p>This code will expire in <strong>10 minutes</strong>.</p>
-
-            <div class="warning">
-                <p><strong>Security Notice:</strong> If you didn't request a password reset, please ignore this email and ensure your account is secure.</p>
-            </div>
+            <p>If you didn't request this verification code, please ignore this email.</p>
         </div>
         <div class="footer">
             <p>&copy; {{ date('Y') }} Kebun Raya. All rights reserved.</p>

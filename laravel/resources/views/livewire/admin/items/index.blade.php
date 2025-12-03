@@ -103,14 +103,12 @@
                     </select>
 
                     <!-- Status Filter -->
-                    <select wire:model.live="statusFilter" 
+                    <select wire:model.live="statusFilter"
                             class="block w-auto px-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                         <option value="">All Status</option>
-                        <option value="registered">Registered</option>
                         <option value="stored">Stored</option>
                         <option value="claimed">Claimed</option>
                         <option value="disposed">Disposed</option>
-                        <option value="returned">Returned</option>
                     </select>
 
                     <!-- Clear Filters -->

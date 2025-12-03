@@ -50,7 +50,7 @@ class LostItems extends Component
         }
 
         $lostItems = $query->orderBy('report_datetime', 'desc')
-            ->paginate(12);
+            ->paginate(6);
 
         $categories = \App\Models\Category::orderBy('category_name')
             ->get();

@@ -1,10 +1,21 @@
-<div>
+<div x-data="{
+    modalOpen: @entangle('showModal')
+}"
+x-init="
+    $watch('modalOpen', value => {
+        if (value) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    })
+">
     @if($showModal)
         <!-- Backdrop -->
-        <div class="fixed inset-0 bg-opacity-60 backdrop-blur-sm transition-opacity z-40"></div>
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm transition-opacity z-40"></div>
 
         <!-- Modal Container -->
-        <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-xl shadow-2xl w-full max-w-5xl my-8 max-h-[90vh] overflow-y-auto">
                 
                 @include('livewire.admin.lost-and-found.partials.create-item-header')
