@@ -1,6 +1,6 @@
 <div>
 <!-- Backdrop Blur -->
-<div class="fixed inset-0 bg-opacity-50 backdrop-blur-sm transition-opacity z-40" wire:click="$parent.closeClaimDetailModal"></div>
+<div class="fixed inset-0 bg-opacity-50 backdrop-blur-sm transition-opacity z-40" wire:click="closeModal"></div>
 
 <!-- Modal Container -->
 <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
@@ -30,6 +30,48 @@
         <!-- Body -->
         <div class="px-6 py-6 space-y-6">
             
+            <!-- Rejection Notice (jika REJECTED) -->
+            @if($claim->claim_status === 'REJECTED')
+                <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <h4 class="text-sm font-semibold text-red-800 mb-2">Claim Rejected</h4>
+                            
+                            @if($claim->rejection_reason)
+                                <div class="bg-white rounded-lg p-3 mb-3 border border-red-200">
+                                    <label class="block text-xs font-medium text-red-600 mb-1">Rejection Reason:</label>
+                                    <p class="text-sm text-gray-900">{{ $claim->rejection_reason }}</p>
+                                </div>
+                            @else
+                                <p class="text-sm text-red-700 mb-3 italic">No rejection reason provided</p>
+                            @endif
+                            
+                            <div class="flex items-center text-xs text-red-600 space-x-4">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                    <span class="font-medium">Rejected by:</span> 
+                                    <span class="ml-1">{{ $claim->processor->full_name ?? 'System' }}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span class="font-medium">Date:</span> 
+                                    <span class="ml-1">{{ $claim->processed_at?->format('d M Y, H:i') ?? 'N/A' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Match Information -->
             <div class="bg-gray-50 rounded-lg p-4">
                 <h4 class="text-sm font-semibold text-gray-900 mb-4">Match Information</h4>
@@ -154,6 +196,20 @@
                             <p class="text-sm text-gray-900">{{ $claim->pickup_schedule->format('d M Y, H:i') }}</p>
                         </div>
                     @endif
+
+                    @if($claim->processed_by)
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Processed By</label>
+                            <p class="text-sm font-semibold text-gray-900">{{ $claim->processor->full_name ?? 'N/A' }}</p>
+                        </div>
+                    @endif
+
+                    @if($claim->processed_at)
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Processed Date</label>
+                            <p class="text-sm text-gray-900">{{ $claim->processed_at->format('d M Y, H:i') }}</p>
+                        </div>
+                    @endif
                 </div>
 
                 @if($claim->claim_notes)
@@ -164,15 +220,20 @@
                 @endif
             </div>
 
-            <!-- Verification Photos -->
-            @if($claim->claim_photos && count($claim->claim_photos) > 0)
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="text-sm font-semibold text-gray-900 mb-4">Verification Photos</h4>
+            <!-- Verification Photos (hanya tampil jika RELEASED) -->
+            @if($claim->claim_status === 'RELEASED' && $claim->claim_photos && count($claim->claim_photos) > 0)
+                <div class="bg-green-50 rounded-lg p-4 border-2 border-green-200">
+                    <h4 class="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Verification Photos (Item Released)
+                    </h4>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                         @foreach($claim->claim_photos as $photo)
                             <img src="{{ Storage::url($photo) }}" 
                                  alt="Verification photo" 
-                                 class="w-full h-32 object-cover rounded-lg border-2 border-gray-200 hover:border-purple-400 transition cursor-pointer"
+                                 class="w-full h-32 object-cover rounded-lg border-2 border-green-200 hover:border-green-400 transition cursor-pointer"
                                  onclick="window.open('{{ Storage::url($photo) }}', '_blank')">
                         @endforeach
                     </div>

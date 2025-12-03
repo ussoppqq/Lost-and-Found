@@ -14,18 +14,18 @@ class ClaimDetail extends Component
     {
         $this->claimId = $claimId;
         $this->claim = Claim::with([
-            'match.lostReport',
-            'match.foundReport',
+            'match.lostReport.user',
+            'match.foundReport.user',
             'item.category',
             'item.photos',
             'report',
-            'user'
+            'user',
+            'processor' 
         ])->findOrFail($claimId);
     }
 
     public function closeModal()
     {
-        // Dispatch event ke parent untuk menutup modal
         $this->dispatch('closeClaimDetailModal');
     }
 
