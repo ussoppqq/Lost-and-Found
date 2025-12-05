@@ -47,43 +47,43 @@
             padding-bottom: 10px; 
         }
         
-        /* Stats Grid - Using Float Layout */
+        /* Stats Grid - FIXED: Better spacing and no overflow */
         .stats-grid { 
             width: 100%; 
             margin-bottom: 20px;
-            overflow: hidden;
+            display: table;
+            table-layout: fixed;
         }
         
         .stat-cell { 
-            float: left;
-            width: 24%; 
-            margin-right: 1.33%;
-            padding: 12px; 
+            display: table-cell;
+            width: 25%; 
+            padding: 10px 8px;
             border: 2px solid #E5E7EB; 
             background: #F9FAFB;
-        }
-        
-        .stat-cell:last-child { 
-            margin-right: 0; 
+            vertical-align: top;
         }
         
         .stat-label { 
-            font-size: 9px; 
+            font-size: 8px; 
             color: #6B7280; 
             text-transform: uppercase; 
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             font-weight: bold;
+            line-height: 1.2;
         }
         
         .stat-value { 
-            font-size: 24px; 
+            font-size: 22px; 
             font-weight: bold; 
-            margin-bottom: 3px; 
+            margin-bottom: 3px;
+            line-height: 1;
         }
         
         .stat-detail { 
-            font-size: 9px; 
-            color: #9CA3AF; 
+            font-size: 8px; 
+            color: #9CA3AF;
+            line-height: 1.3;
         }
         
         /* Chart Container */
@@ -220,8 +220,8 @@
         </div>
     </div>
 
-    <!-- Key Metrics -->
-    <div class="stats-grid clearfix">
+    <!-- Key Metrics - FIXED LAYOUT -->
+    <div class="stats-grid">
         <div class="stat-cell">
             <div class="stat-label">Lost Reports</div>
             <div class="stat-value" style="color: #DC2626;">{{ $totalLost }}</div>
@@ -235,12 +235,12 @@
         <div class="stat-cell">
             <div class="stat-label">Total Items</div>
             <div class="stat-value" style="color: #2563EB;">{{ $totalStored + $totalRegistered }}</div>
-            <div class="stat-detail">{{ $totalStored }} in storage</div>
+            <div class="stat-detail">{{ $totalStored }} stored</div>
         </div>
         <div class="stat-cell">
-            <div class="stat-label">Success Rate</div>
-            <div class="stat-value" style="color: #7C3AED;">{{ $successRate }}%</div>
-            <div class="stat-detail">{{ $totalClaimed }} claimed</div>
+            <div class="stat-label">Claims Released</div>
+            <div class="stat-value" style="color: #7C3AED;">{{ $totalReleased }}</div>
+            <div class="stat-detail">{{ $successRate }}% success</div>
         </div>
     </div>
 
@@ -347,7 +347,6 @@
         </div>
         @endif
     </div>
-    @endif
 
     <!-- Recent Activities -->
     <div class="no-break" style="margin-top: 15px;">

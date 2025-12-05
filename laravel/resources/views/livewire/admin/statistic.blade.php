@@ -41,9 +41,9 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Period Type</label>
                             <select wire:model.live="periodType" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white shadow-sm">
-                                <option value="weekly">📅 Weekly</option>
-                                <option value="monthly">📆 Monthly</option>
-                                <option value="yearly">🗓️ Yearly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
                             </select>
                         </div>
                         <div>

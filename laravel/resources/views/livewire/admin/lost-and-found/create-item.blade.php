@@ -12,7 +12,7 @@ x-init="
 ">
     @if($showModal)
         <!-- Backdrop -->
-        <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm transition-opacity z-40"></div>
+        <div class="fixed inset-0 bg-opacity-60 backdrop-blur-sm transition-opacity z-40"></div>
 
         <!-- Modal Container -->
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">

@@ -294,7 +294,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
                             <div>
-                                <h4 class="text-sm font-semibold text-gray-900">Quick Match</h4>
+                                <h4 class="text-sm font-semibold text-gray-900">Quick Claim</h4>
                                 <p class="text-xs text-gray-600">Find and match with {{ $report->report_type === 'LOST' ? 'found' : 'lost' }} items</p>
                             </div>
                         </div>
@@ -304,7 +304,7 @@
                             <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
-                            Match Report
+                            Claim Report
                         </button>
                     </div>
                 </div>
