@@ -40,12 +40,12 @@ Route::get('/', fn() => view('home'))->name('home');
 Route::get('/categories', fn() => view('categories'))->name('categories');
 
 // Auth Routes (Public)
-// Route::middleware(middleware: 'guest')->group(function (): void {
+Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');
     Route::get('/register-extra', RegisterExtra::class)->name('register-extra');
     Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
     Route::get('/reset-password/{token}', ResetPassword::class)->name('password.reset');
-// });
+});
 
 // Public Forms
 Route::get('/found-form', FoundForm::class)->name('found-form');
