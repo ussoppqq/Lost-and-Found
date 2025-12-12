@@ -4,7 +4,9 @@
       "Bash(php artisan:*)",
       "Bash(git checkout:*)",
       "Bash(composer require:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []
