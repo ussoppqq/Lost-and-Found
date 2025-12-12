@@ -142,13 +142,13 @@
                 <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 tracking-wide mb-4">
                     KEBUN RAYA BOGOR
                 </h2>
-                <div class="w-24 h-1 bg-green-600 mx-auto rounded-full"></div>
+                <div class="w-24 h-1 bg-gray-600 mx-auto rounded-full"></div>
             </div>
 
 
 
             {{-- Container untuk cards --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto px-4">
+            <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto px-2 sm:px-4">
 
                 {{-- LOST Card --}}
                 <div class="group">
@@ -201,13 +201,13 @@
 
                         <!-- Text Section -->
                         <div class="p-4 md:p-6 text-center">
-                            <div class="w-12 h-1 bg-green-500 mx-auto rounded-full mb-3"></div>
+                            <div class="w-12 h-1 bg-gray-500 mx-auto rounded-full mb-3"></div>
                             <p class="text-gray-600 leading-relaxed text-sm md:text-base min-h-[3rem]">
                                 Found something that doesn't belong to you? Help us return it to the rightful owner.
                             </p>
                             <div class="mt-4">
                                 <span
-                                    class="inline-flex items-center text-green-600 font-semibold group-hover:text-green-700 transition-colors text-sm md:text-base">
+                                    class="inline-flex items-center text-gray-600 font-semibold group-hover:text-gray-700 transition-colors text-sm md:text-base">
                                     Report Found Item
                                     <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">
@@ -226,7 +226,7 @@
             <div class="mt-16 lg:mt-20 text-center">
                 <div class="bg-gray-50 rounded-3xl p-8 lg:p-12 max-w-3xl mx-auto">
                     <div class="flex items-center justify-center mb-6">
-                        <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -239,7 +239,7 @@
                     </p>
                     <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                         <a href="{{ url('/map') }}"
-                            class="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors font-medium">
+                            class="inline-flex items-center justify-center px-6 py-3 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors font-medium">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -249,7 +249,7 @@
                             View Map
                         </a>
                         <a href="#"
-                            class="inline-flex items-center justify-center px-6 py-3 border border-green-600 text-green-600 rounded-full hover:bg-green-50 transition-colors font-medium">
+                            class="inline-flex items-center justify-center px-6 py-3 border border-gray-600 text-gray-600 rounded-full hover:bg-gray-50 transition-colors font-medium">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

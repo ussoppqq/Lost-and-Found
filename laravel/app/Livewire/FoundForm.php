@@ -28,10 +28,14 @@ class FoundForm extends Component
     private const OTP_COOLDOWN_SECONDS = 60;  // jeda kirim/ulang OTP
     private const SUBMIT_LOCK_SECONDS  = 3;   // kunci tombol submit sesaat
 
+    protected $listeners = ['locationUpdated'];
+
     // --- FORM STATE ---
     public string  $item_name = '';
     public string  $description = '';
     public ?string $location = null;
+    public ?float $latitude = null;
+    public ?float $longitude = null;
     public ?string $date_found = null;
     public ?string $category = null;
     public ?string $phone = null;
@@ -295,6 +299,13 @@ class FoundForm extends Component
         }
     }
 
+    // ---------- LOCATION ----------
+    public function locationUpdated($latitude = null, $longitude = null): void
+    {
+        $this->latitude = $latitude;
+        $this->longitude = $longitude;
+    }
+
     // ---------- NAVIGATION ----------
     public function nextStep(): void
     {
@@ -365,8 +376,10 @@ class FoundForm extends Component
                 'report_description' => $this->description,
                 'report_datetime'    => $reportDateTime,
                 'report_location'    => $this->location ?? 'Not specified',
+                'latitude'           => $this->latitude,
+                'longitude'          => $this->longitude,
                 'report_status'      => 'OPEN',
-                'photo_url'          => null, 
+                'photo_url'          => null,
                 'reporter_name'      => $user->full_name,
                 'reporter_phone'     => $user->phone_number,
                 'reporter_email'     => $user->email,

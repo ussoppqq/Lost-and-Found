@@ -18,21 +18,23 @@ class Report extends Model
 
     protected $fillable = [
         'report_id',
-        'report_number',      
+        'report_number',
         'company_id',
         'user_id',
         'item_id',
         'category_id',
         'report_type',
-        'item_name',          
+        'item_name',
         'report_description',
         'report_datetime',
         'report_location',
+        'latitude',
+        'longitude',
         'report_status',
-        'photo_url',          
-        'reporter_name',      
-        'reporter_phone',     
-        'reporter_email', 
+        'photo_url',
+        'reporter_name',
+        'reporter_phone',
+        'reporter_email',
     ];
 
     protected $casts = [

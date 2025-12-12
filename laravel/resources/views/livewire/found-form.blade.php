@@ -214,6 +214,11 @@
               @error('location') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
+            {{-- Map Location Picker --}}
+            <div class="mb-4">
+              @livewire('location-picker', ['latitude' => $latitude, 'longitude' => $longitude])
+            </div>
+
             {{-- Date Found --}}
             <div>
               <label for="date_found_d" class="block text-sm font-semibold text-gray-900 mb-2">
@@ -540,6 +545,11 @@
                 class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 placeholder:text-gray-400"
                 placeholder="e.g. Library, Cafeteria, Hallway">
               @error('location') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            {{-- Map Location Picker --}}
+            <div class="mb-4">
+              @livewire('location-picker', ['latitude' => $latitude, 'longitude' => $longitude])
             </div>
 
             {{-- Date Found --}}

@@ -117,8 +117,7 @@
                     </div>
                 @else
                     <a href="{{ route('login') }}"
-                       :class="scrolled ? 'bg-gray-800 text-white hover:bg-gray-900' : 'bg-white text-gray-800 hover:bg-gray-100'"
-                       class="px-5 py-2 lg:px-6 lg:py-3 rounded-full transition-all duration-300 shadow-lg font-medium text-sm lg:text-base border border-transparent">
+                       class="px-5 py-2 lg:px-6 lg:py-3 rounded-full transition-all duration-300 shadow-lg font-medium text-sm lg:text-base border border-transparent bg-gray-800 text-white hover:bg-gray-900">
                         Login
                     </a>
                 @endauth
