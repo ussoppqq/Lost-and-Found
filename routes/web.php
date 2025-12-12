@@ -21,6 +21,7 @@ use App\Livewire\Admin\Categories\Index as CategoriesIndex;
 use App\Livewire\Admin\Items\Index as ItemsIndex;
 use App\Livewire\Admin\LostAndFound\Index as LostFoundIndex;
 use App\Livewire\Admin\Matches\MatchList;
+use App\Livewire\Admin\Matches\AiMatchSuggestion;
 use App\Livewire\Admin\Users\Index as UsersIndex;
 use App\Livewire\Admin\Statistic;
 
@@ -117,8 +118,11 @@ Route::middleware(['auth', 'moderator'])->prefix('admin')->name('admin.')->group
     // Items Management
     Route::get('/items', ItemsIndex::class)->name('items');
     
-    // Matches Management (route sederhana untuk kompatibilitas dengan layout)
+    // Matches Management
     Route::get('/matches', MatchList::class)->name('matches');
+    
+    // AI Match Suggestions (Accessible by Admin & Moderator)
+    Route::get('/matches/ai-suggestions', AiMatchSuggestion::class)->name('matches.ai-suggestions');
     
     // Categories Management
     Route::get('/categories', CategoriesIndex::class)->name('categories');

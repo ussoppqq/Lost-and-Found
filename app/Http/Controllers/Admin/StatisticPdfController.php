@@ -21,16 +21,17 @@ class StatisticPdfController extends Controller
             $tz = 'Asia/Jakarta';
             $companyId = auth()->user()->company_id;
 
+            // Get parameters from request
             $periodType = $request->get('period_type', 'weekly');
-            $selectedDate = $request->get('selected_date', now($tz)->format('Y-m-d'));
+            $startDate = $request->get('start_date');
+            $endDate = $request->get('end_date');
 
-            $dateRange = $this->getDateRange($periodType, $selectedDate, $tz);
-            $start = $dateRange['start'];
-            $end = $dateRange['end'];
+            // Parse dates
+            $start = Carbon::parse($startDate, $tz)->startOfDay();
+            $end = Carbon::parse($endDate, $tz)->endOfDay();
 
             Log::info('PDF Export Started', [
                 'period_type' => $periodType,
-                'selected_date' => $selectedDate,
                 'start' => $start->toDateTimeString(),
                 'end' => $end->toDateTimeString(),
                 'company_id' => $companyId,
@@ -57,8 +58,16 @@ class StatisticPdfController extends Controller
             $totalClaimed = $items->where('item_status', 'CLAIMED')->count();
             $totalReturned = $items->where('item_status', 'RETURNED')->count();
             $totalDisposed = $items->where('item_status', 'DISPOSED')->count();
+            
+            // FIXED: Get total RELEASED claims (not CLAIMED items)
+            $totalReleased = Claim::where('company_id', $companyId)
+                ->whereBetween('created_at', [$start, $end])
+                ->where('claim_status', 'RELEASED')
+                ->count();
+
+            // Calculate success rate based on RELEASED claims
             $totalItemsAll = $totalStored + $totalRegistered + $totalClaimed + $totalDisposed + $totalReturned;
-            $successRate = $totalItemsAll > 0 ? round(($totalClaimed / $totalItemsAll) * 100, 1) : 0;
+            $successRate = $totalItemsAll > 0 ? round(($totalReleased / $totalItemsAll) * 100, 1) : 0;
 
             // Item status distribution
             $itemStatusData = [
@@ -113,6 +122,7 @@ class StatisticPdfController extends Controller
 
             $claimStatusData = [
                 'PENDING' => $claims->where('claim_status', 'PENDING')->count(),
+                'APPROVED' => $claims->where('claim_status', 'APPROVED')->count(),
                 'REJECTED' => $claims->where('claim_status', 'REJECTED')->count(),
                 'RELEASED' => $claims->where('claim_status', 'RELEASED')->count(),
             ];
@@ -156,6 +166,7 @@ class StatisticPdfController extends Controller
                 'totalClaimed' => $totalClaimed,
                 'totalReturned' => $totalReturned,
                 'totalDisposed' => $totalDisposed,
+                'totalReleased' => $totalReleased, // FIXED: Added totalReleased
                 'successRate' => $successRate,
                 'categoryDistribution' => $categoryDistribution,
                 'recent' => $recent,
@@ -167,7 +178,7 @@ class StatisticPdfController extends Controller
                 'hasData' => $hasData,
                 'totalLost' => $totalLost,
                 'totalFound' => $totalFound,
-                'totalReports' => $totalLost + $totalFound,
+                'totalReleased' => $totalReleased,
                 'categoriesCount' => count($categoryDistribution),
                 'recentActivitiesCount' => count($recent),
                 'chartUrls' => $chartUrls ? array_keys($chartUrls) : null,
@@ -195,41 +206,12 @@ class StatisticPdfController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            // Return error response instead of redirect
             return response()->json([
                 'error' => 'Failed to generate PDF',
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ], 500);
-        }
-    }
-
-    private function getDateRange($periodType, $selectedDate, $tz)
-    {
-        $date = Carbon::parse($selectedDate, $tz);
-
-        switch ($periodType) {
-            case 'weekly':
-                return [
-                    'start' => $date->copy()->startOfWeek()->startOfDay(),
-                    'end' => $date->copy()->endOfWeek()->endOfDay(),
-                ];
-            case 'monthly':
-                return [
-                    'start' => $date->copy()->startOfMonth()->startOfDay(),
-                    'end' => $date->copy()->endOfMonth()->endOfDay(),
-                ];
-            case 'yearly':
-                return [
-                    'start' => $date->copy()->startOfYear()->startOfDay(),
-                    'end' => $date->copy()->endOfYear()->endOfDay(),
-                ];
-            default:
-                return [
-                    'start' => $date->copy()->startOfWeek()->startOfDay(),
-                    'end' => $date->copy()->endOfWeek()->endOfDay(),
-                ];
         }
     }
 
@@ -276,7 +258,7 @@ class StatisticPdfController extends Controller
         }
 
         // 2. Item Status Pie Chart
-        if (! empty($data['itemStatus'])) {
+        if (!empty($data['itemStatus'])) {
             $itemLabels = array_keys($data['itemStatus']);
             $itemValues = array_values($data['itemStatus']);
             $itemColors = ['#3B82F6', '#10B981', '#8B5CF6', '#EF4444', '#F59E0B'];
@@ -307,7 +289,7 @@ class StatisticPdfController extends Controller
         }
 
         // 3. Category Horizontal Bar Chart
-        if (! empty($data['categoryDist'])) {
+        if (!empty($data['categoryDist'])) {
             $categoryChart = [
                 'type' => 'horizontalBar',
                 'data' => [
@@ -333,7 +315,7 @@ class StatisticPdfController extends Controller
         }
 
         // 4. Trend Line Chart
-        if (! empty($data['trendData'])) {
+        if (!empty($data['trendData'])) {
             $trendChart = [
                 'type' => 'line',
                 'data' => [
@@ -382,7 +364,7 @@ class StatisticPdfController extends Controller
             $claimChart = [
                 'type' => 'bar',
                 'data' => [
-                    'labels' => ['Pending', 'Rejected', 'Released'],
+                    'labels' => ['Pending', 'Approved', 'Rejected', 'Released'],
                     'datasets' => [[
                         'label' => 'Claims',
                         'data' => array_values($data['claimStatus']),
@@ -403,6 +385,6 @@ class StatisticPdfController extends Controller
             $urls['claim'] = $baseUrl.'?width=350&height=250&c='.urlencode(json_encode($claimChart));
         }
 
-        return ! empty($urls) ? $urls : null;
+        return !empty($urls) ? $urls : null;
     }
 }
