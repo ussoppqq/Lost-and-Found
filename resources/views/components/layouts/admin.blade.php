@@ -95,6 +95,20 @@
                             Matches
                         </a>
 
+                        <a href="{{ route('admin.matches.ai-suggestions') }}"
+                            class="group flex items-center px-4 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.matches.ai-suggestions') ? 'bg-purple-900 text-white' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-900' }}">
+                            <svg class="mr-3 h-5 w-5 flex-shrink-0 {{ request()->routeIs('admin.matches.ai-suggestions') ? 'text-purple-200' : 'text-purple-600' }}"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            <span>AI Suggestions</span>
+                            <span
+                                class="ml-auto px-2 py-0.5 text-xs font-bold {{ request()->routeIs('admin.matches.ai-suggestions') ? 'bg-purple-800 text-purple-100' : 'bg-purple-100 text-purple-800' }} rounded-full">
+                                AI
+                            </span>
+                        </a>
+
                         <!-- Categories -->
                         <a href="{{ route('admin.categories') }}"
                             class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.categories*') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
@@ -152,7 +166,8 @@
                                     src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->full_name ?? 'Admin') }}&background=1f2937&color=fff"
                                     alt="Profile">
                                 <div class="text-left">
-                                    <span class="text-sm font-medium text-gray-700 block">{{ auth()->user()->full_name ?? 'Admin' }}</span>
+                                    <span
+                                        class="text-sm font-medium text-gray-700 block">{{ auth()->user()->full_name ?? 'Admin' }}</span>
                                     <span class="text-xs text-gray-500">
                                         {{ auth()->user()->isAdmin() ? 'Admin' : 'Moderator' }}
                                     </span>
@@ -162,7 +177,7 @@
                             <!-- Dropdown menu -->
                             <div x-show="open" @click.away="open = false" x-transition
                                 class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                
+
                                 <a href="{{ route('profile') }}"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <div class="flex items-center">
@@ -179,7 +194,8 @@
                                     <button type="submit"
                                         class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <div class="flex items-center">
-                                            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                             </svg>
