@@ -5,8 +5,7 @@ namespace App\Livewire\Auth;
 use Livewire\Component;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
+use App\Mail\PasswordResetMail;
 
 class ForgotPassword extends Component
 {
