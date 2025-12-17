@@ -38,7 +38,7 @@ use App\Livewire\TrackingDetail;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', fn() => view('home'))->name('home');
+Route::get('/', fn() => view('welcome'))->name('home');
 Route::get('/categories', fn() => view('categories'))->name('categories');
 
 // Auth Routes (Public)
@@ -146,6 +146,10 @@ Route::middleware(['auth', 'moderator'])->prefix('admin')->name('admin.')->group
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     // User Management (Admin Only)
     Route::get('/users', UsersIndex::class)->name('users');
+});
+
+Route::get('/admin/pin-mapper', function () {
+    return view('admin.pin-mapper');
 });
 
 /*
