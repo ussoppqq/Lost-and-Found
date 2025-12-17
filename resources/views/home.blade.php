@@ -758,33 +758,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </div>
-                    <h3 class="text-xl lg:text-2xl font-bold text-gray-800 mb-4">How It Works</h3>
-                    <p class="text-gray-600 leading-relaxed text-sm lg:text-base">
-                        Our lost and found system helps visitors quickly report and recover lost items.
-                        Simply report what you've lost or found, and we'll help connect you with the right person.
-                        Together, we can make Kebun Raya Bogor a more caring community.
-                    </p>
-                    <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{{ url('/map') }}"
-                            class="inline-flex items-center justify-center px-6 py-3 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors font-medium">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            View Map
-                        </a>
-                        <a href="#"
-                            class="inline-flex items-center justify-center px-6 py-3 border border-gray-600 text-gray-600 rounded-full hover:bg-gray-50 transition-colors font-medium">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Learn More
-                        </a>
-                    </div>
+                    </button>
+                </div>
+
+                <!-- Map Content would go here -->
+                <div class="p-4 text-center text-gray-500">
+                    <p>Interactive map feature coming soon...</p>
                 </div>
             </div>
         </div>
