@@ -28,14 +28,12 @@ class FoundForm extends Component
     private const OTP_COOLDOWN_SECONDS = 60;  // jeda kirim/ulang OTP
     private const SUBMIT_LOCK_SECONDS  = 3;   // kunci tombol submit sesaat
 
-    protected $listeners = ['locationUpdated'];
+    // protected $listeners = ['locationUpdated'];
 
     // --- FORM STATE ---
     public string  $item_name = '';
     public string  $description = '';
     public ?string $location = null;
-    public ?float $latitude = null;
-    public ?float $longitude = null;
     public ?string $date_found = null;
     public ?string $category = null;
     public ?string $phone = null;
@@ -64,7 +62,7 @@ class FoundForm extends Component
     protected function step1Rules(): array
     {
         return [
-            'phone'      => 'required|string|max:30',
+            'phone'      => 'required|string|regex:/^[0-9]{9,13}$/|max:30',
             'user_name'  => $this->is_existing_user ? 'nullable' : 'required|string|max:255',
             'location'   => 'nullable|string|max:255',
             'date_found' => 'nullable|date|before_or_equal:now',
@@ -100,6 +98,7 @@ class FoundForm extends Component
         'description.min'            => 'Description must be at least 10 characters.',
         'description.max'            => 'Description cannot exceed 200 characters.',
         'phone.required'             => 'Phone number is required.',
+        'phone.regex'                => 'Phone number must be 9-13 digits (without +62 prefix).',
         'user_name.required'         => 'Name is required for new users.',
         'category.required'          => 'Category is required.',
         'category.uuid'              => 'Invalid category selected.',
@@ -299,13 +298,6 @@ class FoundForm extends Component
         }
     }
 
-    // ---------- LOCATION ----------
-    public function locationUpdated($latitude = null, $longitude = null): void
-    {
-        $this->latitude = $latitude;
-        $this->longitude = $longitude;
-    }
-
     // ---------- NAVIGATION ----------
     public function nextStep(): void
     {
@@ -376,8 +368,6 @@ class FoundForm extends Component
                 'report_description' => $this->description,
                 'report_datetime'    => $reportDateTime,
                 'report_location'    => $this->location ?? 'Not specified',
-                'latitude'           => $this->latitude,
-                'longitude'          => $this->longitude,
                 'report_status'      => 'OPEN',
                 'photo_url'          => null,
                 'reporter_name'      => $user->full_name,
@@ -483,7 +473,7 @@ class FoundForm extends Component
     // ---------- GET LOCATIONS FOR AUTOCOMPLETE ----------
     public function getLocationsProperty()
     {
-        return \App\Models\Location::orderBy('name')->get();
+        return \App\Models\Location::orderBy('area')->orderBy('name')->get();
     }
 
     public function render()

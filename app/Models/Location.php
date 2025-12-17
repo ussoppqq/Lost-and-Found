@@ -13,7 +13,7 @@ class Location extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    public $timestamps = false; // migration tidak ada timestamps
+    public $timestamps = false;
 
-    protected $fillable = ['name', 'area'];
+    protected $fillable = ['location_id', 'area', 'name'];
 }

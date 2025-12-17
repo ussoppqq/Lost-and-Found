@@ -28,8 +28,6 @@ class Report extends Model
         'report_description',
         'report_datetime',
         'report_location',
-        'latitude',
-        'longitude',
         'report_status',
         'photo_url',
         'reporter_name',

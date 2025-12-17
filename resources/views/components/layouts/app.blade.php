@@ -13,8 +13,8 @@
 
     <style>
         body {
-            font-family: 'Crimson Text', serif;
-            font-weight: 600;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 400;
         }
 
         h1,
@@ -25,12 +25,12 @@
         h6,
         .font-dmserif-title,
         label {
-            font-family: 'DM Serif Display', serif;
+            font-family: 'Times New Roman', Times, serif;
             font-weight: 700;
         }
 
         .font-openSans {
-            font-family: 'Open Sans', sans-serif;
+            font-family: 'Times New Roman', Times, serif;
         }
 
         /* Biar anchor target gak ketutup navbar fixed */

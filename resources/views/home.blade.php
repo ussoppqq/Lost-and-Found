@@ -150,13 +150,13 @@
                         </div>
 
                         <div class="p-4 md:p-6 text-center">
-                            <div class="w-12 h-1 bg-red-500 mx-auto rounded-full mb-4 md:mb-3"></div>
+                            <div class="w-12 h-1 bg-blue-500 mx-auto rounded-full mb-4 md:mb-3"></div>
                             <p class="hidden md:block text-gray-600 leading-relaxed text-sm md:text-base mb-4">
                                 Lost something valuable? Let us help you find it back.
                             </p>
                             <div class="mt-2 md:mt-4">
                                 <span
-                                    class="inline-flex items-center justify-center text-red-600 font-semibold group-hover:text-red-700 transition-colors text-sm md:text-base">
+                                    class="inline-flex items-center justify-center text-blue-600 font-semibold group-hover:text-blue-700 transition-colors text-sm md:text-base">
                                     Report Lost Item
                                     <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">
@@ -183,13 +183,13 @@
                         </div>
 
                         <div class="p-4 md:p-6 text-center">
-                            <div class="w-12 h-1 bg-red-500 mx-auto rounded-full mb-4 md:mb-3"></div>
+                            <div class="w-12 h-1 bg-blue-500 mx-auto rounded-full mb-4 md:mb-3"></div>
                             <p class="hidden md:block text-gray-600 leading-relaxed text-sm md:text-base mb-4">
                                 Found something that doesn't belong to you? Help us return it to the rightful owner.
                             </p>
                             <div class="mt-2 md:mt-4">
                                 <span
-                                    class="inline-flex items-center justify-center text-red-600 font-semibold group-hover:text-red-700 transition-colors text-sm md:text-base">
+                                    class="inline-flex items-center justify-center text-blue-600 font-semibold group-hover:text-blue-700 transition-colors text-sm md:text-base">
                                     Report Found Item
                                     <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">

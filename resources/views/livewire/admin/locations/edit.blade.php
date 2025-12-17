@@ -23,15 +23,28 @@
                 @csrf
                 @method('PUT')
 
-                <!-- Area Name -->
+                <!-- Area -->
                 <div class="mb-6">
                     <label for="area" class="block text-sm font-semibold text-gray-900 mb-2">
-                        Location Name <span class="text-red-500">*</span>
+                        Area <span class="text-red-500">*</span>
                     </label>
                     <input type="text" id="area" name="area" value="{{ old('area', $location->area) }}" required
                         class="w-full px-4 py-3 text-base rounded-xl border-2 border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 placeholder:text-gray-400"
-                        placeholder="e.g., Taman Anggrek, Taman Palem, etc.">
+                        placeholder="e.g., Zona Fungsional Utama, Area Taman Tematik, etc.">
                     @error('area')
+                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Location Name -->
+                <div class="mb-6">
+                    <label for="name" class="block text-sm font-semibold text-gray-900 mb-2">
+                        Location Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="name" name="name" value="{{ old('name', $location->name) }}" required
+                        class="w-full px-4 py-3 text-base rounded-xl border-2 border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 placeholder:text-gray-400"
+                        placeholder="e.g., Taman Anggrek, Pintu Masuk Utama, etc.">
+                    @error('name')
                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>

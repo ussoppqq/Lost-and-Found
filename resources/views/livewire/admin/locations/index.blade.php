@@ -50,6 +50,10 @@
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Area
+                        </th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Location Name
                         </th>
                         <th scope="col"
@@ -65,6 +69,9 @@
                             {{ $locations->firstItem() + $index }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-gray-600">{{ $location->area }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -73,7 +80,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span class="text-sm font-medium text-gray-900">{{ $location->area }}</span>
+                                <span class="text-sm font-medium text-gray-900">{{ $location->name }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -103,7 +110,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="3" class="px-6 py-12 text-center">
+                        <td colspan="4" class="px-6 py-12 text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

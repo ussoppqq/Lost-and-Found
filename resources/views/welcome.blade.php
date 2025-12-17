@@ -113,7 +113,7 @@
                     }
 
                     if (isUUID(v)) {
-                        window.location.href = "{{ route('tracking.detail', ['reportId' => '_ID']) }}".replace('ID_', v);
+                        window.location.href = "{{ route('tracking.detail', ['reportId' => '_ID_']) }}".replace('_ID_', v);
                         return;
                     }
 
@@ -122,7 +122,7 @@
                         return;
                     }
 
-                    showError("${raw.substring(0, 20)}${raw.length > 20 ? '...' : ''}" bukan Report ID yang valid.Cek PDF receipt untuk mendapatkan Tracking ID yang benar.);
+                    showError(`"${raw.substring(0, 20)}${raw.length > 20 ? '...' : ''}" bukan Report ID yang valid. Cek PDF receipt untuk mendapatkan Tracking ID yang benar.`);
                 });
             })();
         </script>
@@ -156,13 +156,13 @@
                         </div>
 
                         <div class="p-4 md:p-6 text-center">
-                            <div class="w-12 h-1 bg-red-500 mx-auto rounded-full mb-3"></div>
+                            <div class="w-12 h-1 bg-blue-500 mx-auto rounded-full mb-3"></div>
                             <p class="text-gray-600 leading-relaxed text-sm md:text-base min-h-[3rem]">
                                 Lost something valuable? Let us help you find it back.
                             </p>
                             <div class="mt-4">
                                 <span
-                                    class="inline-flex items-center text-red-600 font-semibold group-hover:text-red-700 transition-colors text-sm md:text-base">
+                                    class="inline-flex items-center text-blue-600 font-semibold group-hover:text-blue-700 transition-colors text-sm md:text-base">
                                     Report Lost Item
                                     <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">

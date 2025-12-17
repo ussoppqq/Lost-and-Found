@@ -14,7 +14,7 @@ class LocationController extends Controller
      */
     public function index()
     {
-        $locations = Location::orderBy('area')->paginate(20);
+        $locations = Location::orderBy('area')->orderBy('name')->paginate(20);
         return view('livewire.admin.locations.index', compact('locations'));
     }
 
@@ -32,12 +32,14 @@ class LocationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'area' => 'required|string|max:255|unique:locations,area',
+            'area' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
         ]);
 
         Location::create([
             'location_id' => Str::uuid(),
             'area' => $validated['area'],
+            'name' => $validated['name'],
         ]);
 
         return redirect()->route('admin.locations.index')
@@ -70,11 +72,13 @@ class LocationController extends Controller
         $location = Location::findOrFail($id);
 
         $validated = $request->validate([
-            'area' => 'required|string|max:255|unique:locations,area,' . $id . ',location_id',
+            'area' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
         ]);
 
         $location->update([
             'area' => $validated['area'],
+            'name' => $validated['name'],
         ]);
 
         return redirect()->route('admin.locations.index')

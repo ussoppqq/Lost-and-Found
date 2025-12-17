@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm:*)",
+      "Bash(php artisan migrate:status:*)",
+      "Bash(php artisan:*)",
+      "Bash(php test_location_grouping.php:*)"
+    ]
+  }
+}

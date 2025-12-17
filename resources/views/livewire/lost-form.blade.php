@@ -75,9 +75,16 @@
               </div>
               @else
               {{-- <div class="flex gap-2"> --}}
-                <input id="phone_d" type="tel" inputmode="tel" autocomplete="tel" wire:model.live="phone" required
-                  class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 placeholder:text-gray-400"
-                  placeholder="Enter your phone number">
+                <div class="flex gap-2">
+                  <div class="flex items-center px-4 py-3 bg-gray-100 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold whitespace-nowrap">
+                    +62
+                  </div>
+                  <input id="phone_d" type="tel" inputmode="numeric" autocomplete="tel" wire:model.live="phone" required
+                    class="flex-1 px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 placeholder:text-gray-400"
+                    placeholder="81234567890"
+                    pattern="[0-9]*"
+                    onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                </div>
                 {{-- @if($needs_otp_verification && !$otp_verified)
                 <button type="button" id="btnSendOtp" wire:click="sendOtpAutomatically"
                   class="px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-60 whitespace-nowrap">
@@ -211,7 +218,7 @@
             {{-- Location --}}
             <div class="mb-4">
               <div class="flex items-center justify-between mb-2">
-                <label for="location_d" class="block text-sm font-semibold text-gray-900">
+                <label for="location_select_d" class="block text-sm font-semibold text-gray-900">
                   Where You Lost It <span class="text-gray-500 text-xs font-normal">(optional)</span>
                 </label>
                 <button type="button" onclick="toggleLocationMode('d')"
@@ -233,7 +240,7 @@
                 $groupedLocations = $locations->groupBy('area');
                 @endphp
                 @foreach($groupedLocations as $area => $locs)
-                <optgroup label="{{ $area ?: 'Other Locations' }}">
+                <optgroup label="{{ $area }}">
                   @foreach($locs as $loc)
                   <option value="{{ $loc->name }}">{{ $loc->name }}</option>
                   @endforeach
@@ -431,9 +438,16 @@
               </div>
               @else
               {{-- <div class="flex gap-2"> --}}
-                <input id="phone_m" type="tel" inputmode="tel" autocomplete="tel" wire:model.live="phone" required
-                  class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 placeholder:text-gray-400"
-                  placeholder="Enter your phone number">
+                <div class="flex gap-2">
+                  <div class="flex items-center px-4 py-3 bg-gray-100 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold whitespace-nowrap">
+                    +62
+                  </div>
+                  <input id="phone_m" type="tel" inputmode="numeric" autocomplete="tel" wire:model.live="phone" required
+                    class="flex-1 px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 placeholder:text-gray-400"
+                    placeholder="81234567890"
+                    pattern="[0-9]*"
+                    onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                </div>
                 {{-- @if($needs_otp_verification && !$otp_verified)
                 <button type="button" id="btnSendOtpMobile" wire:click="sendOtpAutomatically"
                   class="px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-60 whitespace-nowrap text-sm">
@@ -567,7 +581,7 @@
             {{-- Location --}}
             <div class="mb-4">
               <div class="flex items-center justify-between mb-2">
-                <label for="location_m" class="block text-sm font-semibold text-gray-900">
+                <label for="location_select_m" class="block text-sm font-semibold text-gray-900">
                   Where You Lost It <span class="text-gray-500 text-xs font-normal">(optional)</span>
                 </label>
                 <button type="button" onclick="toggleLocationMode('m')"
@@ -589,9 +603,9 @@
                 $groupedLocations = $locations->groupBy('area');
                 @endphp
                 @foreach($groupedLocations as $area => $locs)
-                <optgroup label="{{ $area ?: 'Other Locations' }}">
+                <optgroup label="{{ $area }}">
                   @foreach($locs as $loc)
-                  <option value="{{ $loc->area_name }}">{{ $loc->area_name }}</option>
+                  <option value="{{ $loc->name }}">{{ $loc->name }}</option>
                   @endforeach
                 </optgroup>
                 @endforeach
