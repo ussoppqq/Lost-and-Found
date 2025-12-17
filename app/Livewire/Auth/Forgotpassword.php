@@ -2,21 +2,26 @@
 
 namespace App\Livewire\Auth;
 
-use Livewire\Component;
+use App\Mail\PasswordResetMail;
 use App\Models\User;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Hash;
-use App\Mail\PasswordResetMail;
+use Illuminate\Support\Facades\Password;
+use Livewire\Component;
 
 class ForgotPassword extends Component
 {
     public $email;
+
     public $emailSent = false;
+
     public $recovery_code;
+
     public $new_password;
+
     public $new_password_confirmation;
+
     public $step = 1; // 1: email input, 2: recovery code, 3: new password
 
     protected $rules = [
@@ -37,8 +42,9 @@ class ForgotPassword extends Component
             // Find user
             $user = User::where('email', $this->email)->first();
 
-            if (!$user) {
+            if (! $user) {
                 $this->addError('email', 'We could not find a user with that email address.');
+
                 return;
             }
 
@@ -62,9 +68,9 @@ class ForgotPassword extends Component
 
         } catch (\Exception $e) {
             $this->addError('email', 'An error occurred. Please try again later.');
-            Log::error('Password reset error: ' . $e->getMessage(), [
+            Log::error('Password reset error: '.$e->getMessage(), [
                 'email' => $this->email,
-                'exception' => $e
+                'exception' => $e,
             ]);
         }
     }
@@ -82,14 +88,16 @@ class ForgotPassword extends Component
                 ->where('email_verification_code', $this->recovery_code)
                 ->first();
 
-            if (!$user) {
+            if (! $user) {
                 $this->addError('recovery_code', 'Invalid recovery code.');
+
                 return;
             }
 
             // Check if code expired
             if ($user->email_verification_code_expires_at < now()) {
                 $this->addError('recovery_code', 'Recovery code has expired. Please request a new one.');
+
                 return;
             }
 
@@ -99,7 +107,7 @@ class ForgotPassword extends Component
 
         } catch (\Exception $e) {
             $this->addError('recovery_code', 'An error occurred. Please try again.');
-            Log::error('Recovery code verification error: ' . $e->getMessage());
+            Log::error('Recovery code verification error: '.$e->getMessage());
         }
     }
 
@@ -120,8 +128,9 @@ class ForgotPassword extends Component
                 ->where('email_verification_code', $this->recovery_code)
                 ->first();
 
-            if (!$user) {
+            if (! $user) {
                 $this->addError('new_password', 'Invalid session. Please start over.');
+
                 return;
             }
 
@@ -141,7 +150,7 @@ class ForgotPassword extends Component
 
         } catch (\Exception $e) {
             $this->addError('new_password', 'An error occurred. Please try again.');
-            Log::error('Password reset error: ' . $e->getMessage());
+            Log::error('Password reset error: '.$e->getMessage());
         }
     }
 
@@ -155,7 +164,7 @@ class ForgotPassword extends Component
     {
         return view('livewire.auth.forgot-password')
             ->layout('components.layouts.auth', [
-                'title' => 'Forgot Password'
+                'title' => 'Forgot Password',
             ]);
     }
 }
