@@ -34,12 +34,9 @@ class UserSeeder extends Seeder
                 'phone_number' => '628111111111',
                 'password' => Hash::make('password'),
                 'is_verified' => true,
-                'email_verified_at' => now(),
             ]
         );
 
-        // 4 Moderator - Satu untuk setiap cabang
-        // Moderator Bogor
         User::updateOrCreate(
             ['email' => 'moderator1@kebunraya.com'],
             [
@@ -50,7 +47,6 @@ class UserSeeder extends Seeder
                 'phone_number' => '628222222222',
                 'password' => Hash::make('password'),
                 'is_verified' => true,
-                'email_verified_at' => now(),
             ]
         );
 
@@ -65,11 +61,9 @@ class UserSeeder extends Seeder
                 'phone_number' => '628333333333',
                 'password' => Hash::make('password'),
                 'is_verified' => true,
-                'email_verified_at' => now(),
             ]
         );
 
-        // Moderator Purwodadi
         User::updateOrCreate(
             ['email' => 'moderator3@kebunraya.com'],
             [
@@ -80,7 +74,6 @@ class UserSeeder extends Seeder
                 'phone_number' => '628444444444',
                 'password' => Hash::make('password'),
                 'is_verified' => true,
-                'email_verified_at' => now(),
             ]
         );
 
@@ -95,7 +88,6 @@ class UserSeeder extends Seeder
                 'phone_number' => '628555555555',
                 'password' => Hash::make('password'),
                 'is_verified' => true,
-                'email_verified_at' => now(),
             ]
         );
 
@@ -110,7 +102,6 @@ class UserSeeder extends Seeder
                 'phone_number' => '628666666666',
                 'password' => Hash::make('password'),
                 'is_verified' => true,
-                'email_verified_at' => now(),
             ]
         );
     }
