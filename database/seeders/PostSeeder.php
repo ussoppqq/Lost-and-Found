@@ -21,7 +21,7 @@ class PostSeeder extends Seeder
         Post::create([
             'post_id' => Str::uuid(),
             'company_id' => $bogor->company_id,
-            'post_name' => 'Post Bogor - Gerbang Utama',
+            'post_name' => 'Post 1 - Gerbang Utama',
             'post_address' => 'Gerbang Utama Kebun Raya Bogor',
             'capacity' => 100,
         ]);
@@ -30,7 +30,7 @@ class PostSeeder extends Seeder
         Post::create([
             'post_id' => Str::uuid(),
             'company_id' => $cibodas->company_id,
-            'post_name' => 'Post Cibodas - Pusat Informasi',
+            'post_name' => 'Post 2 - Pusat Informasi',
             'post_address' => 'Pusat Informasi Kebun Raya Cibodas',
             'capacity' => 80,
         ]);
@@ -39,7 +39,7 @@ class PostSeeder extends Seeder
         Post::create([
             'post_id' => Str::uuid(),
             'company_id' => $purwodadi->company_id,
-            'post_name' => 'Post Purwodadi - Area Koleksi',
+            'post_name' => 'Post 3 - Area Koleksi',
             'post_address' => 'Area Koleksi Kebun Raya Purwodadi',
             'capacity' => 75,
         ]);
@@ -48,7 +48,7 @@ class PostSeeder extends Seeder
         Post::create([
             'post_id' => Str::uuid(),
             'company_id' => $bali->company_id,
-            'post_name' => 'Post Bali - Gerbang Masuk',
+            'post_name' => 'Post 4 - Gerbang Masuk',
             'post_address' => 'Gerbang Masuk Kebun Raya Bali',
             'capacity' => 90,
         ]);
