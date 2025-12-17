@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
         // 4 Moderator - Satu untuk setiap cabang
         // Moderator Bogor
         User::updateOrCreate(
-            ['email' => 'moderator.bogor@kebunraya.com'],
+            ['email' => 'moderator1@kebunraya.com'],
             [
                 'user_id' => Str::uuid(),
                 'company_id' => $bogor->company_id,
@@ -56,7 +56,7 @@ class UserSeeder extends Seeder
 
         // Moderator Cibodas
         User::updateOrCreate(
-            ['email' => 'moderator.cibodas@kebunraya.com'],
+            ['email' => 'moderator2@kebunraya.com'],
             [
                 'user_id' => Str::uuid(),
                 'company_id' => $cibodas->company_id,
@@ -71,7 +71,7 @@ class UserSeeder extends Seeder
 
         // Moderator Purwodadi
         User::updateOrCreate(
-            ['email' => 'moderator.purwodadi@kebunraya.com'],
+            ['email' => 'moderator3@kebunraya.com'],
             [
                 'user_id' => Str::uuid(),
                 'company_id' => $purwodadi->company_id,
@@ -86,7 +86,7 @@ class UserSeeder extends Seeder
 
         // Moderator Bali
         User::updateOrCreate(
-            ['email' => 'moderator.bali@kebunraya.com'],
+            ['email' => 'moderator4@kebunraya.com'],
             [
                 'user_id' => Str::uuid(),
                 'company_id' => $bali->company_id,
