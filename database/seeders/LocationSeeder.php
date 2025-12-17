@@ -51,7 +51,7 @@ class LocationSeeder extends Seeder
         foreach ($locations as $location) {
             Location::create([
                 'location_id' => Str::uuid(),
-                'area_name'   => $location['name'],
+                'name'        => $location['name'],
                 'area'        => $location['area'],
             ]);
         }
