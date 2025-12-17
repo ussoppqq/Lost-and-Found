@@ -6,7 +6,11 @@
       "Bash(git ls-tree:*)",
       "Bash(php artisan:*)",
       "Bash(ls:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(dir:*)",
+      "Bash(move \"resources\\views\\livewire\\auth\\forgot-Password.blade.php\" \"resources\\views\\livewire\\auth\\forgot-password.blade.php\")",
+      "Bash(ren \"resources\\views\\livewire\\auth\\forgot-Password.blade.php\" \"forgot-password.blade.php\")",
+      "Bash(mv:*)"
     ]
   }
 }
