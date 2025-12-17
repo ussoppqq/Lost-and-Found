@@ -39,9 +39,9 @@
                 </button>
             </form>
 
-            {{-- Tip kecil --}}
+            {{-- Tip --}}
             <p class="text-center text-white/80 text-xs mt-3 drop-shadow">
-                Tip: kamu bisa paste <span class="font-mono">Tracking ID</span> dari PDF receipt langsung di sini.
+                Tip: You can paste the <span class="font-mono">Tracking ID</span> from your PDF receipt directly here.
             </p>
         </div>
 
@@ -110,24 +110,24 @@
                     const v = clean(raw);
 
                     if (!v) {
-                        showError('Masukkan Report ID yang valid dari PDF receipt Anda.');
+                        showError('Please enter a valid Report ID from your PDF receipt.');
                         return;
                     }
 
                     if (isUUID(v)) {
-                        // redirect langsung ke tracking detail
+                        // redirect directly to tracking detail
                         window.location.href = "{{ route('tracking.detail', ['reportId' => '__ID__']) }}".replace('__ID__', v);
                         return;
                     }
 
                     if (isPrefix(v)) {
-                        // redirect ke halaman tracking dengan prefilled ID
+                        // redirect to tracking page with prefilled ID
                         window.location.href = "/tracking?reportId=" + encodeURIComponent(v);
                         return;
                     }
 
-                    // kalau bukan ID yang valid, tampilkan error
-                    showError(`"${raw.substring(0, 20)}${raw.length > 20 ? '...' : ''}" bukan Report ID yang valid. Cek PDF receipt untuk mendapatkan Tracking ID yang benar.`);
+                    // if not a valid ID, show error
+                    showError(`"${raw.substring(0, 20)}${raw.length > 20 ? '...' : ''}" is not a valid Report ID. Check your PDF receipt to get the correct Tracking ID.`);
                 });
             })();
         </script>
@@ -166,13 +166,13 @@
 
                         <!-- Text Section -->
                         <div class="p-4 md:p-6 text-center">
-                            <div class="w-12 h-1 bg-red-500 mx-auto rounded-full mb-3"></div>
-                            <p class="text-gray-600 leading-relaxed text-sm md:text-base min-h-[3rem]">
+                            <div class="w-12 h-1 bg-red-500 mx-auto rounded-full mb-4 md:mb-3"></div>
+                            <p class="hidden md:block text-gray-600 leading-relaxed text-sm md:text-base mb-4">
                                 Lost something valuable? Let us help you find it back.
                             </p>
-                            <div class="mt-4">
+                            <div class="mt-2 md:mt-4">
                                 <span
-                                    class="inline-flex items-center text-red-600 font-semibold group-hover:text-red-700 transition-colors text-sm md:text-base">
+                                    class="inline-flex items-center justify-center text-red-600 font-semibold group-hover:text-red-700 transition-colors text-sm md:text-base">
                                     Report Lost Item
                                     <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">
@@ -201,13 +201,13 @@
 
                         <!-- Text Section -->
                         <div class="p-4 md:p-6 text-center">
-                            <div class="w-12 h-1 bg-gray-500 mx-auto rounded-full mb-3"></div>
-                            <p class="text-gray-600 leading-relaxed text-sm md:text-base min-h-[3rem]">
+                            <div class="w-12 h-1 bg-red-500 mx-auto rounded-full mb-4 md:mb-3"></div>
+                            <p class="hidden md:block text-gray-600 leading-relaxed text-sm md:text-base mb-4">
                                 Found something that doesn't belong to you? Help us return it to the rightful owner.
                             </p>
-                            <div class="mt-4">
+                            <div class="mt-2 md:mt-4">
                                 <span
-                                    class="inline-flex items-center text-gray-600 font-semibold group-hover:text-gray-700 transition-colors text-sm md:text-base">
+                                    class="inline-flex items-center justify-center text-red-600 font-semibold group-hover:text-red-700 transition-colors text-sm md:text-base">
                                     Report Found Item
                                     <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">
@@ -237,26 +237,6 @@
                         Simply report what you've lost or found, and we'll help connect you with the right person.
                         Together, we can make Kebun Raya Bogor a more caring community.
                     </p>
-                    <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="{{ url('/map') }}"
-                            class="inline-flex items-center justify-center px-6 py-3 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors font-medium">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            View Map
-                        </a>
-                        <a href="#"
-                            class="inline-flex items-center justify-center px-6 py-3 border border-gray-600 text-gray-600 rounded-full hover:bg-gray-50 transition-colors font-medium">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Learn More
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>

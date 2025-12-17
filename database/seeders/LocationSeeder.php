@@ -13,25 +13,47 @@ class LocationSeeder extends Seeder
      */
     public function run(): void
     {
-        Location::create([
-            'location_id' => Str::uuid(),
-            'area_name'   => 'Main Entrance',
-            'latitude'    => -6.597147,
-            'longitude'   => 106.799404,
-        ]);
+        $locations = [
+            // Zona Fungsional Utama
+            ['name' => 'Pintu Masuk Utama', 'area' => 'Zona Fungsional Utama'],
+            ['name' => 'Pusat Informasi / Visitor Center', 'area' => 'Zona Fungsional Utama'],
+            ['name' => 'Area Parkir', 'area' => 'Zona Fungsional Utama'],
+            ['name' => 'Toko Souvenir / Gift Shop', 'area' => 'Zona Fungsional Utama'],
+            ['name' => 'Kantor Pengelola', 'area' => 'Zona Fungsional Utama'],
 
-        Location::create([
-            'location_id' => Str::uuid(),
-            'area_name'   => 'Lotus Pond',
-            'latitude'    => -6.598234,
-            'longitude'   => 106.800123,
-        ]);
+            // Area Taman Tematik & Spot Menarik
+            ['name' => 'Taman Teijsmann', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Taman Meksiko', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Taman Bambu', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Taman Obat', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Orchidarium / Griya Anggrek', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Kolam Gunting', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Taman Nepenthes', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Taman Araceae', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Taman Kopi', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Taman Durian', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Taman Palem', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Taman Paku-pakuan', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Taman Akuatik', 'area' => 'Area Taman Tematik & Spot Menarik'],
+            ['name' => 'Ecodome', 'area' => 'Area Taman Tematik & Spot Menarik'],
 
-        Location::create([
-            'location_id' => Str::uuid(),
-            'area_name'   => 'Orchid Garden',
-            'latitude'    => -6.599456,
-            'longitude'   => 106.801234,
-        ]);
+            // Situs Bersejarah & Area Ikonik
+            ['name' => 'Istana Bogor', 'area' => 'Situs Bersejarah & Area Ikonik'],
+            ['name' => 'Monumen Lady Raffles', 'area' => 'Situs Bersejarah & Area Ikonik'],
+            ['name' => 'Monumen Reinwardt', 'area' => 'Situs Bersejarah & Area Ikonik'],
+            ['name' => 'Makam Belanda (Olive Cemetery)', 'area' => 'Situs Bersejarah & Area Ikonik'],
+            ['name' => 'Monumen J.J. Smith', 'area' => 'Situs Bersejarah & Area Ikonik'],
+            ['name' => 'Museum Zoologi Bogor', 'area' => 'Situs Bersejarah & Area Ikonik'],
+            ['name' => 'Jembatan Merah', 'area' => 'Situs Bersejarah & Area Ikonik'],
+            ['name' => 'Jembatan Cinta', 'area' => 'Situs Bersejarah & Area Ikonik'],
+        ];
+
+        foreach ($locations as $location) {
+            Location::create([
+                'location_id' => Str::uuid(),
+                'area_name'   => $location['name'],
+                'area'        => $location['area'],
+            ]);
+        }
     }
 }

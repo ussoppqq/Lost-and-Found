@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(git commit:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(php artisan:*)",
+      "Bash(ls:*)",
+      "Bash(findstr:*)"
     ]
   }
 }

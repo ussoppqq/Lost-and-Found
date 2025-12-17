@@ -30,7 +30,7 @@
         <!-- Body -->
         <div class="px-6 py-6 space-y-6">
             
-            <!-- Rejection Notice (jika REJECTED) -->
+            <!-- Rejection Notice (if REJECTED) -->
             @if($claim->claim_status === 'REJECTED')
                 <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4">
                     <div class="flex items-start">
@@ -220,7 +220,7 @@
                 @endif
             </div>
 
-            <!-- Verification Photos (hanya tampil jika RELEASED) -->
+            <!-- Verification Photos (only shown if RELEASED) -->
             @if($claim->claim_status === 'RELEASED' && $claim->claim_photos && count($claim->claim_photos) > 0)
                 <div class="bg-green-50 rounded-lg p-4 border-2 border-green-200">
                     <h4 class="text-sm font-semibold text-gray-900 mb-4 flex items-center">

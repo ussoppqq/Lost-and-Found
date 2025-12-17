@@ -63,12 +63,12 @@ x-init="
                 const formattedTime = new Date().toLocaleString('en-US', options);
                 const clockElement = document.getElementById('currentTime');
                 if (clockElement) {
-                    clockElement.textContent = 'Current Time (WIB): ' + formattedTime;
+                    clockElement.textContent = 'Current Time: ' + formattedTime;
                 }
             }
-            
+
             function updateDatetimeInput() {
-                // Dapatkan waktu WIB yang benar
+                // Get correct time
                 const wibDate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' });
                 const wibTime = new Date(wibDate);
                 
@@ -82,10 +82,10 @@ x-init="
                 
                 const datetimeInput = document.getElementById('report-datetime');
                 if (datetimeInput) {
-                    // Selalu set value (override jika ada)
+                    // Always set value (override if exists)
                     datetimeInput.value = datetimeValue;
-                    
-                    // Trigger input event untuk Livewire
+
+                    // Trigger input event for Livewire
                     datetimeInput.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             }
@@ -115,7 +115,7 @@ x-init="
                 }, 300);
             });
             
-            // Cleanup intervals jika page unload
+            // Cleanup intervals if page unload
             window.addEventListener('beforeunload', function() {
                 clearInterval(clockInterval);
                 clearInterval(datetimeInterval);

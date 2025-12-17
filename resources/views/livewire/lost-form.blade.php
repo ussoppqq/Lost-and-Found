@@ -205,18 +205,42 @@
 
             {{-- Location --}}
             <div class="mb-4">
-              <label for="location_d" class="block text-sm font-semibold text-gray-900 mb-2">
-                Where You Lost It <span class="text-gray-500 text-xs font-normal">(optional)</span>
-              </label>
-              <input id="location_d" type="text" wire:model.defer="location"
-                class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 placeholder:text-gray-400"
-                placeholder="e.g. Library, Cafeteria, Hallway">
-              @error('location') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
+              <div class="flex items-center justify-between mb-2">
+                <label for="location_d" class="block text-sm font-semibold text-gray-900">
+                  Where You Lost It <span class="text-gray-500 text-xs font-normal">(optional)</span>
+                </label>
+                <button type="button" onclick="toggleLocationMode('d')"
+                  class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-1.5 shadow-sm transition-colors">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12M8 12h12M8 17h12M3 7h.01M3 12h.01M3 17h.01"/>
+                  </svg>
+                  <span id="location_mode_toggle_d">Type</span>
+                </button>
+              </div>
 
-            {{-- Map Location Picker --}}
-            <div class="mb-4">
-              @livewire('location-picker', ['latitude' => $latitude, 'longitude' => $longitude])
+              {{-- Select Mode --}}
+              <select id="location_select_d" wire:model.defer="location"
+                class="w-full px-4 py-3 text-base rounded-xl border-2 border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 appearance-none bg-white"
+                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%232563eb%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
+                <option value="">-- Select Location --</option>
+                @php
+                  $groupedLocations = $locations->groupBy('area');
+                @endphp
+                @foreach($groupedLocations as $area => $locs)
+                  <optgroup label="{{ $area ?: 'Other Locations' }}">
+                    @foreach($locs as $loc)
+                      <option value="{{ $loc->area_name }}">{{ $loc->area_name }}</option>
+                    @endforeach
+                  </optgroup>
+                @endforeach
+              </select>
+
+              {{-- Type Mode --}}
+              <input type="text" id="location_input_d" wire:model.defer="location"
+                class="hidden w-full px-4 py-3 text-base rounded-xl border-2 border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 placeholder:text-gray-400"
+                placeholder="Type location name...">
+
+              @error('location') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             {{-- Date Lost --}}
@@ -538,18 +562,42 @@
 
             {{-- Location --}}
             <div class="mb-4">
-              <label for="location_m" class="block text-sm font-semibold text-gray-900 mb-2">
-                Where You Lost It <span class="text-gray-500 text-xs font-normal">(optional)</span>
-              </label>
-              <input id="location_m" type="text" wire:model.defer="location"
-                class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 placeholder:text-gray-400"
-                placeholder="e.g. Library, Cafeteria, Hallway">
-              @error('location') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
+              <div class="flex items-center justify-between mb-2">
+                <label for="location_m" class="block text-sm font-semibold text-gray-900">
+                  Where You Lost It <span class="text-gray-500 text-xs font-normal">(optional)</span>
+                </label>
+                <button type="button" onclick="toggleLocationMode('m')"
+                  class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-1.5 shadow-sm transition-colors">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12M8 12h12M8 17h12M3 7h.01M3 12h.01M3 17h.01"/>
+                  </svg>
+                  <span id="location_mode_toggle_m">Type</span>
+                </button>
+              </div>
 
-            {{-- Map Location Picker --}}
-            <div class="mb-4">
-              @livewire('location-picker', ['latitude' => $latitude, 'longitude' => $longitude])
+              {{-- Select Mode --}}
+              <select id="location_select_m" wire:model.defer="location"
+                class="w-full px-4 py-3 text-base rounded-xl border-2 border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 appearance-none bg-white"
+                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%232563eb%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
+                <option value="">-- Select Location --</option>
+                @php
+                  $groupedLocations = $locations->groupBy('area');
+                @endphp
+                @foreach($groupedLocations as $area => $locs)
+                  <optgroup label="{{ $area ?: 'Other Locations' }}">
+                    @foreach($locs as $loc)
+                      <option value="{{ $loc->area_name }}">{{ $loc->area_name }}</option>
+                    @endforeach
+                  </optgroup>
+                @endforeach
+              </select>
+
+              {{-- Type Mode --}}
+              <input type="text" id="location_input_m" wire:model.defer="location"
+                class="hidden w-full px-4 py-3 text-base rounded-xl border-2 border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 placeholder:text-gray-400"
+                placeholder="Type location name...">
+
+              @error('location') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             {{-- Date Lost --}}
@@ -978,5 +1026,29 @@
       }
     }
   });
+
+  // --- Toggle Location Mode (Select/Type) ---
+  function toggleLocationMode(prefix) {
+    const selectElement = document.getElementById(`location_select_${prefix}`);
+    const inputElement = document.getElementById(`location_input_${prefix}`);
+    const toggleButton = document.getElementById(`location_mode_toggle_${prefix}`);
+
+    if (!selectElement || !inputElement || !toggleButton) return;
+
+    const isSelectVisible = !selectElement.classList.contains('hidden');
+
+    if (isSelectVisible) {
+      // Switch to Type Mode
+      selectElement.classList.add('hidden');
+      inputElement.classList.remove('hidden');
+      toggleButton.textContent = 'Select';
+      inputElement.focus();
+    } else {
+      // Switch to Select Mode
+      inputElement.classList.add('hidden');
+      selectElement.classList.remove('hidden');
+      toggleButton.textContent = 'Type';
+    }
+  }
 </script>
 @endonce

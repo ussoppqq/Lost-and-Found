@@ -77,7 +77,7 @@
                             <!-- Date -->
                             <div>
                                 <label class="block text-xs font-medium text-gray-500 uppercase mb-1">Found Date</label>
-                                <p class="text-sm text-gray-700">{{ \Carbon\Carbon::parse($report->report_datetime)->format('d M Y, H:i') }} WIB</p>
+                                <p class="text-sm text-gray-700">{{ \Carbon\Carbon::parse($report->report_datetime)->format('d M Y, H:i') }}</p>
                             </div>
 
                             <!-- Reporter -->

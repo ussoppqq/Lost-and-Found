@@ -15,5 +15,5 @@ class Location extends Model
 
     public $timestamps = false; // migration tidak ada timestamps
 
-    protected $fillable = ['area_name', 'latitude', 'longitude'];
+    protected $fillable = ['area_name', 'area'];
 }

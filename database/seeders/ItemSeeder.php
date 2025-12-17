@@ -15,8 +15,8 @@ class ItemSeeder extends Seeder
     public function run(): void
     {
         $company1 = Company::first();
-        $post1 = Post::where('post_name', 'post 1')->first();
-        $post2 = Post::where('post_name', 'post 2')->first();
+        $post1 = Post::where('post_name', 'LIKE', '%Bogor%')->first();
+        $post2 = Post::where('post_name', 'LIKE', '%Cibodas%')->first();
 
         $category1 = Category::where('category_name', 'Phone')->first();
         $category2 = Category::where('category_name', 'Wallet')->first();

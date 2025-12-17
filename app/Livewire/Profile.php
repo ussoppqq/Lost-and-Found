@@ -38,6 +38,30 @@ class Profile extends Component
         $this->currentTab = $tab;
     }
 
+    public function saveAvatar()
+    {
+        $this->validate([
+            'newAvatar' => 'required|image|max:2048', // 2MB max
+        ]);
+
+        $user = Auth::user();
+
+        // Hapus avatar lama jika ada
+        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        // Simpan avatar baru
+        $path = $this->newAvatar->store('avatars', 'public');
+        $user->avatar = $path;
+        $user->save();
+
+        $this->avatar = $user->avatar;
+        $this->newAvatar = null;
+
+        session()->flash('success', 'Profile photo updated successfully!');
+    }
+
     public function update()
     {
         $this->validate([
@@ -46,7 +70,6 @@ class Profile extends Component
             'phone_number' => 'nullable|string|max:20',
             'company_name' => 'nullable|string|max:255',
             'email'        => 'required|email|max:255|unique:users,email,' . Auth::id(),
-            'newAvatar'    => 'nullable|image|max:2048', // 2MB max
         ]);
 
         $user = Auth::user();
@@ -58,15 +81,8 @@ class Profile extends Component
             $user->company->update(['company_name' => $this->company_name]);
         }
 
-        // simpan avatar baru kalau ada
-        if ($this->newAvatar) {
-            $path = $this->newAvatar->store('avatars', 'public');
-            $user->avatar = $path;
-        }
-
         $user->save();
 
-        $this->avatar = $user->avatar; // refresh
         $this->editMode = false;
 
         session()->flash('success', 'Profile updated successfully!');

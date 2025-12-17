@@ -20,9 +20,9 @@
                     Record lost item report (no physical item)
                 @endif
             </p>
-            <!-- Realtime Clock WIB -->
+            <!-- Realtime Clock -->
             <p class="text-xs text-indigo-600 mt-1 font-medium" id="currentTime">
-                Current Time (WIB): Loading...
+                Current Time: Loading...
             </p>
         </div>
         <button wire:click="closeModal" type="button" class="text-gray-400 hover:text-gray-600 transition-colors">

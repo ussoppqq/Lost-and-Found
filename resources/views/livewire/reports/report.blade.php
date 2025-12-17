@@ -21,37 +21,37 @@
   </style>
 </head>
 <body>
-  <div class="title">Detail Laporan</div>
+  <div class="title">Report Details</div>
   <div class="subtitle">
     ID: #{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($report->report_id ?? $report->id, 0, 12)) }}
   </div>
 
   <table class="table">
     <tr>
-      <td class="head">Tipe</td>
+      <td class="head">Type</td>
       <td>
-        <span class="badge">{{ $report->report_type === 'LOST' ? 'Barang Hilang' : 'Barang Ditemukan' }}</span>
+        <span class="badge">{{ $report->report_type === 'LOST' ? 'Lost Item' : 'Found Item' }}</span>
       </td>
     </tr>
     <tr>
-      <td class="head">Status Laporan</td>
+      <td class="head">Report Status</td>
       <td>{{ $report->report_status }}</td>
     </tr>
     <tr>
-      <td class="head">Nama Barang</td>
+      <td class="head">Item Name</td>
       <td>{{ $report->item->item_name ?? $report->item_name ?? '-' }}</td>
     </tr>
     <tr>
-      <td class="head">Tanggal Kejadian</td>
-      <td>{{ \Carbon\Carbon::parse($report->report_datetime)->format('d F Y, H:i') }} WIB</td>
+      <td class="head">Date</td>
+      <td>{{ \Carbon\Carbon::parse($report->report_datetime)->format('d F Y, H:i') }}</td>
     </tr>
     <tr>
-      <td class="head">Lokasi</td>
+      <td class="head">Location</td>
       <td>{{ $report->report_location }}</td>
     </tr>
     @if($report->report_description)
     <tr>
-      <td class="head">Deskripsi</td>
+      <td class="head">Description</td>
       <td>{{ $report->report_description }}</td>
     </tr>
     @endif
@@ -59,24 +59,24 @@
 
   @if($report->item)
     <div class="section">
-      <h3>Status Barang</h3>
+      <h3>Item Status</h3>
       <table class="table">
         <tr><td class="head">Status</td><td>{{ $report->item->item_status }}</td></tr>
         @if($report->item->post)
-        <tr><td class="head">Lokasi Penyimpanan</td><td>{{ $report->item->post->post_name }} — {{ $report->item->post->post_address }}</td></tr>
+        <tr><td class="head">Storage Location</td><td>{{ $report->item->post->post_name }} — {{ $report->item->post->post_address }}</td></tr>
         @endif
         @if($report->item->storage)
-        <tr><td class="head">Rak/Storage</td><td>{{ $report->item->storage }}</td></tr>
+        <tr><td class="head">Shelf/Storage</td><td>{{ $report->item->storage }}</td></tr>
         @endif
         @if($report->item->retention_until)
-        <tr><td class="head">Retensi Hingga</td><td>{{ \Carbon\Carbon::parse($report->item->retention_until)->format('d F Y') }}</td></tr>
+        <tr><td class="head">Retention Until</td><td>{{ \Carbon\Carbon::parse($report->item->retention_until)->format('d F Y') }}</td></tr>
         @endif
       </table>
     </div>
 
     @if($report->item->claims->isNotEmpty())
     <div class="section page-break">
-      <h3>Riwayat Klaim</h3>
+      <h3>Claim History</h3>
       <table class="table">
         @foreach($report->item->claims as $claim)
           <tr>
@@ -90,23 +90,23 @@
   @endif
 
   <div class="section">
-    <h3>Informasi Pelapor</h3>
+    <h3>Reporter Information</h3>
     <table class="table">
-      <tr><td class="head">Nama</td><td>{{ $report->user->full_name ?? $report->reporter_name ?? 'Guest User' }}</td></tr>
-      <tr><td class="head">Nomor HP</td><td>{{ $report->user->phone_number ?? $report->reporter_phone ?? '-' }}</td></tr>
+      <tr><td class="head">Name</td><td>{{ $report->user->full_name ?? $report->reporter_name ?? 'Guest User' }}</td></tr>
+      <tr><td class="head">Phone Number</td><td>{{ $report->user->phone_number ?? $report->reporter_phone ?? '-' }}</td></tr>
       @if($report->reporter_email || ($report->user && $report->user->email))
       <tr><td class="head">Email</td><td>{{ $report->user->email ?? $report->reporter_email }}</td></tr>
       @endif
-      <tr><td class="head">Tanggal Laporan</td><td>{{ \Carbon\Carbon::parse($report->created_at)->format('d M Y, H:i') }}</td></tr>
+      <tr><td class="head">Report Date</td><td>{{ \Carbon\Carbon::parse($report->created_at)->format('d M Y, H:i') }}</td></tr>
     </table>
   </div>
 
   @if($report->item && $report->item->photos->isNotEmpty())
     <div class="section page-break">
-      <h3>Foto Barang</h3>
+      <h3>Item Photo</h3>
       @foreach($report->item->photos as $photo)
         <div style="margin-bottom:8px;">
-          {{-- Dompdf butuh path file lokal, bukan URL --}}
+          {{-- Dompdf needs local file path, not URL --}}
           <img src="{{ public_path('storage/'.$photo->photo_url) }}" alt="{{ $photo->alt_text ?? 'Item photo' }}">
         </div>
       @endforeach

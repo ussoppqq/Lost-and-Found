@@ -101,7 +101,7 @@
                 @auth
                     {{-- Avatar Dropdown --}}
                     <div class="relative" x-data="{ dropdown: false }">
-                        <button @click="dropdown = !dropdown" class="flex items-center focus:outline-none">
+                        <button @click="dropdown = !dropdown" class="flex items-center focus:outline-none group relative">
                             @php
                                 $user = auth()->user();
                                 $initials = collect(explode(' ', $user->full_name ?? 'User'))
@@ -119,6 +119,12 @@
                                     {{ $initials }}
                                 </div>
                             @endif
+                            {{-- Pencil Icon Overlay --}}
+                            <div class="absolute -bottom-0.5 -right-0.5 h-4 w-4 bg-gray-800 rounded-full flex items-center justify-center shadow-md group-hover:bg-gray-900 transition-colors">
+                                <svg class="h-2.5 w-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                            </div>
                         </button>
                         <div
                             x-show="dropdown"

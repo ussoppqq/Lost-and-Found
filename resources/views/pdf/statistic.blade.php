@@ -389,7 +389,7 @@
 
     <!-- Footer -->
     <div class="footer clearfix">
-        <div><strong>Generated:</strong> {{ now('Asia/Jakarta')->format('d M Y, H:i') }} WIB</div>
+        <div><strong>Generated:</strong> {{ now('Asia/Jakarta')->format('d M Y, H:i') }}</div>
         <div style="margin-top: 3px;">Lost & Found Management System</div>
     </div>
 </body>

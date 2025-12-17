@@ -227,7 +227,7 @@
                                         {{ $match->match_status }}
                                     </span>
                                     
-                                    <!-- Claim Status (jika ada) -->
+                                    <!-- Claim Status (if exists) -->
                                     @if($match->hasClaim())
                                         <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $match->claim->getStatusBadgeClass() }}">
                                             Claim: {{ $match->claim->claim_status }}
@@ -328,7 +328,7 @@
                                                         </svg>
                                                     </button>
                                                 @elseif($match->claim->isReleased() || $match->claim->isRejected())
-                                                    <!-- Claim sudah diproses - Show View Claim -->
+                                                    <!-- Claim already processed - Show View Claim -->
                                                     <button 
                                                         wire:click="viewClaim('{{ $match->match_id }}')"
                                                         class="text-indigo-600 hover:text-indigo-900"
@@ -341,7 +341,7 @@
                                             @endif
                                         @endif
 
-                                        <!-- Delete Button - Hanya jika tidak ada claim yang RELEASED -->
+                                        <!-- Delete Button - Only if there's no RELEASED claim -->
                                         @if(!$match->hasClaim() || !$match->claim->isReleased())
                                             <button 
                                                 wire:click="deleteMatch('{{ $match->match_id }}')"

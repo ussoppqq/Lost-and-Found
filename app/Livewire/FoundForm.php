@@ -480,12 +480,19 @@ class FoundForm extends Component
         $this->resendCooldownSec = 0;
     }
 
+    // ---------- GET LOCATIONS FOR AUTOCOMPLETE ----------
+    public function getLocationsProperty()
+    {
+        return \App\Models\Location::orderBy('area_name')->get();
+    }
+
     public function render()
     {
         return view('livewire.found-form', [
             'categories' => Category::when($this->company_id, fn($q) => $q->where('company_id', $this->company_id))
                                     ->orderBy('category_name')
                                     ->get(),
+            'locations' => $this->locations,
         ])->layout('components.layouts.user', [
             'title' => 'Report Found Item',
         ]);

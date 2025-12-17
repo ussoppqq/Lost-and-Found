@@ -1,19 +1,22 @@
 
-<div class="min-h-screen bg-white py-8 px-4">
-    <div class="max-w-3xl mx-auto">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gray-800 shadow mb-3">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
-            </div>
-            <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-2">Track Your Item</h1>
-            <p class="text-sm text-gray-600">Masukkan Report ID dari PDF receipt untuk mengecek status</p>
-        </div>
+<div class="min-h-screen bg-white py-4">
+    <div class="mx-auto w-full px-4 max-w-lg lg:max-w-3xl">
+        {{-- WRAPPER CARD --}}
+        <div class="w-full bg-white rounded-2xl shadow-lg border border-gray-200 p-5 sm:p-8">
 
-        <!-- Search Form (ID only) -->
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6">
+            <!-- Header -->
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gray-800 shadow mb-3">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-2">Track Your Item</h1>
+                <p class="text-sm text-gray-600">Enter Report ID from PDF receipt to check status</p>
+            </div>
+
+            <!-- Search Form (ID only) -->
+            <div class="bg-gray-50 rounded-2xl border border-gray-200 p-6 mb-6">
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">
@@ -21,7 +24,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            Report ID (dari PDF Receipt)
+                            Report ID (from PDF Receipt)
                         </div>
                     </label>
                     <div class="relative">
@@ -53,8 +56,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <div class="text-xs text-gray-700">
-                                <p class="font-semibold mb-1">Di mana menemukan Report ID?</p>
-                                <p>Cek PDF yang diunduh setelah submit laporan. Report ID ada di kotak bertuliskan "Tracking ID".</p>
+                                <p class="font-semibold mb-1">Where to find Report ID?</p>
+                                <p>Check the downloaded PDF after submitting the report. Report ID is in the box labeled "Tracking ID".</p>
                             </div>
                         </div>
                     </div>
@@ -85,7 +88,7 @@
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                         </svg>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-red-800 mb-1">Report ID Tidak Ditemukan</p>
+                            <p class="text-sm font-semibold text-red-800 mb-1">Report ID Not Found</p>
                             <p class="text-sm text-red-700">{{ session('error') }}</p>
                         </div>
                     </div>
@@ -148,10 +151,10 @@
                             </div>
                             @php
                                 $statusConfig = [
-                                    'OPEN' => ['color' => 'yellow', 'text' => 'Terbuka'],
-                                    'STORED' => ['color' => 'blue', 'text' => 'Tersimpan'],
-                                    'MATCHED' => ['color' => 'purple', 'text' => 'Tercocokkan'],
-                                    'CLOSED' => ['color' => 'gray', 'text' => 'Ditutup']
+                                    'OPEN' => ['color' => 'yellow', 'text' => 'Open'],
+                                    'STORED' => ['color' => 'blue', 'text' => 'Stored'],
+                                    'MATCHED' => ['color' => 'purple', 'text' => 'Matched'],
+                                    'CLOSED' => ['color' => 'gray', 'text' => 'Closed']
                                 ];
                                 $status = $statusConfig[$report->report_status] ?? ['color' => 'gray', 'text' => $report->report_status];
                             @endphp
@@ -159,13 +162,13 @@
                                 {{ $status['text'] }}
                             </span>
                             <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold {{ $report->report_type === 'LOST' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' }}">
-                                {{ $report->report_type === 'LOST' ? 'Hilang' : 'Ditemukan' }}
+                                {{ $report->report_type === 'LOST' ? 'Lost' : 'Found' }}
                             </span>
                         </div>
 
                         <!-- Item Name -->
                         <div class="text-base font-bold text-gray-900 truncate mb-1 group-hover:text-gray-800 transition-colors">
-                            {{ optional($report->item)->item_name ?? $report->item_name ?? 'Barang' }}
+                            {{ optional($report->item)->item_name ?? $report->item_name ?? 'Item' }}
                         </div>
 
                         <!-- Location & Date -->
@@ -199,5 +202,8 @@
             @endforeach
         </div>
         @endif
+
+        </div>
+        {{-- END WRAPPER CARD --}}
     </div>
 </div>

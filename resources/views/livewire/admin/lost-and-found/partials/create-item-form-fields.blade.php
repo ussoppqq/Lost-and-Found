@@ -160,7 +160,7 @@
                 <input type="datetime-local" id="report-datetime" wire:model="report_datetime"
                     class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                 @error('report_datetime') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                <p class="text-xs text-gray-500 mt-1">Timezone: WIB (GMT+7)</p>
+                <p class="text-xs text-gray-500 mt-1">Timezone: GMT+7</p>
             </div>
 
             <div class="sm:col-span-2">
@@ -178,7 +178,7 @@
                         <span class="text-xs text-gray-500 font-normal ml-2">Max 2MB each, up to 5 photos</span>
                     </label>
 
-                    {{-- Hidden input dengan wire:key untuk reset --}}
+                    {{-- Hidden input with wire:key for reset --}}
                     <div wire:key="upload-{{ $uploadKey }}">
                         <input type="file" 
                                wire:model="newPhotos" 
@@ -344,7 +344,7 @@
                     <span class="text-xs text-gray-500 font-normal ml-2">Max 2MB each, up to 5 photos</span>
                 </label>
 
-                {{-- Hidden input dengan wire:key untuk reset --}}
+                {{-- Hidden input with wire:key for reset --}}
                 <div wire:key="upload-{{ $uploadKey }}">
                     <input type="file" 
                            wire:model="newPhotos" 
@@ -378,7 +378,7 @@
                         </div>
                     @endif
 
-                    {{-- Upload Button (hanya tampil jika belum mencapai limit) --}}
+                    {{-- Upload Button (only shown if limit not reached) --}}
                     @if(count($photos) < 5)
                         <button type="button" 
                                 onclick="document.getElementById('photo-upload-found').click()"

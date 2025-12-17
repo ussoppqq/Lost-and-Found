@@ -40,15 +40,15 @@
                             <div class="flex space-x-2">
                                 <input type="text" wire:model="otp"
                                     class="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                    placeholder="Masukkan 6 digit OTP" maxlength="6">
+                                    placeholder="Enter 6 digit OTP" maxlength="6">
 
                                 <button type="button" wire:click="sendOtp" wire:loading.attr="disabled"
                                     class="bg-black hover:bg-gray-800 disabled:bg-gray-400 text-white px-4 py-2 rounded transition">
                                     <span wire:loading.remove wire:target="sendOtp">
-                                        Kirim OTP
+                                        Send OTP
                                     </span>
                                     <span wire:loading wire:target="sendOtp">
-                                        Mengirim...
+                                        Sending...
                                     </span>
                                 </button>
                             </div>
@@ -59,7 +59,7 @@
                             @if (session()->has('success'))
                                 <div class="mt-2 p-2 bg-green-100 border border-green-300 rounded text-sm text-green-700">
                                     {{ session('success') }}
-                                    <br>Kode berlaku selama 5 menit.
+                                    <br>Code is valid for 5 minutes.
                                 </div>
                             @endif
                         </div>
@@ -85,10 +85,10 @@
                                     <button type="button" wire:click="sendEmailVerification" wire:loading.attr="disabled"
                                         class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded transition whitespace-nowrap">
                                         <span wire:loading.remove wire:target="sendEmailVerification">
-                                            Verifikasi Email
+                                            Verify Email
                                         </span>
                                         <span wire:loading wire:target="sendEmailVerification">
-                                            Mengirim...
+                                            Sending...
                                         </span>
                                     </button>
                                 @endif
@@ -99,34 +99,34 @@
                         {{-- Email Verification Code --}}
                         @if($emailVerificationSent && $step == 2)
                             <div class="mb-4">
-                                <label class="block text-sm font-medium mb-1 text-gray-700">Kode Verifikasi Email</label>
+                                <label class="block text-sm font-medium mb-1 text-gray-700">Email Verification Code</label>
                                 <div class="flex space-x-2">
                                     <input type="text" wire:model="email_verification_code"
                                         class="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                        placeholder="Masukkan 6 digit kode" maxlength="6">
+                                        placeholder="Enter 6 digit code" maxlength="6">
 
                                     <button type="button" wire:click="verifyEmail" wire:loading.attr="disabled"
                                         class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded transition">
                                         <span wire:loading.remove wire:target="verifyEmail">
-                                            Verifikasi
+                                            Verify
                                         </span>
                                         <span wire:loading wire:target="verifyEmail">
-                                            Memverifikasi...
+                                            Verifying...
                                         </span>
                                     </button>
                                 </div>
                                 @error('email_verification_code') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
 
                                 <div class="mt-2 p-2 bg-blue-100 border border-blue-300 rounded text-sm text-blue-700">
-                                    Kode verifikasi telah dikirim ke <strong>{{ $email }}</strong>
-                                    <br>Kode berlaku selama 10 menit.
+                                    Verification code has been sent to <strong>{{ $email }}</strong>
+                                    <br>Code is valid for 10 minutes.
                                 </div>
                             </div>
                         @endif
 
                         @if($step == 3)
                             <div class="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-                                ✓ Email berhasil diverifikasi!
+                                ✓ Email successfully verified!
                             </div>
                         @endif
 
@@ -150,7 +150,7 @@
                         <button type="submit" wire:loading.attr="disabled"
                             class="w-full bg-black hover:bg-gray-800 disabled:bg-gray-400 text-white py-2 rounded transition">
                             <span wire:loading.remove wire:target="register">Register</span>
-                            <span wire:loading wire:target="register">Mendaftarkan...</span>
+                            <span wire:loading wire:target="register">Registering...</span>
                         </button>
                     </form>
 

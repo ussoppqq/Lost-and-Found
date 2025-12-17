@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 // Controllers
 use App\Http\Controllers\ReportPdfController;
 use App\Http\Controllers\Admin\StatisticPdfController;
+use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\LostPdfController;
 use App\Http\Controllers\ReportReceiptController;
 
@@ -126,6 +127,9 @@ Route::middleware(['auth', 'moderator'])->prefix('admin')->name('admin.')->group
     
     // Categories Management
     Route::get('/categories', CategoriesIndex::class)->name('categories');
+
+    // Location Management
+    Route::resource('locations', LocationController::class);
 
     // Statistics
     Route::get('/statistic', Statistic::class)->name('statistic');

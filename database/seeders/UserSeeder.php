@@ -13,78 +13,104 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $company = Company::first();
+        $companies = Company::all();
+        $bogor = $companies->where('company_name', 'Kebun Raya Bogor')->first();
+        $cibodas = $companies->where('company_name', 'Kebun Raya Cibodas')->first();
+        $purwodadi = $companies->where('company_name', 'Kebun Raya Purwodadi')->first();
+        $bali = $companies->where('company_name', 'Kebun Raya Bali')->first();
 
-        $adminRole = Role::where('role_name', 'Admin')->first();
-        $userRole = Role::where('role_name', 'User')->first();
-        $moderatorRole = Role::where('role_name', 'Moderator')->first();
+        $adminRole = Role::where('role_code', 'ADMIN')->first();
+        $userRole = Role::where('role_code', 'USER')->first();
+        $moderatorRole = Role::where('role_code', 'MODERATOR')->first();
 
-        // Admin
+        // 1 Admin - Kebun Raya Bogor
         User::updateOrCreate(
-            ['email' => 'admin@example.com'],
+            ['email' => 'admin@kebunraya.com'],
             [
                 'user_id' => Str::uuid(),
-                'company_id' => $company->company_id,
+                'company_id' => $bogor->company_id,
                 'role_id' => $adminRole->role_id,
                 'full_name' => 'Super Admin',
                 'phone_number' => '628111111111',
                 'password' => Hash::make('password'),
                 'is_verified' => true,
+                'email_verified_at' => now(),
             ]
         );
 
-        // User biasa
+        // 4 Moderator - Satu untuk setiap cabang
+        // Moderator Bogor
         User::updateOrCreate(
-            ['email' => 'johndoe@example.com'],
+            ['email' => 'moderator.bogor@kebunraya.com'],
             [
                 'user_id' => Str::uuid(),
-                'company_id' => $company->company_id,
-                'role_id' => $userRole->role_id,
-                'full_name' => 'John Doe',
+                'company_id' => $bogor->company_id,
+                'role_id' => $moderatorRole->role_id,
+                'full_name' => 'Moderator Bogor',
                 'phone_number' => '628222222222',
                 'password' => Hash::make('password'),
                 'is_verified' => true,
+                'email_verified_at' => now(),
             ]
         );
 
-        // Moderator
+        // Moderator Cibodas
         User::updateOrCreate(
-            ['email' => 'moderator@example.com'],
+            ['email' => 'moderator.cibodas@kebunraya.com'],
             [
                 'user_id' => Str::uuid(),
-                'company_id' => $company->company_id,
+                'company_id' => $cibodas->company_id,
                 'role_id' => $moderatorRole->role_id,
-                'full_name' => 'Moderator User',
+                'full_name' => 'Moderator Cibodas',
                 'phone_number' => '628333333333',
                 'password' => Hash::make('password'),
                 'is_verified' => true,
+                'email_verified_at' => now(),
             ]
         );
 
-        // Tambahan user
+        // Moderator Purwodadi
         User::updateOrCreate(
-            ['email' => 'budi@example.com'],
+            ['email' => 'moderator.purwodadi@kebunraya.com'],
             [
                 'user_id' => Str::uuid(),
-                'company_id' => $company->company_id,
-                'role_id' => $userRole->role_id,
-                'full_name' => 'Budi Santoso',
-                'phone_number' => '081234567892',
+                'company_id' => $purwodadi->company_id,
+                'role_id' => $moderatorRole->role_id,
+                'full_name' => 'Moderator Purwodadi',
+                'phone_number' => '628444444444',
                 'password' => Hash::make('password'),
                 'is_verified' => true,
+                'email_verified_at' => now(),
             ]
         );
 
+        // Moderator Bali
         User::updateOrCreate(
-            ['email' => 'siti@example.com'],
+            ['email' => 'moderator.bali@kebunraya.com'],
             [
                 'user_id' => Str::uuid(),
-                'company_id' => $company->company_id,
-                'role_id' => $userRole->role_id,
-                'full_name' => 'Siti Nurhaliza',
-                'phone_number' => '081234567893',
+                'company_id' => $bali->company_id,
+                'role_id' => $moderatorRole->role_id,
+                'full_name' => 'Moderator Bali',
+                'phone_number' => '628555555555',
                 'password' => Hash::make('password'),
-                'is_verified' => false,
+                'is_verified' => true,
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // User biasa untuk testing
+        User::updateOrCreate(
+            ['email' => 'user@example.com'],
+            [
+                'user_id' => Str::uuid(),
+                'company_id' => $bogor->company_id,
+                'role_id' => $userRole->role_id,
+                'full_name' => 'User Test',
+                'phone_number' => '628666666666',
+                'password' => Hash::make('password'),
+                'is_verified' => true,
+                'email_verified_at' => now(),
             ]
         );
     }

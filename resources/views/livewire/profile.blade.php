@@ -80,6 +80,20 @@
                         </svg>
                         Upload New Photo
                     </label>
+                    @if($newAvatar)
+                        <button wire:click="saveAvatar" class="inline-flex items-center px-4 py-2 ml-2 bg-green-600 text-white rounded-xl hover:bg-green-700 font-semibold text-sm transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Save Photo
+                        </button>
+                        <button wire:click="$set('newAvatar', null)" class="inline-flex items-center px-4 py-2 ml-2 bg-gray-300 text-gray-700 rounded-xl hover:bg-gray-400 font-semibold text-sm transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Cancel
+                        </button>
+                    @endif
                     <p class="text-xs text-gray-500 mt-2">JPG, PNG or GIF (MAX. 2MB)</p>
                     @error('newAvatar')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>

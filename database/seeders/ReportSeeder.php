@@ -13,8 +13,8 @@ class ReportSeeder extends Seeder
     public function run(): void
     {
         $company1 = Company::first();
-        $user1 = User::where('email', 'budi@example.com')->first();
-        $user2 = User::where('email', 'siti@example.com')->first();
+        $user1 = User::where('email', 'user@example.com')->first();
+        $user2 = User::where('email', 'moderator.bogor@kebunraya.com')->first();
 
         // Report 1 (FOUND, linked ke item nanti)
         Report::create([

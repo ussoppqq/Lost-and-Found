@@ -219,7 +219,7 @@
         </div>
         <div class="info-row">
             <div class="info-label">Date & Time:</div>
-            <div class="info-value">{{ \Carbon\Carbon::parse($report->report_datetime)->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB</div>
+            <div class="info-value">{{ \Carbon\Carbon::parse($report->report_datetime)->timezone('Asia/Jakarta')->format('d M Y, H:i') }}</div>
         </div>
         <div class="info-row">
             <div class="info-label">Status:</div>
@@ -228,7 +228,7 @@
     </div>
 
     <div class="footer">
-        <p><strong>Generated on:</strong> {{ $generatedAt }} WIB</p>
+        <p><strong>Generated on:</strong> {{ $generatedAt }}</p>
         <p style="margin-top: 10px;">This is an automatically generated receipt.</p>
         <p style="margin-top: 5px; font-weight: bold;">Keep this document for tracking and verification purposes.</p>
     </div>

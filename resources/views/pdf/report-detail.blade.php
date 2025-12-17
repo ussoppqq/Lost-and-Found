@@ -86,7 +86,7 @@
     @if($report->item && $report->item->photos->isNotEmpty())
     <div class="card">
         <div class="card-header">
-            <h2>Foto Barang</h2>
+            <h2>Item Photo</h2>
         </div>
         <div class="card-body">
             @foreach($report->item->photos->take(4) as $photo)
@@ -97,7 +97,7 @@
     @elseif($report->photo_url)
     <div class="card">
         <div class="card-header">
-            <h2>Foto Laporan</h2>
+            <h2>Report Photo</h2>
         </div>
         <div class="card-body">
             <p style="color: #6b7280;">{{ asset('storage/' . $report->photo_url) }}</p>
@@ -108,32 +108,32 @@
     {{-- Report Details --}}
     <div class="card">
         <div class="card-header">
-            <h2>Detail Laporan</h2>
+            <h2>Report Details</h2>
         </div>
         <div class="card-body">
             <div class="detail-row">
-                <div class="detail-label">ID Laporan</div>
+                <div class="detail-label">Report ID</div>
                 <div class="detail-value mono"># {{ strtoupper(substr($report->report_id, 0, 12)) }}</div>
             </div>
 
             <div class="detail-row">
-                <div class="detail-label">Tipe Laporan</div>
+                <div class="detail-label">Report Type</div>
                 <div class="detail-value">
                     <span class="badge {{ $report->report_type === 'LOST' ? 'badge-red' : 'badge-green' }}">
-                        {{ $report->report_type === 'LOST' ? 'Barang Hilang' : 'Barang Ditemukan' }}
+                        {{ $report->report_type === 'LOST' ? 'Lost Item' : 'Found Item' }}
                     </span>
                 </div>
             </div>
 
             <div class="detail-row">
-                <div class="detail-label">Status Laporan</div>
+                <div class="detail-label">Report Status</div>
                 <div class="detail-value">
                     @php
                         $statusConfig = [
-                            'OPEN' => ['class' => 'badge-yellow', 'text' => 'Terbuka'],
-                            'STORED' => ['class' => 'badge-blue', 'text' => 'Tersimpan'],
-                            'MATCHED' => ['class' => 'badge-purple', 'text' => 'Tercocokkan'],
-                            'CLOSED' => ['class' => 'badge-gray', 'text' => 'Ditutup']
+                            'OPEN' => ['class' => 'badge-yellow', 'text' => 'Open'],
+                            'STORED' => ['class' => 'badge-blue', 'text' => 'Stored'],
+                            'MATCHED' => ['class' => 'badge-purple', 'text' => 'Matched'],
+                            'CLOSED' => ['class' => 'badge-gray', 'text' => 'Closed']
                         ];
                         $status = $statusConfig[$report->report_status] ?? ['class' => 'badge-gray', 'text' => $report->report_status];
                     @endphp
@@ -142,7 +142,7 @@
             </div>
 
             <div class="detail-row">
-                <div class="detail-label">Nama Barang</div>
+                <div class="detail-label">Item Name</div>
                 <div class="detail-value"><strong>{{ $report->item->item_name ?? $report->item_name ?? '-' }}</strong></div>
             </div>
 
@@ -153,12 +153,12 @@
             </div>
 
             <div class="detail-row">
-                <div class="detail-label">Warna</div>
+                <div class="detail-label">Color</div>
                 <div class="detail-value">{{ $report->item->color ?? '-' }}</div>
             </div>
 
             <div class="detail-row">
-                <div class="detail-label">Kategori</div>
+                <div class="detail-label">Category</div>
                 <div class="detail-value">
                     {{ $report->item->category->category_name ?? '-' }}
                     @if($report->item->category && $report->item->category->subcategory_name)
@@ -169,25 +169,25 @@
             @endif
 
             <div class="detail-row">
-                <div class="detail-label">Tanggal Kejadian</div>
-                <div class="detail-value">{{ \Carbon\Carbon::parse($report->report_datetime)->format('d F Y, H:i') }} WIB</div>
+                <div class="detail-label">Date</div>
+                <div class="detail-value">{{ \Carbon\Carbon::parse($report->report_datetime)->format('d F Y, H:i') }}</div>
             </div>
 
             <div class="detail-row">
-                <div class="detail-label">Lokasi</div>
+                <div class="detail-label">Location</div>
                 <div class="detail-value">{{ $report->report_location }}</div>
             </div>
 
             @if($report->report_description)
             <div class="detail-row">
-                <div class="detail-label">Deskripsi</div>
+                <div class="detail-label">Description</div>
                 <div class="detail-value" style="color: #374151; line-height: 1.6;">{{ $report->report_description }}</div>
             </div>
             @endif
 
             @if($report->item && $report->item->item_description)
             <div class="detail-row">
-                <div class="detail-label">Detail Item</div>
+                <div class="detail-label">Item Details</div>
                 <div class="detail-value" style="color: #374151; line-height: 1.6;">{{ $report->item->item_description }}</div>
             </div>
             @endif
@@ -198,7 +198,7 @@
     @if($report->item)
     <div class="card">
         <div class="card-header">
-            <h2>Status Barang</h2>
+            <h2>Item Status</h2>
         </div>
         <div class="card-body">
             <div class="detail-row">
@@ -206,11 +206,11 @@
                 <div class="detail-value">
                     @php
                         $itemStatusConfig = [
-                            'REGISTERED' => ['class' => 'badge-gray', 'text' => 'Terdaftar'],
-                            'STORED' => ['class' => 'badge-blue', 'text' => 'Tersimpan'],
-                            'CLAIMED' => ['class' => 'badge-yellow', 'text' => 'Diklaim'],
-                            'DISPOSED' => ['class' => 'badge-red', 'text' => 'Dibuang'],
-                            'RETURNED' => ['class' => 'badge-green', 'text' => 'Dikembalikan']
+                            'REGISTERED' => ['class' => 'badge-gray', 'text' => 'Registered'],
+                            'STORED' => ['class' => 'badge-blue', 'text' => 'Stored'],
+                            'CLAIMED' => ['class' => 'badge-yellow', 'text' => 'Claimed'],
+                            'DISPOSED' => ['class' => 'badge-red', 'text' => 'Disposed'],
+                            'RETURNED' => ['class' => 'badge-green', 'text' => 'Returned']
                         ];
                         $itemStatus = $itemStatusConfig[$report->item->item_status] ?? ['class' => 'badge-gray', 'text' => $report->item->item_status];
                     @endphp
@@ -220,7 +220,7 @@
 
             @if($report->item->post)
             <div class="detail-row">
-                <div class="detail-label">Lokasi Penyimpanan</div>
+                <div class="detail-label">Storage Location</div>
                 <div class="detail-value">
                     <strong>{{ $report->item->post->post_name }}</strong><br>
                     <span style="font-size: 9pt; color: #6b7280;">{{ $report->item->post->post_address }}</span>
@@ -229,7 +229,7 @@
 
             @if($report->item->storage)
             <div class="detail-row">
-                <div class="detail-label">Nomor Rak/Storage</div>
+                <div class="detail-label">Shelf/Storage Number</div>
                 <div class="detail-value mono">{{ $report->item->storage }}</div>
             </div>
             @endif
@@ -237,18 +237,18 @@
 
             @if($report->item->retention_until)
             <div class="detail-row">
-                <div class="detail-label">Retensi Hingga</div>
+                <div class="detail-label">Retention Until</div>
                 <div class="detail-value">
                     {{ \Carbon\Carbon::parse($report->item->retention_until)->format('d F Y') }}
                     @php
                         $daysLeft = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($report->item->retention_until), false);
                     @endphp
                     @if($daysLeft > 0)
-                        <span style="font-size: 9pt; color: #ea580c;">({{ $daysLeft }} hari tersisa)</span>
+                        <span style="font-size: 9pt; color: #ea580c;">({{ $daysLeft }} days remaining)</span>
                     @elseif($daysLeft < 0)
-                        <span style="font-size: 9pt; color: #dc2626;">(Melewati {{ abs($daysLeft) }} hari)</span>
+                        <span style="font-size: 9pt; color: #dc2626;">(Exceeded by {{ abs($daysLeft) }} days)</span>
                     @else
-                        <span style="font-size: 9pt; color: #ca8a04;">(Hari ini)</span>
+                        <span style="font-size: 9pt; color: #ca8a04;">(Today)</span>
                     @endif
                 </div>
             </div>
@@ -256,9 +256,9 @@
 
             @if($report->item->sensitivity_level === 'RESTRICTED')
             <div class="detail-row">
-                <div class="detail-label">Level Sensitifitas</div>
+                <div class="detail-label">Sensitivity Level</div>
                 <div class="detail-value">
-                    <span class="badge badge-red">🔒 Terbatas</span>
+                    <span class="badge badge-red">Restricted</span>
                 </div>
             </div>
             @endif
@@ -269,7 +269,7 @@
     @if($report->item && $report->item->claims->isNotEmpty())
     <div class="card">
         <div class="card-header">
-            <h2>Riwayat Klaim</h2>
+            <h2>Claim History</h2>
         </div>
         <div class="card-body">
             @foreach($report->item->claims as $claim)
@@ -277,10 +277,10 @@
                 <div style="margin-bottom: 10px;">
                     @php
                         $claimStatusConfig = [
-                            'PENDING' => ['class' => 'badge-yellow', 'text' => 'Menunggu'],
-                            'APPROVED' => ['class' => 'badge-green', 'text' => 'Disetujui'],
-                            'REJECTED' => ['class' => 'badge-red', 'text' => 'Ditolak'],
-                            'RELEASED' => ['class' => 'badge-blue', 'text' => 'Diserahkan']
+                            'PENDING' => ['class' => 'badge-yellow', 'text' => 'Pending'],
+                            'APPROVED' => ['class' => 'badge-green', 'text' => 'Approved'],
+                            'REJECTED' => ['class' => 'badge-red', 'text' => 'Rejected'],
+                            'RELEASED' => ['class' => 'badge-blue', 'text' => 'Released']
                         ];
                         $claimStatus = $claimStatusConfig[$claim->claim_status] ?? ['class' => 'badge-gray', 'text' => $claim->claim_status];
                     @endphp
@@ -289,14 +289,14 @@
                 </div>
 
                 <div class="detail-row" style="border: none; padding: 5px 0;">
-                    <div class="detail-label" style="font-size: 8pt;">Pengklaim</div>
+                    <div class="detail-label" style="font-size: 8pt;">Claimant</div>
                     <div class="detail-value" style="font-size: 9pt; font-weight: 600;">{{ $claim->user->full_name ?? '-' }}</div>
                 </div>
 
                 @if($claim->pickup_schedule)
                 <div class="detail-row" style="border: none; padding: 5px 0;">
-                    <div class="detail-label" style="font-size: 8pt;">Jadwal Pickup</div>
-                    <div class="detail-value" style="font-size: 9pt;">{{ \Carbon\Carbon::parse($claim->pickup_schedule)->format('d F Y, H:i') }} WIB</div>
+                    <div class="detail-label" style="font-size: 8pt;">Pickup Schedule</div>
+                    <div class="detail-value" style="font-size: 9pt;">{{ \Carbon\Carbon::parse($claim->pickup_schedule)->format('d F Y, H:i') }}</div>
                 </div>
                 @endif
             </div>
@@ -309,16 +309,16 @@
     {{-- Reporter Info --}}
     <div class="card">
         <div class="card-header">
-            <h2>Informasi Pelapor</h2>
+            <h2>Reporter Information</h2>
         </div>
         <div class="card-body">
             <div class="detail-row">
-                <div class="detail-label">Nama</div>
+                <div class="detail-label">Name</div>
                 <div class="detail-value"><strong>{{ $report->user->full_name ?? $report->reporter_name ?? 'Guest User' }}</strong></div>
             </div>
 
             <div class="detail-row">
-                <div class="detail-label">Nomor HP</div>
+                <div class="detail-label">Phone Number</div>
                 <div class="detail-value mono">{{ $report->user->phone_number ?? $report->reporter_phone ?? '-' }}</div>
             </div>
 
@@ -330,7 +330,7 @@
             @endif
 
             <div class="detail-row">
-                <div class="detail-label">Tanggal Laporan</div>
+                <div class="detail-label">Report Date</div>
                 <div class="detail-value">{{ \Carbon\Carbon::parse($report->created_at)->format('d M Y, H:i') }}</div>
             </div>
         </div>
@@ -338,7 +338,7 @@
 
     <div style="margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 8px; text-align: center;">
         <p style="font-size: 9pt; color: #6b7280;">
-            <strong>Generated:</strong> {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB
+            <strong>Generated:</strong> {{ \Carbon\Carbon::now()->timezone('Asia/Jakarta')->format('d M Y, H:i') }}
         </p>
     </div>
 </body>

@@ -30,7 +30,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
-            Kembali
+            Back
         </button>
 
         <div class="grid lg:grid-cols-3 gap-6">
@@ -38,16 +38,16 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- Photos Section - FIXED untuk handle report_photos -->
                 @php
-                    // Prioritas: report->photos > item->photos > report->photo_url
+                    // Priority: report->photos > item->photos > report->photo_url
                     $displayPhotos = null;
                     $photoTitle = '';
-                    
+
                     if($this->report->photos && $this->report->photos->isNotEmpty()) {
                         $displayPhotos = $this->report->photos;
-                        $photoTitle = 'Foto Laporan';
+                        $photoTitle = 'Report Photo';
                     } elseif($this->report->item && $this->report->item->photos && $this->report->item->photos->isNotEmpty()) {
                         $displayPhotos = $this->report->item->photos;
-                        $photoTitle = 'Foto Barang';
+                        $photoTitle = 'Item Photo';
                     }
                 @endphp
 
@@ -95,9 +95,9 @@
                     </div>
                 </div>
                 @elseif($this->report->photo_url)
-                {{-- Fallback untuk single photo_url --}}
+                {{-- Fallback for single photo_url --}}
                 <div class="bg-white rounded-2xl shadow-lg p-6 avoid-break">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Foto Laporan</h2>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Report Photo</h2>
                     <img 
                         src="{{ asset('storage/' . $this->report->photo_url) }}" 
                         alt="Report photo"
@@ -109,35 +109,35 @@
 
                 <!-- Report Details -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 avoid-break">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Detail Laporan</h2>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Report Details</h2>
                     
                     <div class="space-y-4">
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">ID Laporan</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Report ID</div>
                             <div class="w-2/3 text-sm text-gray-900 font-mono">
                                 #{{ Str::upper(Str::substr($this->report->report_id, 0, 12)) }}
                             </div>
                         </div>
 
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Tipe Laporan</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Report Type</div>
                             <div class="w-2/3">
                                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold
                                     {{ $this->report->report_type === 'LOST' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700' }}">
-                                    {{ $this->report->report_type === 'LOST' ? 'Barang Hilang' : 'Barang Ditemukan' }}
+                                    {{ $this->report->report_type === 'LOST' ? 'Lost Item' : 'Found Item' }}
                                 </span>
                             </div>
                         </div>
 
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Status Laporan</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Report Status</div>
                             <div class="w-2/3">
                                 @php
                                     $statusConfig = [
-                                        'OPEN' => ['color' => 'yellow', 'text' => 'Terbuka'],
-                                        'STORED' => ['color' => 'blue', 'text' => 'Tersimpan'],
-                                        'MATCHED' => ['color' => 'purple', 'text' => 'Tercocokkan'],
-                                        'CLOSED' => ['color' => 'gray', 'text' => 'Ditutup']
+                                        'OPEN' => ['color' => 'yellow', 'text' => 'Open'],
+                                        'STORED' => ['color' => 'blue', 'text' => 'Stored'],
+                                        'MATCHED' => ['color' => 'purple', 'text' => 'Matched'],
+                                        'CLOSED' => ['color' => 'gray', 'text' => 'Closed']
                                     ];
                                     $status = $statusConfig[$this->report->report_status] ?? ['color' => 'gray', 'text' => $this->report->report_status];
                                 @endphp
@@ -148,7 +148,7 @@
                         </div>
 
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Nama Barang</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Item Name</div>
                             <div class="w-2/3 text-sm font-semibold text-gray-900">
                                 {{ $this->report->item->item_name ?? $this->report->item_name ?? '-' }}
                             </div>
@@ -163,14 +163,14 @@
                         </div>
 
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Warna</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Color</div>
                             <div class="w-2/3 text-sm text-gray-900">
                                 {{ $this->report->item->color ?? '-' }}
                             </div>
                         </div>
 
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Kategori</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Category</div>
                             <div class="w-2/3 text-sm text-gray-900">
                                 {{ $this->report->item->category->category_name ?? '-' }}
                                 @if($this->report->item->category && $this->report->item->category->subcategory_name)
@@ -181,14 +181,14 @@
                         @endif
 
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Tanggal Kejadian</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Date</div>
                             <div class="w-2/3 text-sm text-gray-900">
-                                {{ \Carbon\Carbon::parse($this->report->report_datetime)->format('d F Y, H:i') }} WIB
+                                {{ \Carbon\Carbon::parse($this->report->report_datetime)->format('d F Y, H:i') }}
                             </div>
                         </div>
 
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Lokasi</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Location</div>
                             <div class="w-2/3 text-sm text-gray-900">
                                 {{ $this->report->report_location }}
                             </div>
@@ -196,7 +196,7 @@
 
                         @if($this->report->report_description)
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500 flex-shrink-0">Deskripsi</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500 flex-shrink-0">Description</div>
                             <div class="w-2/3 text-sm text-gray-700 break-words overflow-wrap-anywhere">
                                 {{ $this->report->report_description }}
                             </div>
@@ -205,7 +205,7 @@
 
                         @if($this->report->item && $this->report->item->item_description)
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500 flex-shrink-0">Detail Item</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500 flex-shrink-0">Item Details</div>
                             <div class="w-2/3 text-sm text-gray-700 break-words overflow-wrap-anywhere">
                                 {{ $this->report->item->item_description }}
                             </div>
@@ -217,7 +217,7 @@
                 <!-- Item Status (if exists) -->
                 @if($this->report->item)
                 <div class="bg-white rounded-2xl shadow-lg p-6 avoid-break">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Status Barang</h2>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Item Status</h2>
                     
                     <div class="space-y-4">
                         <div class="flex items-start">
@@ -225,11 +225,11 @@
                             <div class="w-2/3">
                                 @php
                                     $itemStatusConfig = [
-                                        'REGISTERED' => ['color' => 'gray', 'text' => 'Terdaftar'],
-                                        'STORED' => ['color' => 'blue', 'text' => 'Tersimpan'],
-                                        'CLAIMED' => ['color' => 'yellow', 'text' => 'Diklaim'],
-                                        'DISPOSED' => ['color' => 'red', 'text' => 'Dibuang'],
-                                        'RETURNED' => ['color' => 'green', 'text' => 'Dikembalikan']
+                                        'REGISTERED' => ['color' => 'gray', 'text' => 'Registered'],
+                                        'STORED' => ['color' => 'blue', 'text' => 'Stored'],
+                                        'CLAIMED' => ['color' => 'yellow', 'text' => 'Claimed'],
+                                        'DISPOSED' => ['color' => 'red', 'text' => 'Disposed'],
+                                        'RETURNED' => ['color' => 'green', 'text' => 'Returned']
                                     ];
                                     $itemStatus = $itemStatusConfig[$this->report->item->item_status] ?? ['color' => 'gray', 'text' => $this->report->item->item_status];
                                 @endphp
@@ -241,7 +241,7 @@
 
                         @if($this->report->item->post)
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Lokasi Penyimpanan</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Storage Location</div>
                             <div class="w-2/3 text-sm text-gray-900">
                                 <div class="font-semibold">{{ $this->report->item->post->post_name }}</div>
                                 <div class="text-gray-600 text-xs mt-1">{{ $this->report->item->post->post_address }}</div>
@@ -250,7 +250,7 @@
 
                         @if($this->report->item->storage)
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Nomor Rak/Storage</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Shelf/Storage Number</div>
                             <div class="w-2/3 text-sm text-gray-900 font-mono">
                                 {{ $this->report->item->storage }}
                             </div>
@@ -260,18 +260,18 @@
 
                         @if($this->report->item->retention_until)
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Retensi Hingga</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Retention Until</div>
                             <div class="w-2/3 text-sm text-gray-900">
                                 {{ \Carbon\Carbon::parse($this->report->item->retention_until)->format('d F Y') }}
                                 @php
                                     $daysLeft = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($this->report->item->retention_until), false);
                                 @endphp
                                 @if($daysLeft > 0)
-                                    <span class="text-orange-600 text-xs">({{ $daysLeft }} hari tersisa)</span>
+                                    <span class="text-orange-600 text-xs">({{ $daysLeft }} days remaining)</span>
                                 @elseif($daysLeft < 0)
-                                    <span class="text-red-600 text-xs">(Melewati {{ abs($daysLeft) }} hari)</span>
+                                    <span class="text-red-600 text-xs">(Exceeded by {{ abs($daysLeft) }} days)</span>
                                 @else
-                                    <span class="text-yellow-600 text-xs">(Hari ini)</span>
+                                    <span class="text-yellow-600 text-xs">(Today)</span>
                                 @endif
                             </div>
                         </div>
@@ -279,13 +279,13 @@
 
                         @if($this->report->item->sensitivity_level === 'RESTRICTED')
                         <div class="flex items-start">
-                            <div class="w-1/3 text-sm font-medium text-gray-500">Level Sensitifitas</div>
+                            <div class="w-1/3 text-sm font-medium text-gray-500">Sensitivity Level</div>
                             <div class="w-2/3">
                                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
                                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                                     </svg>
-                                    Terbatas
+                                    Restricted
                                 </span>
                             </div>
                         </div>
@@ -296,7 +296,7 @@
                 <!-- Claims (if any) -->
                 @if($this->report->item && $this->report->item->claims->isNotEmpty())
                 <div class="bg-white rounded-2xl shadow-lg p-6 avoid-break">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Riwayat Klaim</h2>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Claim History</h2>
                     
                     <div class="space-y-4">
                         @foreach($this->report->item->claims as $claim)
@@ -305,10 +305,10 @@
                                 <div>
                                     @php
                                         $claimStatusConfig = [
-                                            'PENDING' => ['color' => 'yellow', 'text' => 'Menunggu'],
-                                            'APPROVED' => ['color' => 'green', 'text' => 'Disetujui'],
-                                            'REJECTED' => ['color' => 'red', 'text' => 'Ditolak'],
-                                            'RELEASED' => ['color' => 'blue', 'text' => 'Diserahkan']
+                                            'PENDING' => ['color' => 'yellow', 'text' => 'Pending'],
+                                            'APPROVED' => ['color' => 'green', 'text' => 'Approved'],
+                                            'REJECTED' => ['color' => 'red', 'text' => 'Rejected'],
+                                            'RELEASED' => ['color' => 'blue', 'text' => 'Released']
                                         ];
                                         $claimStatus = $claimStatusConfig[$claim->claim_status] ?? ['color' => 'gray', 'text' => $claim->claim_status];
                                     @endphp
@@ -323,7 +323,7 @@
 
                             <div class="space-y-2">
                                 <div class="flex items-start">
-                                    <div class="w-1/3 text-xs font-medium text-gray-500">Pengklaim</div>
+                                    <div class="w-1/3 text-xs font-medium text-gray-500">Claimant</div>
                                     <div class="w-2/3 text-sm text-gray-900">
                                         {{ $claim->user->full_name ?? '-' }}
                                     </div>
@@ -331,9 +331,9 @@
 
                                 @if($claim->pickup_schedule)
                                 <div class="flex items-start">
-                                    <div class="w-1/3 text-xs font-medium text-gray-500">Jadwal Pickup</div>
+                                    <div class="w-1/3 text-xs font-medium text-gray-500">Pickup Schedule</div>
                                     <div class="w-2/3 text-sm text-gray-900">
-                                        {{ \Carbon\Carbon::parse($claim->pickup_schedule)->format('d F Y, H:i') }} WIB
+                                        {{ \Carbon\Carbon::parse($claim->pickup_schedule)->format('d F Y, H:i') }}
                                     </div>
                                 </div>
                                 @endif
@@ -350,18 +350,18 @@
             <div class="lg:col-span-1 space-y-6">
                 <!-- Reporter Info -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 avoid-break">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Informasi Pelapor</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Reporter Information</h3>
                     
                     <div class="space-y-3">
                         <div>
-                            <div class="text-xs text-gray-500 mb-1">Nama</div>
+                            <div class="text-xs text-gray-500 mb-1">Name</div>
                             <div class="text-sm font-semibold text-gray-900">
                                 {{ $this->report->user->full_name ?? $this->report->reporter_name ?? 'Guest User' }}
                             </div>
                         </div>
 
                         <div>
-                            <div class="text-xs text-gray-500 mb-1">Nomor HP</div>
+                            <div class="text-xs text-gray-500 mb-1">Phone Number</div>
                             <div class="text-sm text-gray-900">
                                 {{ $this->report->user->phone_number ?? $this->report->reporter_phone ?? '-' }}
                             </div>
@@ -377,7 +377,7 @@
                         @endif
 
                         <div>
-                            <div class="text-xs text-gray-500 mb-1">Tanggal Laporan</div>
+                            <div class="text-xs text-gray-500 mb-1">Report Date</div>
                             <div class="text-sm text-gray-900">
                                 {{ \Carbon\Carbon::parse($this->report->created_at)->format('d M Y, H:i') }}
                             </div>
@@ -387,34 +387,16 @@
 
                 <!-- Action Buttons (no-print) -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 no-print">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Bantuan</h3>
-                    
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Actions</h3>
+
                     <div class="space-y-3">
-                        <a href="tel:{{ $this->report->user->phone_number ?? $this->report->reporter_phone }}" 
-                           class="flex items-center justify-center w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                            </svg>
-                            Hubungi via Telepon
-                        </a>
-
-                        @if($this->report->reporter_email || ($this->report->user && $this->report->user->email))
-                        <a href="mailto:{{ $this->report->user->email ?? $this->report->reporter_email }}"
-                           class="flex items-center justify-center w-full px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 active:scale-[0.98] transition-all">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            Kirim Email
-                        </a>
-                        @endif
-
-                        {{-- Tombol UNDUH PDF (server-side Dompdf) --}}
+                        {{-- Download PDF button (server-side Dompdf) --}}
                         <a href="{{ route('reports.pdf', $this->report) }}" target="_blank"
                            class="flex items-center justify-center w-full px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 active:scale-[0.98] transition-all">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12v9m0 0l-3-3m3 3l3-3M12 3v9" />
                             </svg>
-                            Unduh PDF
+                            Download PDF
                         </a>
                     </div>
                 </div>
@@ -431,7 +413,7 @@
                             <div class="flex items-start">
                                 <div class="flex-shrink-0 w-4 h-4 rounded-full bg-green-500 ring-4 ring-white z-10"></div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-semibold text-gray-900">Laporan Dibuat</div>
+                                    <div class="text-sm font-semibold text-gray-900">Report Created</div>
                                     <div class="text-xs text-gray-500">
                                         {{ \Carbon\Carbon::parse($this->report->created_at)->format('d M Y, H:i') }}
                                     </div>
@@ -444,9 +426,9 @@
                             <div class="flex items-start">
                                 <div class="flex-shrink-0 w-4 h-4 rounded-full bg-blue-500 ring-4 ring-white z-10"></div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-semibold text-gray-900">Barang Tersimpan</div>
+                                    <div class="text-sm font-semibold text-gray-900">Item Stored</div>
                                     <div class="text-xs text-gray-500">
-                                        {{ $this->report->item->post->post_name ?? 'Lokasi penyimpanan' }}
+                                        {{ $this->report->item->post->post_name ?? 'Storage location' }}
                                     </div>
                                 </div>
                             </div>
@@ -457,7 +439,7 @@
                             <div class="flex items-start">
                                 <div class="flex-shrink-0 w-4 h-4 rounded-full bg-yellow-500 ring-4 ring-white z-10"></div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-semibold text-gray-900">Klaim Dibuat</div>
+                                    <div class="text-sm font-semibold text-gray-900">Claim Created</div>
                                     <div class="text-xs text-gray-500">
                                         {{ \Carbon\Carbon::parse($this->report->item->claims->first()->created_at)->format('d M Y, H:i') }}
                                     </div>
@@ -471,7 +453,7 @@
                                 <div class="flex-shrink-0 w-4 h-4 rounded-full {{ $this->report->item->item_status === 'RETURNED' ? 'bg-green-600' : 'bg-red-500' }} ring-4 ring-white z-10"></div>
                                 <div class="ml-4">
                                     <div class="text-sm font-semibold text-gray-900">
-                                        {{ $this->report->item->item_status === 'RETURNED' ? 'Barang Dikembalikan' : 'Barang Dibuang' }}
+                                        {{ $this->report->item->item_status === 'RETURNED' ? 'Item Returned' : 'Item Disposed' }}
                                     </div>
                                     <div class="text-xs text-gray-500">
                                         {{ \Carbon\Carbon::parse($this->report->item->updated_at)->format('d M Y, H:i') }}

@@ -25,43 +25,43 @@
     
 </head>
 <body>
-    <h1>Detail Laporan</h1>
+    <h1>Report Details</h1>
 
     <div class="section">
         <div class="row">
-            <div class="label">ID Laporan</div>
+            <div class="label">Report ID</div>
             <div class="value">#{{ strtoupper(substr($report->report_id, 0, 12)) }}</div>
         </div>
         <div class="row">
-            <div class="label">Tipe Laporan</div>
+            <div class="label">Report Type</div>
             <div class="value">
                 @if($report->report_type === 'LOST')
-                    <span class="badge badge-red">Barang Hilang</span>
+                    <span class="badge badge-red">Lost Item</span>
                 @else
-                    <span class="badge badge-green">Barang Ditemukan</span>
+                    <span class="badge badge-green">Found Item</span>
                 @endif
             </div>
         </div>
         <div class="row">
-            <div class="label">Status Laporan</div>
+            <div class="label">Report Status</div>
             <div class="value">{{ $report->report_status }}</div>
         </div>
         <div class="row">
-            <div class="label">Tanggal</div>
-            <div class="value">{{ \Carbon\Carbon::parse($report->report_datetime)->format('d F Y, H:i') }} WIB</div>
+            <div class="label">Date</div>
+            <div class="value">{{ \Carbon\Carbon::parse($report->report_datetime)->format('d F Y, H:i') }}</div>
         </div>
         <div class="row">
-            <div class="label">Lokasi</div>
+            <div class="label">Location</div>
             <div class="value">{{ $report->report_location }}</div>
         </div>
     </div>
 
     <div class="divider"></div>
 
-    <h2>Informasi Barang</h2>
+    <h2>Item Information</h2>
     <div class="section">
         <div class="row">
-            <div class="label">Nama Barang</div>
+            <div class="label">Item Name</div>
             <div class="value">{{ optional($report->item)->item_name ?? $report->item_name ?? '-' }}</div>
         </div>
         @if(optional($report->item)->brand)
@@ -72,7 +72,7 @@
         @endif
         @if(optional($report->item)->color)
         <div class="row">
-            <div class="label">Warna</div>
+            <div class="label">Color</div>
             <div class="value">{{ $report->item->color }}</div>
         </div>
         @endif
@@ -82,7 +82,7 @@
         @endphp
         @if($categoryName)
         <div class="row">
-            <div class="label">Kategori</div>
+            <div class="label">Category</div>
             <div class="value">
                 {{ $categoryName }}
                 @if($subcategoryName)
@@ -93,7 +93,7 @@
         @endif
         @if(optional($report->item)->item_description)
         <div class="row">
-            <div class="label">Deskripsi Item</div>
+            <div class="label">Item Description</div>
             <div class="value">{{ $report->item->item_description }}</div>
         </div>
         @endif
@@ -101,14 +101,14 @@
 
     <div class="divider"></div>
 
-    <h2>Informasi Pelapor</h2>
+    <h2>Reporter Information</h2>
     <div class="section">
         <div class="row">
-            <div class="label">Nama</div>
+            <div class="label">Name</div>
             <div class="value">{{ optional($report->user)->full_name ?? $report->reporter_name ?? 'Guest User' }}</div>
         </div>
         <div class="row">
-            <div class="label">Nomor HP</div>
+            <div class="label">Phone Number</div>
             <div class="value">{{ optional($report->user)->phone_number ?? $report->reporter_phone ?? '-' }}</div>
         </div>
         @if($report->reporter_email || optional($report->user)->email)
@@ -118,7 +118,7 @@
         </div>
         @endif
         <div class="row">
-            <div class="label">Tanggal Laporan</div>
+            <div class="label">Report Date</div>
             <div class="value">{{ \Carbon\Carbon::parse($report->created_at)->format('d M Y, H:i') }}</div>
         </div>
     </div>
@@ -126,7 +126,7 @@
     @php $hasItem = data_get($report, 'item') !== null; @endphp
     @if($hasItem)
     <div class="divider"></div>
-    <h2>Status Barang</h2>
+    <h2>Item Status</h2>
     <div class="section">
         <div class="row">
             <div class="label">Status</div>
@@ -134,19 +134,19 @@
         </div>
         @if(data_get($report, 'item.post'))
         <div class="row">
-            <div class="label">Lokasi Penyimpanan</div>
+            <div class="label">Storage Location</div>
             <div class="value">{{ data_get($report, 'item.post.post_name') }}</div>
         </div>
         @endif
         @if(data_get($report, 'item.storage'))
         <div class="row">
-            <div class="label">Nomor Storage</div>
+            <div class="label">Storage Number</div>
             <div class="value">{{ data_get($report, 'item.storage') }}</div>
         </div>
         @endif
         @if(data_get($report, 'item.retention_until'))
         <div class="row">
-            <div class="label">Retensi Hingga</div>
+            <div class="label">Retention Until</div>
             <div class="value">{{ \Carbon\Carbon::parse(data_get($report, 'item.retention_until'))->format('d F Y') }}</div>
         </div>
         @endif
@@ -156,13 +156,13 @@
     @php $claims = data_get($report, 'item.claims'); @endphp
     @if($claims && $claims->isNotEmpty())
         <div class="divider"></div>
-        <h2>Riwayat Klaim</h2>
+        <h2>Claim History</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Tanggal</th>
+                    <th>Date</th>
                     <th>Status</th>
-                    <th>Pengklaim</th>
+                    <th>Claimant</th>
                 </tr>
             </thead>
             <tbody>
