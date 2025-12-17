@@ -15,5 +15,5 @@ class Location extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['location_id', 'area', 'name'];
+    protected $fillable = ['location_id', 'company_id', 'area', 'name'];
 }

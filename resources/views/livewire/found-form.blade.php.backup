@@ -11,8 +11,8 @@
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
-        <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-2">Report Lost Item</h1>
-        <p class="text-sm text-gray-600">Fill out the form below with details about your lost item.</p>
+        <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-2">Report Found Item</h1>
+        <p class="text-sm text-gray-600">Fill out the form below with details about the item you found.</p>
       </div>
 
       {{-- Stepper (mobile) --}}
@@ -49,6 +49,35 @@
         session('message') }}</div>
       @endif
 
+      {{-- SELECT KEBUN RAYA (Prominent) --}}
+      <div class="mb-6">
+        <div class="rounded-2xl border-2 border-blue-300 bg-blue-50 p-5">
+          <label for="company_select" class="block text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Which Kebun Raya did you visit? <span class="text-red-500">*</span>
+          </label>
+          <select id="company_select" wire:model.live="company_id" required
+            class="w-full px-4 py-3 text-base font-semibold rounded-xl border-2 border-blue-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 appearance-none bg-white"
+            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%232563eb%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
+            <option value="">-- Select Kebun Raya --</option>
+            @foreach($companies as $company)
+              <option value="{{ $company->company_id }}">{{ $company->company_name }}</option>
+            @endforeach
+          </select>
+          @error('company_id')
+          <p class="mt-2 text-sm font-semibold text-red-600 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+            {{ $message }}
+          </p>
+          @enderror
+        </div>
+      </div>
+
       {{-- FORM --}}
       <form wire:submit.prevent="submit" class="space-y-6">
 
@@ -57,24 +86,6 @@
           {{-- LEFT: Your Information --}}
           <div class="rounded-2xl border border-gray-200 bg-white p-5">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Your Information</h2>
-
-            {{-- Kebun Raya Selection --}}
-            <div class="mb-4">
-              <label for="company_select_d" class="block text-sm font-semibold text-gray-900 mb-2">
-                Which Kebun Raya? <span class="text-red-500">*</span>
-              </label>
-              <select id="company_select_d" wire:model.live="company_id" required
-                class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 appearance-none bg-white"
-                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23374151%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
-                <option value="">-- Select Kebun Raya --</option>
-                @foreach($companies as $company)
-                  <option value="{{ $company->company_id }}">{{ $company->company_name }}</option>
-                @endforeach
-              </select>
-              @error('company_id')
-              <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-              @enderror
-            </div>
 
             {{-- Phone --}}
             <div class="mb-4">
@@ -237,7 +248,7 @@
             <div class="mb-4">
               <div class="flex items-center justify-between mb-2">
                 <label for="location_select_d" class="block text-sm font-semibold text-gray-900">
-                  Where You Lost It <span class="text-gray-500 text-xs font-normal">(optional)</span>
+                  Where You Found It <span class="text-gray-500 text-xs font-normal">(optional)</span>
                 </label>
                 <button type="button" onclick="toggleLocationMode('d')"
                   class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-1.5 shadow-sm transition-colors">
@@ -274,14 +285,14 @@
               @error('location') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            {{-- Date Lost --}}
+            {{-- Date Found --}}
             <div>
-              <label for="date_lost_d" class="block text-sm font-semibold text-gray-900 mb-2">
-                Date & Time Lost <span class="text-gray-500 text-xs font-normal">(optional)</span>
+              <label for="date_found_d" class="block text-sm font-semibold text-gray-900 mb-2">
+                Date & Time Found <span class="text-gray-500 text-xs font-normal">(optional)</span>
               </label>
-              <input id="date_lost_d" type="datetime-local" wire:model.defer="date_lost"
+              <input id="date_found_d" type="datetime-local" wire:model.defer="date_found"
                 class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800">
-              @error('date_lost') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
+              @error('date_found') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             {{-- Desktop helper: scroll ke Item Details --}}
@@ -334,7 +345,7 @@
               </label>
               <textarea id="description_d" rows="5" wire:model.defer="description" maxlength="200"
                 class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 resize-none placeholder:text-gray-400"
-                placeholder="Describe your lost item: color, brand, unique marks, contents, etc."></textarea>
+                placeholder="Describe the found item: color, brand, unique marks, contents, etc."></textarea>
               @error('description') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -346,7 +357,7 @@
 
               {{-- wire:key untuk reset input --}}
               <div wire:key="upload-{{ $uploadKey }}-d">
-                <input type="file" accept="image/*" multiple class="hidden" wire:model="newPhotos" id="lostPhotos_d">
+                <input type="file" accept="image/*" multiple class="hidden" wire:model="newPhotos" id="foundPhotos_d">
               </div>
 
               <div class="space-y-3">
@@ -368,7 +379,7 @@
                 </div>
                 @endif
 
-                @if(count($photos) < 5) <button type="button" onclick="document.getElementById('lostPhotos_d').click()"
+                @if(count($photos) < 5) <button type="button" onclick="document.getElementById('foundPhotos_d').click()"
                   class="w-full flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-300 bg-white hover:bg-gray-50 active:bg-gray-100 p-8 transition">
                   <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -438,24 +449,6 @@
         <div class="lg:hidden">
           <div class="rounded-2xl border border-gray-200 bg-white p-5">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Your Information</h2>
-
-            {{-- Kebun Raya Selection --}}
-            <div class="mb-4">
-              <label for="company_select_m" class="block text-sm font-semibold text-gray-900 mb-2">
-                Which Kebun Raya? <span class="text-red-500">*</span>
-              </label>
-              <select id="company_select_m" wire:model.live="company_id" required
-                class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 appearance-none bg-white"
-                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23374151%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
-                <option value="">-- Select Kebun Raya --</option>
-                @foreach($companies as $company)
-                  <option value="{{ $company->company_id }}">{{ $company->company_name }}</option>
-                @endforeach
-              </select>
-              @error('company_id')
-              <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-              @enderror
-            </div>
 
             {{-- Phone --}}
             <div class="mb-4">
@@ -618,7 +611,7 @@
             <div class="mb-4">
               <div class="flex items-center justify-between mb-2">
                 <label for="location_select_m" class="block text-sm font-semibold text-gray-900">
-                  Where You Lost It <span class="text-gray-500 text-xs font-normal">(optional)</span>
+                  Where You Found It <span class="text-gray-500 text-xs font-normal">(optional)</span>
                 </label>
                 <button type="button" onclick="toggleLocationMode('m')"
                   class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-1.5 shadow-sm transition-colors">
@@ -655,14 +648,14 @@
               @error('location') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            {{-- Date Lost --}}
+            {{-- Date Found --}}
             <div>
-              <label for="date_lost_m" class="block text-sm font-semibold text-gray-900 mb-2">
-                Date & Time Lost <span class="text-gray-500 text-xs font-normal">(optional)</span>
+              <label for="date_found_m" class="block text-sm font-semibold text-gray-900 mb-2">
+                Date & Time Found <span class="text-gray-500 text-xs font-normal">(optional)</span>
               </label>
-              <input id="date_lost_m" type="datetime-local" wire:model.defer="date_lost"
+              <input id="date_found_m" type="datetime-local" wire:model.defer="date_found"
                 class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800">
-              @error('date_lost') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
+              @error('date_found') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
             {{-- Next (selalu tampil; disable jika OTP belum verified) --}}
@@ -677,11 +670,6 @@
                 </svg>
               </button>
 
-              {{-- @if($needs_otp_verification && !$otp_verified)
-              <p class="text-xs text-red-600 text-center">
-                Verify the OTP first before continuing.
-              </p>
-              @endif --}}
             </div>
           </div>
         </div>
@@ -727,7 +715,7 @@
               </label>
               <textarea id="description_m" rows="5" wire:model.defer="description" maxlength="200"
                 class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 resize-none placeholder:text-gray-400"
-                placeholder="Describe your lost item: color, brand, unique marks, contents, etc."></textarea>
+                placeholder="Describe the found item: color, brand, unique marks, contents, etc."></textarea>
               @error('description') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -738,7 +726,7 @@
               </label>
 
               <div wire:key="upload-{{ $uploadKey }}-m">
-                <input type="file" accept="image/*" multiple class="hidden" wire:model="newPhotos" id="lostPhotos_m">
+                <input type="file" accept="image/*" multiple class="hidden" wire:model="newPhotos" id="foundPhotos_m">
               </div>
 
               <div class="space-y-3">
@@ -760,7 +748,7 @@
                 </div>
                 @endif
 
-                @if(count($photos) < 5) <button type="button" onclick="document.getElementById('lostPhotos_m').click()"
+                @if(count($photos) < 5) <button type="button" onclick="document.getElementById('foundPhotos_m').click()"
                   class="w-full flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-300 bg-white hover:bg-gray-50 active:bg-gray-100 p-8 transition">
                   <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -844,7 +832,7 @@
       @endif
 
       <p class="mt-6 text-center text-sm text-gray-500 leading-relaxed">
-        Your information will help others return your lost item.<br class="hidden sm:inline"> Thank you for reporting.
+        Your information helps us contact the rightful owner.<br class="hidden sm:inline"> Thank you for reporting.
       </p>
     </div>
   </div>

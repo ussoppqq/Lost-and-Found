@@ -14,7 +14,11 @@ class LocationController extends Controller
      */
     public function index()
     {
-        $locations = Location::orderBy('area')->orderBy('name')->paginate(20);
+        $companyId = auth()->user()->company_id;
+        $locations = Location::where('company_id', $companyId)
+                            ->orderBy('area')
+                            ->orderBy('name')
+                            ->paginate(20);
         return view('livewire.admin.locations.index', compact('locations'));
     }
 
@@ -36,8 +40,11 @@ class LocationController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
+        $companyId = auth()->user()->company_id;
+
         Location::create([
             'location_id' => Str::uuid(),
+            'company_id' => $companyId,
             'area' => $validated['area'],
             'name' => $validated['name'],
         ]);
@@ -51,7 +58,8 @@ class LocationController extends Controller
      */
     public function show(string $id)
     {
-        $location = Location::findOrFail($id);
+        $companyId = auth()->user()->company_id;
+        $location = Location::where('company_id', $companyId)->findOrFail($id);
         return view('livewire.admin.locations.show', compact('location'));
     }
 
@@ -60,7 +68,8 @@ class LocationController extends Controller
      */
     public function edit(string $id)
     {
-        $location = Location::findOrFail($id);
+        $companyId = auth()->user()->company_id;
+        $location = Location::where('company_id', $companyId)->findOrFail($id);
         return view('livewire.admin.locations.edit', compact('location'));
     }
 
@@ -69,7 +78,8 @@ class LocationController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $location = Location::findOrFail($id);
+        $companyId = auth()->user()->company_id;
+        $location = Location::where('company_id', $companyId)->findOrFail($id);
 
         $validated = $request->validate([
             'area' => 'required|string|max:255',
@@ -90,7 +100,8 @@ class LocationController extends Controller
      */
     public function destroy(string $id)
     {
-        $location = Location::findOrFail($id);
+        $companyId = auth()->user()->company_id;
+        $location = Location::where('company_id', $companyId)->findOrFail($id);
         $location->delete();
 
         return redirect()->route('admin.locations.index')

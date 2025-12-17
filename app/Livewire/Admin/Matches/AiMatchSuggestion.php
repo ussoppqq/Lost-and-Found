@@ -29,7 +29,9 @@ class AiMatchSuggestion extends Component
     public function mount()
     {
         // Load first lost report by default
-        $firstLostReport = Report::where('report_type', 'LOST')
+        $companyId = auth()->user()->company_id;
+        $firstLostReport = Report::where('company_id', $companyId)
+            ->where('report_type', 'LOST')
             ->whereIn('report_status', ['OPEN', 'STORED'])
             ->first();
 
@@ -98,6 +100,7 @@ class AiMatchSuggestion extends Component
 
             MatchedItem::create([
                 'match_id' => Str::uuid(),
+                'company_id' => auth()->user()->company_id,
                 'lost_report_id' => $this->selectedLostReportId,
                 'found_report_id' => $foundReportId,
                 'match_status' => 'PENDING',
@@ -127,8 +130,11 @@ class AiMatchSuggestion extends Component
         $this->batchResults = [];
 
         try {
+            $companyId = auth()->user()->company_id;
+
             // Get all unmatched lost reports
-            $lostReports = Report::where('report_type', 'LOST')
+            $lostReports = Report::where('company_id', $companyId)
+                ->where('report_type', 'LOST')
                 ->whereIn('report_status', ['OPEN', 'STORED'])
                 ->whereDoesntHave('matchesAsLost', function($query) {
                     $query->where('match_status', 'CONFIRMED');
@@ -153,7 +159,10 @@ class AiMatchSuggestion extends Component
 
     public function render()
     {
+        $companyId = auth()->user()->company_id;
+
         $lostReports = Report::with('category')
+            ->where('company_id', $companyId)
             ->where('report_type', 'LOST')
             ->whereIn('report_status', ['OPEN', 'STORED'])
             ->whereDoesntHave('matchesAsLost', function($query) {
@@ -165,7 +174,9 @@ class AiMatchSuggestion extends Component
         // Fix untuk selected report
         $selectedReport = null;
         if ($this->selectedLostReportId) {
-            $selectedReport = Report::with('category')->find($this->selectedLostReportId);
+            $selectedReport = Report::where('company_id', $companyId)
+                ->with('category')
+                ->find($this->selectedLostReportId);
         }
 
         return view('livewire.admin.matches.ai-match-suggestion', [

@@ -142,12 +142,23 @@
                     @error('phone_number') <span class="text-xs text-red-600 mt-1">{{ $message }}</span> @enderror
                 </div>
 
+                {{-- Company (Admin/Moderator only - Read-only) --}}
+                @php
+                    $user = Auth::user();
+                @endphp
+                @if($user->company_id && ($user->isAdmin() || $user->isModerator()))
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Company Name</label>
-                    <input type="text" wire:model="company_name" {{ $editMode ? '' : 'disabled' }}
-                           class="w-full px-4 py-3 text-sm rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 disabled:bg-gray-50 disabled:text-gray-500">
-                    @error('company_name') <span class="text-xs text-red-600 mt-1">{{ $message }}</span> @enderror
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Company / Kebun Raya</label>
+                    <div class="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-200">
+                        <svg class="w-5 h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span class="text-sm font-medium text-gray-900 flex-1">{{ $user->company->company_name ?? 'N/A' }}</span>
+                        <span class="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-3 py-1 rounded-lg">Read-only</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Company assignment is managed by system administrators</p>
                 </div>
+                @endif
             </div>
 
             @if($editMode)

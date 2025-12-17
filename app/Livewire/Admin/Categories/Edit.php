@@ -37,12 +37,13 @@ class Edit extends Component
     public function openModal($categoryId)
     {
         $this->categoryId = $categoryId;
-        $this->category = Category::findOrFail($categoryId);
-        
+        $companyId = auth()->user()->company_id;
+        $this->category = Category::where('company_id', $companyId)->findOrFail($categoryId);
+
         $this->category_name = $this->category->category_name;
         $this->category_icon = $this->category->category_icon ?? '📦';
         $this->retention_days = $this->category->retention_days ?? 30;
-        
+
         $this->showModal = true;
     }
 

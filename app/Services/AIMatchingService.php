@@ -22,9 +22,10 @@ class AIMatchingService
      */
     public function findPotentialMatches(Report $lostReport, int $limit = 5): array
     {
-        // Get found reports yang belum matched
+        // Get found reports yang belum matched - filter by same company
         $foundReports = Report::with('category')
             ->where('report_type', 'FOUND')
+            ->where('company_id', $lostReport->company_id) // Only match reports from same company
             ->whereIn('report_status', ['OPEN', 'STORED'])
             ->whereDoesntHave('matchesAsFound', function($query) {
                 $query->where('match_status', 'CONFIRMED');

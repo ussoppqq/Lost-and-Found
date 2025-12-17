@@ -62,6 +62,7 @@ class FoundForm extends Component
     protected function step1Rules(): array
     {
         return [
+            'company_id' => 'required|uuid|exists:companies,company_id',
             'phone'      => 'required|string|regex:/^[0-9]{9,13}$/|max:30',
             'user_name'  => $this->is_existing_user ? 'nullable' : 'required|string|max:255',
             'location'   => 'nullable|string|max:255',
@@ -93,6 +94,8 @@ class FoundForm extends Component
     }
 
     protected array $messages = [
+        'company_id.required'        => 'Please select which Kebun Raya you visited.',
+        'company_id.exists'          => 'Invalid Kebun Raya selected.',
         'item_name.required'         => 'Item name is required.',
         'description.required'       => 'Please describe the found item.',
         'description.min'            => 'Description must be at least 10 characters.',
@@ -115,7 +118,8 @@ class FoundForm extends Component
     // ---------- LIFECYCLE ----------
     public function mount(): void
     {
-        $this->company_id = session('company_id') ?? Company::first()?->company_id;
+        // Don't set default company_id - force user to select
+        $this->company_id = null;
         $this->date_found = now()->timezone('Asia/Jakarta')->format('Y-m-d\TH:i');
 
         if (Auth::check()) {
@@ -473,12 +477,16 @@ class FoundForm extends Component
     // ---------- GET LOCATIONS FOR AUTOCOMPLETE ----------
     public function getLocationsProperty()
     {
-        return \App\Models\Location::orderBy('area')->orderBy('name')->get();
+        return \App\Models\Location::when($this->company_id, fn($q) => $q->where('company_id', $this->company_id))
+                                   ->orderBy('area')
+                                   ->orderBy('name')
+                                   ->get();
     }
 
     public function render()
     {
         return view('livewire.found-form', [
+            'companies' => Company::orderBy('company_name')->get(),
             'categories' => Category::when($this->company_id, fn($q) => $q->where('company_id', $this->company_id))
                                     ->orderBy('category_name')
                                     ->get(),

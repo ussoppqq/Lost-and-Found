@@ -92,7 +92,9 @@ class MatchCreate extends Component
 
     private function getLostReportsQuery()
     {
+        $companyId = auth()->user()->company_id;
         return Report::with('category')
+            ->where('company_id', $companyId)
             ->where('report_type', 'LOST')
             ->whereIn('report_status', ['OPEN', 'STORED'])
             ->whereDoesntHave('matchesAsLost', function($query) {
@@ -103,7 +105,9 @@ class MatchCreate extends Component
 
     private function getFoundReportsQuery()
     {
+        $companyId = auth()->user()->company_id;
         return Report::with('category')
+            ->where('company_id', $companyId)
             ->where('report_type', 'FOUND')
             ->whereIn('report_status', ['OPEN', 'STORED'])
             ->whereDoesntHave('matchesAsFound', function($query) {
@@ -129,6 +133,7 @@ class MatchCreate extends Component
 
             MatchedItem::create([
                 'match_id' => Str::uuid(),
+                'company_id' => auth()->user()->company_id,
                 'lost_report_id' => $this->lostReportId,
                 'found_report_id' => $this->foundReportId,
                 'match_status' => 'PENDING',

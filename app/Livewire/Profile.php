@@ -13,7 +13,7 @@ class Profile extends Component
 {
     use WithFileUploads;
 
-    public $full_name, $nickname, $phone_number, $company_name, $email;
+    public $full_name, $nickname, $phone_number, $email;
     public $avatar, $newAvatar;
     public $editMode = false;
     public $currentTab = 'profile'; // profile or reports
@@ -28,7 +28,6 @@ class Profile extends Component
         $this->full_name    = $user->full_name;
         $this->nickname     = $user->nickname;
         $this->phone_number = $user->phone_number;
-        $this->company_name = $user->company->company_name ?? '';
         $this->email        = $user->email;
         $this->avatar       = $user->avatar; // path avatar
     }
@@ -68,7 +67,6 @@ class Profile extends Component
             'full_name'    => 'required|string|max:255',
             'nickname'     => 'nullable|string|max:255',
             'phone_number' => 'nullable|string|max:20',
-            'company_name' => 'nullable|string|max:255',
             'email'        => 'required|email|max:255|unique:users,email,' . Auth::id(),
         ]);
 
@@ -76,10 +74,6 @@ class Profile extends Component
         $user->full_name    = $this->full_name;
         $user->phone_number = $this->phone_number;
         $user->email        = $this->email;
-
-        if ($user->company) {
-            $user->company->update(['company_name' => $this->company_name]);
-        }
 
         $user->save();
 
@@ -124,6 +118,10 @@ class Profile extends Component
             ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
+
+        // Load company relationship for admin/moderator
+        $user = Auth::user();
+        $user->load('company');
 
         return view('livewire.profile', [
             'reports' => $reports,

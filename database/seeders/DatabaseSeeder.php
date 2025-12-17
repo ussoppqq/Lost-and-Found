@@ -15,10 +15,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CompanySeeder::class,
             RoleSeeder::class,
-            UserSeeder::class,
+            UserSeeder::class, // Include admin & moderator for each company
             CategorySeeder::class,
             PostSeeder::class,
             LocationSeeder::class,
+            ReportSeeder::class, // Add sample reports for each company
         ]);
     }
 

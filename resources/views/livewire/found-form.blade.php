@@ -58,6 +58,24 @@
           <div class="rounded-2xl border border-gray-200 bg-white p-5">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Your Information</h2>
 
+            {{-- Kebun Raya Selection --}}
+            <div class="mb-4">
+              <label for="company_select_d" class="block text-sm font-semibold text-gray-900 mb-2">
+                Which Kebun Raya? <span class="text-red-500">*</span>
+              </label>
+              <select id="company_select_d" wire:model.live="company_id" required
+                class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 appearance-none bg-white"
+                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23374151%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
+                <option value="">-- Select Kebun Raya --</option>
+                @foreach($companies as $company)
+                  <option value="{{ $company->company_id }}">{{ $company->company_name }}</option>
+                @endforeach
+              </select>
+              @error('company_id')
+              <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+              @enderror
+            </div>
+
             {{-- Phone --}}
             <div class="mb-4">
               <label for="phone_d" class="block text-sm font-semibold text-gray-900 mb-2">
@@ -420,6 +438,24 @@
         <div class="lg:hidden">
           <div class="rounded-2xl border border-gray-200 bg-white p-5">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Your Information</h2>
+
+            {{-- Kebun Raya Selection --}}
+            <div class="mb-4">
+              <label for="company_select_m" class="block text-sm font-semibold text-gray-900 mb-2">
+                Which Kebun Raya? <span class="text-red-500">*</span>
+              </label>
+              <select id="company_select_m" wire:model.live="company_id" required
+                class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800 appearance-none bg-white"
+                style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
+                <option value="">-- Select Kebun Raya --</option>
+                @foreach($companies as $company)
+                  <option value="{{ $company->company_id }}">{{ $company->company_name }}</option>
+                @endforeach
+              </select>
+              @error('company_id')
+              <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+              @enderror
+            </div>
 
             {{-- Phone --}}
             <div class="mb-4">

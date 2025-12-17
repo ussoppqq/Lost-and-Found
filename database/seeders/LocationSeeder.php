@@ -4,15 +4,27 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Location;
+use App\Models\Company;
 use Illuminate\Support\Str;
 
 class LocationSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * NOTE: Lokasi-lokasi ini adalah untuk Kebun Raya Bogor.
+     * Untuk Kebun Raya lainnya (Cibodas, Purwodadi, Bali) belum diinput.
      */
     public function run(): void
     {
+        // Get Kebun Raya Bogor company
+        $bogorCompany = Company::where('company_name', 'Kebun Raya Bogor')->first();
+
+        if (!$bogorCompany) {
+            $this->command->error('Kebun Raya Bogor company not found. Please run CompanySeeder first.');
+            return;
+        }
+        // Lokasi khusus untuk Kebun Raya Bogor
         $locations = [
             // Zona Fungsional Utama
             ['name' => 'Pintu Masuk Utama', 'area' => 'Zona Fungsional Utama'],
@@ -51,9 +63,12 @@ class LocationSeeder extends Seeder
         foreach ($locations as $location) {
             Location::create([
                 'location_id' => Str::uuid(),
+                'company_id'  => $bogorCompany->company_id,
                 'name'        => $location['name'],
                 'area'        => $location['area'],
             ]);
         }
+
+        $this->command->info("✓ Created " . count($locations) . " locations for Kebun Raya Bogor");
     }
 }
