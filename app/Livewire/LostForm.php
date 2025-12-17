@@ -483,7 +483,7 @@ class LostForm extends Component
     // ---------- GET LOCATIONS FOR AUTOCOMPLETE ----------
     public function getLocationsProperty()
     {
-        return \App\Models\Location::orderBy('area_name')->get();
+        return \App\Models\Location::orderBy('name')->get();
     }
 
     public function render()

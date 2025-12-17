@@ -38,13 +38,15 @@
 
       {{-- Flash top-level --}}
       @if(session('status'))
-      <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">{{ session('status') }}</div>
+      <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">{{ session('status')
+        }}</div>
       @endif
       @if(session('error'))
       <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">{{ session('error') }}</div>
       @endif
       @if(session('message'))
-      <div class="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm">{{ session('message') }}</div>
+      <div class="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm">{{
+        session('message') }}</div>
       @endif
 
       {{-- FORM --}}
@@ -68,7 +70,8 @@
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="text-sm font-medium text-gray-900 flex-1">{{ $phone }}</span>
-                <span class="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-2 py-1 rounded-lg whitespace-nowrap">Logged-in</span>
+                <span
+                  class="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-2 py-1 rounded-lg whitespace-nowrap">Logged-in</span>
               </div>
               @else
               {{-- <div class="flex gap-2"> --}}
@@ -88,7 +91,8 @@
 
             {{-- OTP (desktop) --}}
             {{-- @if($needs_otp_verification && !$otp_verified)
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-2xl p-5 mb-4 shadow-sm">
+            <div
+              class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-2xl p-5 mb-4 shadow-sm">
               <div class="flex items-start gap-3 mb-4">
                 <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,7 +195,8 @@
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="text-sm font-medium text-gray-900 flex-1 break-words">{{ $user_name }}</span>
-                <span class="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-2 py-1 rounded-lg whitespace-nowrap">
+                <span
+                  class="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-2 py-1 rounded-lg whitespace-nowrap">
                   {{ auth()->check() ? 'Logged-in' : 'Verified' }}
                 </span>
               </div>
@@ -212,7 +217,8 @@
                 <button type="button" onclick="toggleLocationMode('d')"
                   class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-1.5 shadow-sm transition-colors">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12M8 12h12M8 17h12M3 7h.01M3 12h.01M3 17h.01"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 7h12M8 12h12M8 17h12M3 7h.01M3 12h.01M3 17h.01" />
                   </svg>
                   <span id="location_mode_toggle_d">Type</span>
                 </button>
@@ -224,14 +230,14 @@
                 style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%232563eb%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
                 <option value="">-- Select Location --</option>
                 @php
-                  $groupedLocations = $locations->groupBy('area');
+                $groupedLocations = $locations->groupBy('area');
                 @endphp
                 @foreach($groupedLocations as $area => $locs)
-                  <optgroup label="{{ $area ?: 'Other Locations' }}">
-                    @foreach($locs as $loc)
-                      <option value="{{ $loc->area_name }}">{{ $loc->area_name }}</option>
-                    @endforeach
-                  </optgroup>
+                <optgroup label="{{ $area ?: 'Other Locations' }}">
+                  @foreach($locs as $loc)
+                  <option value="{{ $loc->name }}">{{ $loc->name }}</option>
+                  @endforeach
+                </optgroup>
                 @endforeach
               </select>
 
@@ -337,8 +343,7 @@
                 </div>
                 @endif
 
-                @if(count($photos) < 5)
-                <button type="button" onclick="document.getElementById('foundPhotos_d').click()"
+                @if(count($photos) < 5) <button type="button" onclick="document.getElementById('foundPhotos_d').click()"
                   class="w-full flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-300 bg-white hover:bg-gray-50 active:bg-gray-100 p-8 transition">
                   <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -352,25 +357,24 @@
                     </p>
                     <p class="text-sm text-gray-500 mt-1">JPG, PNG up to 25MB each</p>
                   </div>
-                </button>
-                @else
-                <div class="text-center p-4 bg-white rounded-xl border border-gray-200">
-                  <p class="text-sm font-medium text-gray-600">Maximum photos reached (5/5)</p>
-                </div>
-                @endif
-
-                <div wire:loading wire:target="newPhotos"
-                  class="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
-                  <div class="flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                        stroke-width="4" />
-                      <path class="opacity-75" fill="currentColor"
-                        d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    <p class="text-sm font-medium text-blue-700">Uploading photos...</p>
+                  </button>
+                  @else
+                  <div class="text-center p-4 bg-white rounded-xl border border-gray-200">
+                    <p class="text-sm font-medium text-gray-600">Maximum photos reached (5/5)</p>
                   </div>
-                </div>
+                  @endif
+
+                  <div wire:loading wire:target="newPhotos"
+                    class="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
+                    <div class="flex items-center justify-center gap-2">
+                      <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                        <path class="opacity-75" fill="currentColor"
+                          d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      <p class="text-sm font-medium text-blue-700">Uploading photos...</p>
+                    </div>
+                  </div>
               </div>
 
               @error('photos') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -388,8 +392,7 @@
               class="w-full flex items-center justify-center gap-2 bg-gray-800 text-white rounded-xl px-6 py-4 text-base font-semibold hover:bg-gray-900 active:scale-[0.98] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
               <svg wire:loading wire:target="submit" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor"
-                  d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
               <span wire:loading.remove wire:target="submit">Submit Report</span>
               <span wire:loading wire:target="submit">Submitting...</span>
@@ -418,13 +421,13 @@
               </label>
               @if(auth()->check())
               <div class="flex items-center gap-2 px-4 py-3 bg-white rounded-xl border border-gray-200">
-                <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor"
-                  viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="text-sm font-medium text-gray-900 flex-1">{{ $phone }}</span>
-                <span class="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-2 py-1 rounded-lg whitespace-nowrap">Logged-in</span>
+                <span
+                  class="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-2 py-1 rounded-lg whitespace-nowrap">Logged-in</span>
               </div>
               @else
               {{-- <div class="flex gap-2"> --}}
@@ -444,7 +447,8 @@
 
             {{-- OTP (mobile) --}}
             {{-- @if($needs_otp_verification && !$otp_verified)
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-2xl p-4 mb-4 shadow-sm">
+            <div
+              class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-2xl p-4 mb-4 shadow-sm">
               <div class="flex items-start gap-3 mb-4">
                 <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -542,13 +546,13 @@
               </label>
               @if(auth()->check() || $is_existing_user)
               <div class="flex items-center gap-2 px-4 py-3 bg-white rounded-xl border border-gray-200">
-                <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor"
-                  viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="text-sm font-medium text-gray-900 flex-1 break-words">{{ $user_name }}</span>
-                <span class="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-2 py-1 rounded-lg whitespace-nowrap">
+                <span
+                  class="text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-2 py-1 rounded-lg whitespace-nowrap">
                   {{ auth()->check() ? 'Logged-in' : 'Verified' }}
                 </span>
               </div>
@@ -569,7 +573,8 @@
                 <button type="button" onclick="toggleLocationMode('m')"
                   class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center gap-1.5 shadow-sm transition-colors">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12M8 12h12M8 17h12M3 7h.01M3 12h.01M3 17h.01"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 7h12M8 12h12M8 17h12M3 7h.01M3 12h.01M3 17h.01" />
                   </svg>
                   <span id="location_mode_toggle_m">Type</span>
                 </button>
@@ -581,14 +586,14 @@
                 style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%232563eb%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
                 <option value="">-- Select Location --</option>
                 @php
-                  $groupedLocations = $locations->groupBy('area');
+                $groupedLocations = $locations->groupBy('area');
                 @endphp
                 @foreach($groupedLocations as $area => $locs)
-                  <optgroup label="{{ $area ?: 'Other Locations' }}">
-                    @foreach($locs as $loc)
-                      <option value="{{ $loc->area_name }}">{{ $loc->area_name }}</option>
-                    @endforeach
-                  </optgroup>
+                <optgroup label="{{ $area ?: 'Other Locations' }}">
+                  @foreach($locs as $loc)
+                  <option value="{{ $loc->name }}">{{ $loc->name }}</option>
+                  @endforeach
+                </optgroup>
                 @endforeach
               </select>
 
@@ -612,9 +617,8 @@
 
             {{-- Next (selalu tampil; disable jika OTP belum verified) --}}
             <div class="pt-4 space-y-2">
-              <button type="button" wire:click="nextStep"
-                {{-- @if($needs_otp_verification && !$otp_verified) disabled aria-disabled="true" @else aria-disabled="false" @endif --}}
-                class="w-full flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-semibold transition-all shadow-lg text-white
+              <button type="button" wire:click="nextStep" {{-- @if($needs_otp_verification && !$otp_verified) disabled
+                aria-disabled="true" @else aria-disabled="false" @endif --}} class="w-full flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-semibold transition-all shadow-lg text-white
                        {{-- {{ ($needs_otp_verification && !$otp_verified) ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800 hover:bg-gray-900 active:scale-[0.98]' }} --}}
                        bg-gray-800 hover:bg-gray-900 active:scale-[0.98]">
                 Next Step
@@ -623,11 +627,6 @@
                 </svg>
               </button>
 
-              {{-- @if($needs_otp_verification && !$otp_verified)
-              <p class="text-xs text-red-600 text-center">
-                Verify the OTP first before continuing.
-              </p>
-              @endif --}}
             </div>
           </div>
         </div>
@@ -706,8 +705,7 @@
                 </div>
                 @endif
 
-                @if(count($photos) < 5)
-                <button type="button" onclick="document.getElementById('foundPhotos_m').click()"
+                @if(count($photos) < 5) <button type="button" onclick="document.getElementById('foundPhotos_m').click()"
                   class="w-full flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-gray-300 bg-white hover:bg-gray-50 active:bg-gray-100 p-8 transition">
                   <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -721,25 +719,24 @@
                     </p>
                     <p class="text-sm text-gray-500 mt-1">JPG, PNG up to 25MB each</p>
                   </div>
-                </button>
-                @else
-                <div class="text-center p-4 bg-white rounded-xl border border-gray-200">
-                  <p class="text-sm font-medium text-gray-600">Maximum photos reached (5/5)</p>
-                </div>
-                @endif
-
-                <div wire:loading wire:target="newPhotos"
-                  class="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
-                  <div class="flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                        stroke-width="4" />
-                      <path class="opacity-75" fill="currentColor"
-                        d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    <p class="text-sm font-medium text-blue-700">Uploading photos...</p>
+                  </button>
+                  @else
+                  <div class="text-center p-4 bg-white rounded-xl border border-gray-200">
+                    <p class="text-sm font-medium text-gray-600">Maximum photos reached (5/5)</p>
                   </div>
-                </div>
+                  @endif
+
+                  <div wire:loading wire:target="newPhotos"
+                    class="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
+                    <div class="flex items-center justify-center gap-2">
+                      <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                        <path class="opacity-75" fill="currentColor"
+                          d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      <p class="text-sm font-medium text-blue-700">Uploading photos...</p>
+                    </div>
+                  </div>
               </div>
 
               @error('photos') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
@@ -754,17 +751,16 @@
                 <button type="submit" wire:loading.attr="disabled" wire:target="submit" id="btnSubmitReportMobile"
                   class="w-full flex items-center justify-center gap-2 bg-gray-800 text-white rounded-xl px-6 py-4 text-base font-semibold hover:bg-gray-900 active:scale-[0.98] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
                   <svg wire:loading wire:target="submit" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                      stroke-width="4" />
-                    <path class="opacity-75" fill="currentColor"
-                      d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
                   <span wire:loading.remove wire:target="submit">Submit Report</span>
                   <span wire:loading wire:target="submit">Submitting...</span>
                 </button>
                 <div id="submitSuccessMobile" class="hidden mt-3 p-3 bg-green-50 border-2 border-green-500 rounded-xl">
                   <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor"
+                      viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     <p id="submitSuccessMessageMobile" class="text-sm font-semibold text-green-800"></p>
@@ -775,8 +771,7 @@
               <button type="button" wire:click="previousStep"
                 class="w-full flex items-center justify-center gap-2 bg-white text-gray-700 rounded-xl px-6 py-3.5 text-base font-semibold border border-gray-200 hover:bg-gray-50 active:scale-[0.98] transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 19l-7-7 7-7" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
                 Back to Your Info
               </button>
