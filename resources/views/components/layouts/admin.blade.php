@@ -17,7 +17,7 @@
     @livewireStyles
 </head>
 
-<body class="font-sans antialiased bg-gray-50">
+<body class="font-sans antialiased bg-gray-50" x-data="{ sidebarOpen: false }">
     <div class="flex h-screen bg-gray-50">
         <!-- Sidebar -->
         <div class="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
@@ -156,15 +156,181 @@
             </div>
         </div>
 
+        <!-- Mobile Sidebar -->
+        <div x-show="sidebarOpen"
+             @click.away="sidebarOpen = false"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-40 flex md:hidden">
+            <div class="fixed inset-0 bg-gray-600 bg-opacity-75" @click="sidebarOpen = false"></div>
+            <div class="relative flex-1 flex flex-col max-w-xs w-full bg-white"
+                 x-transition:enter="transition ease-out duration-200 transform"
+                 x-transition:enter-start="-translate-x-full"
+                 x-transition:enter-end="translate-x-0"
+                 x-transition:leave="transition ease-in duration-150 transform"
+                 x-transition:leave-start="translate-x-0"
+                 x-transition:leave-end="-translate-x-full">
+                <div class="absolute top-0 right-0 -mr-12 pt-2">
+                    <button @click="sidebarOpen = false" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+                    <div class="flex items-center flex-shrink-0 px-4 mb-8">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 w-10 h-10 bg-black rounded-lg flex items-center justify-center">
+                                <span class="text-white font-bold text-lg">🌿</span>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-lg font-semibold text-gray-900">Kebun Raya</p>
+                                <p class="text-sm text-gray-500">
+                                    {{ auth()->user()->isAdmin() ? 'Admin Panel' : 'Moderator Panel' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <nav class="mt-5 flex-1 px-2 space-y-1">
+                        @php
+                            $user = auth()->user();
+                            $isAdmin = $user->isAdmin();
+                        @endphp
+
+                        <!-- Home -->
+                        <a href="{{ route('home') }}"
+                            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                            <svg class="mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            Home
+                        </a>
+
+                        <!-- Dashboard -->
+                        <a href="{{ route('admin.dashboard') }}"
+                            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.dashboard*') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <svg class="mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 10h4a1 1 0 001-1V5a1 1 0 00-1-1H3a1 1 0 00-1 1v4a1 1 0 001 1zM3 21h4a1 1 0 001-1v-4a1 1 0 00-1-1H3a1 1 0 00-1 1v4a1 1 0 001 1zM14 10h4a1 1 0 001-1V5a1 1 0 00-1-1h-4a1 1 0 00-1 1v4a1 1 0 001 1zM14 21h4a1 1 0 001-1v-4a1 1 0 00-1-1h-4a1 1 0 00-1 1v4a1 1 0 001 1z" />
+                            </svg>
+                            Dashboard
+                        </a>
+
+                        <!-- Lost & Found -->
+                        <a href="{{ route('admin.lost-found') }}"
+                            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.lost-found*') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <svg class="mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            Lost & Found
+                        </a>
+
+                        <!-- Items -->
+                        <a href="{{ route('admin.items') }}"
+                            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.items*') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <svg class="mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                            Storage
+                        </a>
+
+                        <!-- Matches -->
+                        <a href="{{ route('admin.matches') }}"
+                            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.matches*') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <svg class="mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Matches
+                        </a>
+
+                        <a href="{{ route('admin.matches.ai-suggestions') }}"
+                            class="group flex items-center px-4 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.matches.ai-suggestions') ? 'bg-purple-900 text-white' : 'text-gray-600 hover:bg-purple-50 hover:text-purple-900' }}">
+                            <svg class="mr-3 h-5 w-5 flex-shrink-0 {{ request()->routeIs('admin.matches.ai-suggestions') ? 'text-purple-200' : 'text-purple-600' }}"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            <span>AI Suggestions</span>
+                            <span
+                                class="ml-auto px-2 py-0.5 text-xs font-bold {{ request()->routeIs('admin.matches.ai-suggestions') ? 'bg-purple-800 text-purple-100' : 'bg-purple-100 text-purple-800' }} rounded-full">
+                                AI
+                            </span>
+                        </a>
+
+                        <!-- Categories -->
+                        <a href="{{ route('admin.categories') }}"
+                            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.categories*') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <svg class="mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                            Categories
+                        </a>
+
+                        <!-- Locations -->
+                        <a href="{{ route('admin.locations.index') }}"
+                            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.locations*') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <svg class="mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Locations
+                        </a>
+
+                        <!-- Users - HANYA ADMIN -->
+                        @if($isAdmin)
+                            <a href="{{ route('admin.users') }}"
+                                class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users*') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                Users
+                            </a>
+                        @endif
+
+                        <!-- Statistics -->
+                        <a href="{{ route('admin.statistic') }}"
+                            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.statistic*') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                            <svg class="mr-3 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Statistics
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
         <!-- Main content -->
         <div class="md:pl-64 flex flex-col flex-1">
             <!-- Top bar -->
             <div class="sticky top-0 z-10 bg-white pl-1 pt-1 sm:pl-3 sm:pt-3">
                 <div class="flex justify-between items-center px-4 sm:px-6 py-3 border-b border-gray-200">
-                    <!-- Page title -->
-                    <div>
-                        <h1 class="text-xl font-semibold text-gray-900">{{ $pageTitle ?? 'Dashboard' }}</h1>
-                        <p class="text-sm text-gray-500">{{ $pageDescription ?? 'Welcome to admin panel' }}</p>
+                    <!-- Mobile menu button & Page title -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Mobile hamburger -->
+                        <button @click="sidebarOpen = true" class="md:hidden -ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+
+                        <!-- Page title -->
+                        <div>
+                            <h1 class="text-xl font-semibold text-gray-900">{{ $pageTitle ?? 'Dashboard' }}</h1>
+                            <p class="text-sm text-gray-500 hidden sm:block">{{ $pageDescription ?? 'Welcome to admin panel' }}</p>
+                        </div>
                     </div>
 
                     <!-- User menu -->

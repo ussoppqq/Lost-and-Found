@@ -123,46 +123,142 @@
                 @endauth
             </div>
 
-            {{-- Hamburger Mobile --}}
+            {{-- Avatar Button Mobile --}}
             <div class="md:hidden">
-                <button @click="open = true"
-                        class="text-gray-700 focus:outline-none transition-colors duration-300">
-                    <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
+                @auth
+                    <button @click="open = true" class="flex items-center focus:outline-none">
+                        @php
+                            $user = auth()->user();
+                            $initials = collect(explode(' ', $user->full_name ?? 'User'))
+                                ->map(fn($word) => strtoupper(substr($word, 0, 1)))
+                                ->join('');
+                        @endphp
+                        @if($user->avatar)
+                            <img
+                                src="{{ Storage::url($user->avatar) }}"
+                                alt="Avatar"
+                                class="h-10 w-10 rounded-full border-2 border-gray-300 shadow-md object-cover hover:border-gray-400 transition"
+                            >
+                        @else
+                            <div class="h-10 w-10 rounded-full border-2 border-gray-300 shadow-md bg-gray-200 flex items-center justify-center text-gray-800 font-bold text-sm hover:border-gray-400 transition">
+                                {{ $initials }}
+                            </div>
+                        @endif
+                    </button>
+                @else
+                    <button @click="open = true"
+                            class="text-gray-700 focus:outline-none transition-colors duration-300">
+                        <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                @endauth
             </div>
         </div>
 
         {{-- Sidebar Mobile --}}
         <div x-show="open" class="fixed inset-0 z-40 flex md:hidden" x-transition>
-            <div class="ml-auto w-72 bg-white h-full p-6 space-y-6 shadow-2xl overflow-y-auto border-l border-gray-100">
-                <div class="flex items-center justify-between border-b pb-4">
-                    <img src="{{ asset('storage/images/logo/logodark.png') }}" alt="Logo" class="h-10 w-auto">
-                    <button @click="open = false" class="text-gray-500 hover:text-gray-700">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="space-y-4">
+            <div class="ml-auto w-72 bg-white h-full shadow-2xl overflow-y-auto border-l border-gray-100 flex flex-col">
+                @auth
+                    {{-- Profile Header (replaces logo) --}}
+                    <div class="p-6 border-b border-gray-100" x-data="{ profileOpen: false }">
+                        <div class="flex items-center justify-end mb-4">
+                            <button @click="open = false" class="text-gray-500 hover:text-gray-700">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <button @click="profileOpen = !profileOpen" class="w-full flex items-center space-x-3 hover:bg-gray-50 p-3 rounded-lg transition">
+                            @php
+                                $user = auth()->user();
+                                $initials = collect(explode(' ', $user->full_name ?? 'User'))
+                                    ->map(fn($word) => strtoupper(substr($word, 0, 1)))
+                                    ->join('');
+                            @endphp
+                            @if($user->avatar)
+                                <img
+                                    src="{{ Storage::url($user->avatar) }}"
+                                    alt="Avatar"
+                                    class="h-14 w-14 rounded-full border-2 border-gray-300 object-cover flex-shrink-0"
+                                >
+                            @else
+                                <div class="h-14 w-14 rounded-full border-2 border-gray-300 bg-gray-200 flex items-center justify-center text-gray-800 font-bold text-base flex-shrink-0">
+                                    {{ $initials }}
+                                </div>
+                            @endif
+                            <div class="flex-1 text-left">
+                                <p class="font-semibold text-gray-900 text-base">{{ $user->full_name ?? 'User' }}</p>
+                                <p class="text-xs text-gray-500 truncate">{{ $user->email }}</p>
+                            </div>
+                            <svg class="h-5 w-5 text-gray-400 transition-transform flex-shrink-0" :class="{ 'rotate-180': profileOpen }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        {{-- Profile Dropdown Menu --}}
+                        <div x-show="profileOpen" x-collapse class="mt-2 space-y-1">
+                            @if($user->isAdmin() || $user->isModerator())
+                                <a href="{{ route('admin.dashboard') }}" @click="open = false" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                        </svg>
+                                        Dashboard
+                                    </div>
+                                </a>
+                            @endif
+                            <a href="{{ url('/profile') }}" @click="open = false" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    Profile
+                                </div>
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        Logout
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @else
+                    {{-- Header with Logo for Guest --}}
+                    <div class="flex items-center justify-between border-b p-6 pb-4">
+                        <img src="{{ asset('storage/images/logo/logodark.png') }}" alt="Logo" class="h-10 w-auto">
+                        <button @click="open = false" class="text-gray-500 hover:text-gray-700">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                @endauth
+
+                {{-- Navigation Menu --}}
+                <div class="p-6 space-y-2 flex-1">
                     <a href="{{ url('/') }}" @click="open = false" class="block py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100">Lost &amp; Found</a>
                     <a href="{{ route('lost-items') }}" @click="open = false" class="block py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100">Lost Items</a>
                     <a href="{{ url('/tracking') }}" @click="open = false" class="block py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100">Tracking</a>
 
-                    @auth
-                        <a href="{{ url('/profile') }}" class="block py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100">Profile</a>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit"
-                                    class="w-full text-left py-3 text-gray-700 hover:text-gray-900 font-medium">Logout</button>
-                        </form>
-                    @else
+                    @guest
                         <a href="{{ route('login') }}"
                            class="block mt-6 px-6 py-3 bg-gray-900 text-white rounded-xl text-center hover:bg-gray-800 transition font-medium">Login</a>
-                    @endauth
+                    @endguest
                 </div>
             </div>
         </div>
