@@ -75,10 +75,12 @@
 
                 const showError = (message) => {
                     let alertDiv = document.getElementById('search-error-alert');
+
                     if (!alertDiv) {
                         alertDiv = document.createElement('div');
                         alertDiv.id = 'search-error-alert';
-                        alertDiv.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-full mx-4 bg-red-50 border-2 border-red-200 rounded-xl p-4 shadow-2xl animate-bounce';
+                        alertDiv.className =
+                            'fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-full mx-4 bg-red-50 border-2 border-red-200 rounded-xl p-4 shadow-2xl';
                         alertDiv.innerHTML = `
                             <div class="flex items-start gap-3">
                                 <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -88,7 +90,7 @@
                                     <p class="text-sm font-semibold text-red-800 mb-1">Invalid Tracking ID</p>
                                     <p class="text-sm text-red-700" id="error-message"></p>
                                 </div>
-                                <button onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800">
+                                <button type="button" onclick="this.closest('#search-error-alert').remove()" class="text-red-600 hover:text-red-800">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
@@ -98,22 +100,30 @@
                         document.body.appendChild(alertDiv);
                     }
 
-                    document.getElementById('error-message').textContent = message;
-                    setTimeout(() => { alertDiv.remove(); }, 5000);
+                    const msg = document.getElementById('error-message');
+                    if (msg) msg.textContent = message;
+
+                    clearTimeout(window.__lfErrTimer);
+                    window.__lfErrTimer = setTimeout(() => {
+                        const el = document.getElementById('search-error-alert');
+                        if (el) el.remove();
+                    }, 5000);
                 };
 
                 form.addEventListener('submit', function (e) {
                     e.preventDefault();
-                    const raw = input.value;
+
+                    const raw = input.value || '';
                     const v = clean(raw);
 
                     if (!v) {
-                        showError('Masukkan Report ID yang valid dari PDF receipt Anda.');
+                        showError('Masukkan Tracking ID yang valid dari PDF receipt Anda.');
                         return;
                     }
 
                     if (isUUID(v)) {
-                        window.location.href = "{{ route('tracking.detail', ['reportId' => '_ID_']) }}".replace('_ID_', v);
+                        const url = "{{ route('tracking.detail', ['reportId' => '_ID']) }}".replace('_ID', v);
+                        window.location.href = url;
                         return;
                     }
 
@@ -122,7 +132,8 @@
                         return;
                     }
 
-                    showError(`"${raw.substring(0, 20)}${raw.length > 20 ? '...' : ''}" bukan Report ID yang valid. Cek PDF receipt untuk mendapatkan Tracking ID yang benar.`);
+                    const shortRaw = `${raw.substring(0, 20)}${raw.length > 20 ? '...' : ''}`;
+                    showError(`${shortRaw} bukan Tracking ID yang valid. Cek PDF receipt untuk mendapatkan Tracking ID yang benar.`);
                 });
             })();
         </script>
@@ -156,13 +167,17 @@
                         </div>
 
                         <div class="p-4 md:p-6 text-center">
-                            <div class="w-12 h-1 bg-blue-500 mx-auto rounded-full mb-3"></div>
-                            <p class="text-gray-600 leading-relaxed text-sm md:text-base min-h-[3rem]">
-                                Lost something valuable? Let us help you find it back.
+                            <div class="w-12 h-1 bg-gray-500 mx-auto rounded-full mb-3"></div>
+
+                            {{-- Hide description on mobile, show on desktop --}}
+                            <p class="hidden lg:block text-gray-600 leading-relaxed text-sm md:text-base mb-4">
+                                Lost something valuable? Report it here, and we'll do our best to help you get it back.
                             </p>
-                            <div class="mt-4">
+
+                            {{-- Mobile: reduced margin-top --}}
+                            <div class="mt-2 lg:mt-4">
                                 <span
-                                    class="inline-flex items-center text-blue-600 font-semibold group-hover:text-blue-700 transition-colors text-sm md:text-base">
+                                    class="inline-flex items-center text-gray-600 font-semibold group-hover:text-red-700 transition-colors text-sm md:text-base">
                                     Report Lost Item
                                     <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">
@@ -190,10 +205,14 @@
 
                         <div class="p-4 md:p-6 text-center">
                             <div class="w-12 h-1 bg-gray-500 mx-auto rounded-full mb-3"></div>
-                            <p class="text-gray-600 leading-relaxed text-sm md:text-base min-h-[3rem]">
+
+                            {{-- Hide description on mobile, show on desktop --}}
+                            <p class="hidden lg:block text-gray-600 leading-relaxed text-sm md:text-base mb-4">
                                 Found something that doesn't belong to you? Help us return it to the rightful owner.
                             </p>
-                            <div class="mt-4">
+
+                            {{-- Mobile: reduced margin-top --}}
+                            <div class="mt-2 lg:mt-4">
                                 <span
                                     class="inline-flex items-center text-gray-600 font-semibold group-hover:text-gray-700 transition-colors text-sm md:text-base">
                                     Report Found Item
@@ -213,8 +232,9 @@
             <div class="mt-16 lg:mt-20">
                 <div class="text-center mb-8">
                     <h2 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-3">Garden Map & Facilities</h2>
-                    <p class="text-gray-600 max-w-2xl mx-auto">Explore Bogor Botanical Garden facilities and plant
-                        collections</p>
+                    <p class="text-gray-600 max-w-2xl mx-auto">
+                        Explore Bogor Botanical Garden facilities and plant collections
+                    </p>
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 max-w-5xl mx-auto">
@@ -250,10 +270,9 @@
                                 'sites' => $sites,
                                 'collections' => $collections
                             ])
-                        </div>
-
-                        {{-- Desktop Grid View --}}
-                        <div class="hidden md:grid md:grid-cols-3 gap-8">
+                    </div>
+                    {{-- Desktop Grid View --}}
+                    <div class="hidden md:grid md:grid-cols-3 gap-8">
                             @include('components.map-legend-desktop', [
                                 'facilities' => $facilities,
                                 'avenues' => $avenues,
