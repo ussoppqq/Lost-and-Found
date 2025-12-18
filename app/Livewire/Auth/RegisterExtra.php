@@ -210,7 +210,7 @@ class RegisterExtra extends Component
             'full_name' => 'required|string|max:255',
             'phone_number' => 'required|string|regex:/^62[0-9]{9,13}$/|unique:users,phone_number',
             'email' => 'nullable|email|unique:users,email',
-            'password' => ['required', 'min:6', 'confirmed', new \App\Rules\UniquePassword()],
+            'password' => 'required|min:6|confirmed',
             'otp' => 'required|digits:6',
         ]);
 
@@ -274,25 +274,6 @@ class RegisterExtra extends Component
                 $this->addError('email', 'Terjadi kesalahan saat registrasi. Silakan coba lagi.');
             }
         }
-    }
-
-    /**
-     * Check if password is unique (real-time validation)
-     */
-    public function checkPasswordUnique()
-    {
-        if (empty($this->password) || strlen($this->password) < 6) {
-            return ['unique' => true, 'message' => '']; // Don't check if password is too short
-        }
-
-        $users = User::all();
-        foreach ($users as $user) {
-            if (Hash::check($this->password, $user->password)) {
-                return ['unique' => false, 'message' => 'This password is already being used by another user.'];
-            }
-        }
-
-        return ['unique' => true, 'message' => 'Password is unique'];
     }
 
     public function render()
