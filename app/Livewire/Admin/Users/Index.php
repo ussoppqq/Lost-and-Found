@@ -2,27 +2,33 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Models\Role;
+use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\User;
-use App\Models\Role;
 
 class Index extends Component
 {
     use WithPagination;
 
     public $search = '';
+
     public $roleFilter = 'all';
+
     public $verifiedFilter = 'all';
+
     public $sortBy = 'created_at';
+
     public $sortDirection = 'desc';
 
     // Modal states
     public $showDetailModal = false;
+
     public $showDeleteModal = false;
 
     // Selected user
     public $selectedUser;
+
     public $userId;
 
     protected $queryString = ['search', 'roleFilter', 'verifiedFilter'];
@@ -102,8 +108,8 @@ class Index extends Component
         $user = User::findOrFail($userId);
 
         $user->update([
-            'is_verified' => !$user->is_verified,
-            'phone_verified_at' => !$user->is_verified ? now() : null,
+            'is_verified' => ! $user->is_verified,
+            'phone_verified_at' => ! $user->is_verified ? now() : null,
         ]);
 
         $status = $user->is_verified ? 'verified' : 'unverified';
@@ -129,36 +135,51 @@ class Index extends Component
     }
 
     public function render()
-    {
-        $companyId = auth()->user()->company_id;
+{
+    $currentUser = auth()->user();
 
-        $users = User::with('role', 'company')
-            ->where('company_id', $companyId)
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('full_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('email', 'like', '%' . $this->search . '%')
-                        ->orWhere('phone_number', 'like', '%' . $this->search . '%');
-                });
-            })
-            ->when($this->roleFilter !== 'all', function ($query) {
-                $query->whereHas('role', function ($q) {
-                    $q->where('role_code', $this->roleFilter);
-                });
-            })
-            ->when($this->verifiedFilter !== 'all', function ($query) {
-                $query->where('is_verified', $this->verifiedFilter === 'verified');
-            })
-            ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(10);
+    $users = User::with(['role', 'company'])
+        ->where(function ($query) use ($currentUser) {
 
-        $roles = Role::all();
+            // 1️⃣ User umum (company NULL)
+            $query->where(function ($q) {
+                $q->whereNull('company_id')
+                  ->whereHas('role', function ($r) {
+                      $r->where('role_code', 'USER');
+                  });
+            });
 
-        return view('livewire.admin.users.index', compact('users', 'roles'))
-            ->layout('components.layouts.admin', [
-                'title' => 'Users Management',
-                'pageTitle' => 'Users',
-                'pageDescription' => 'Manage system users and their roles'
-            ]);
-    }
+            // 2️⃣ Admin / Moderator / User dengan company SAMA
+            if ($currentUser->company_id) {
+                $query->orWhere('company_id', $currentUser->company_id);
+            }
+
+        })
+        ->when($this->search, function ($query) {
+            $query->where(function ($q) {
+                $q->where('full_name', 'like', '%'.$this->search.'%')
+                  ->orWhere('email', 'like', '%'.$this->search.'%')
+                  ->orWhere('phone_number', 'like', '%'.$this->search.'%');
+            });
+        })
+        ->when($this->roleFilter !== 'all', function ($query) {
+            $query->whereHas('role', function ($q) {
+                $q->where('role_code', $this->roleFilter);
+            });
+        })
+        ->when($this->verifiedFilter !== 'all', function ($query) {
+            $query->where('is_verified', $this->verifiedFilter === 'verified');
+        })
+        ->orderBy($this->sortBy, $this->sortDirection)
+        ->paginate(10);
+
+    $roles = Role::all();
+
+    return view('livewire.admin.users.index', compact('users', 'roles'))
+        ->layout('components.layouts.admin', [
+            'title' => 'Users Management',
+            'pageTitle' => 'Users',
+            'pageDescription' => 'Manage system users and their roles',
+        ]);
+}
 }
