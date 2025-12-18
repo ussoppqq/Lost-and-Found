@@ -17,6 +17,7 @@ class MatchedItem extends Model
 
     protected $fillable = [
         'match_id',
+        'company_id',
         'lost_report_id',
         'found_report_id',
         'match_status',

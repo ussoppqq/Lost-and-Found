@@ -226,9 +226,11 @@ class MatchList extends Component
     {
         $companyId = auth()->user()->company_id;
 
-        // Query SEMUA matches termasuk yang REJECTED
+        // Query SEMUA matches termasuk yang REJECTED - Filter via report relation
         $matches = MatchedItem::withTrashed()
-            ->where('company_id', $companyId)
+            ->whereHas('lostReport', function ($query) use ($companyId) {
+                $query->where('company_id', $companyId);
+            })
             ->with([
                 'lostReport.category',
                 'foundReport.category',
@@ -258,10 +260,18 @@ class MatchList extends Component
             ->paginate(10);
 
         $stats = [
-            'total' => MatchedItem::where('company_id', $companyId)->count(),
-            'pending' => MatchedItem::where('company_id', $companyId)->where('match_status', 'PENDING')->count(),
-            'confirmed' => MatchedItem::where('company_id', $companyId)->where('match_status', 'CONFIRMED')->count(),
-            'rejected' => MatchedItem::where('company_id', $companyId)->onlyTrashed()->where('match_status', 'REJECTED')->count(),
+            'total' => MatchedItem::whereHas('lostReport', function ($query) use ($companyId) {
+                $query->where('company_id', $companyId);
+            })->count(),
+            'pending' => MatchedItem::whereHas('lostReport', function ($query) use ($companyId) {
+                $query->where('company_id', $companyId);
+            })->where('match_status', 'PENDING')->count(),
+            'confirmed' => MatchedItem::whereHas('lostReport', function ($query) use ($companyId) {
+                $query->where('company_id', $companyId);
+            })->where('match_status', 'CONFIRMED')->count(),
+            'rejected' => MatchedItem::onlyTrashed()->whereHas('lostReport', function ($query) use ($companyId) {
+                $query->where('company_id', $companyId);
+            })->where('match_status', 'REJECTED')->count(),
         ];
 
         return view('livewire.admin.matches.match-list', [
