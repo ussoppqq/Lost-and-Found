@@ -19,6 +19,7 @@ class User extends Authenticatable
         'company_id', // Only for admin/moderator
         'role_id',
         'full_name',
+        'nickname',
         'email',
         'email_verification_code',
         'email_verification_code_expires_at',

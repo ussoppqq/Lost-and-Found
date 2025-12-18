@@ -6,6 +6,8 @@
     $sites = MapLegendData::getInterestingSites();
     $collections = MapLegendData::getPlantCollections();
     $pins = MapLegendData::getMapPins();
+
+    $companies = \App\Models\Company::orderBy('company_name')->get();
 @endphp
 
 <x-layouts.app>
@@ -229,36 +231,76 @@
             </div>
 
             {{-- Garden Map & Legend Section --}}
-            <div class="mt-16 lg:mt-20">
+            <div class="mt-16 lg:mt-20" x-data="{ selectedCompany: '{{ $companies->first()->company_id ?? '' }}' }">
                 <div class="text-center mb-8">
                     <h2 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-3">Garden Map & Facilities</h2>
-                    <p class="text-gray-600 max-w-2xl mx-auto">
-                        Explore Bogor Botanical Garden facilities and plant collections
+                    <p class="text-gray-600 max-w-2xl mx-auto mb-6">
+                        Select a Kebun Raya to explore its facilities and plant collections
                     </p>
+
+                    {{-- Company Selector --}}
+                    <div class="max-w-md mx-auto">
+                        <select x-model="selectedCompany"
+                            class="w-full px-4 py-3 text-base rounded-xl border-2 border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 appearance-none bg-white shadow-sm"
+                            style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%23059669%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; padding-right: 3rem;">
+                            @foreach($companies as $company)
+                                <option value="{{ $company->company_id }}">{{ $company->company_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 max-w-5xl mx-auto">
-                    {{-- Map Preview --}}
-                    <div class="relative bg-gradient-to-br from-green-50 to-emerald-50 p-3 md:p-6">
-                        <button type="button" onclick="openMapModal()"
-                            class="block w-full text-left rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                            aria-label="Open Interactive Garden Map">
-                            <img src="{{ asset('images/peta-kebun-raya-bogor.png') }}" alt="Peta Kebun Raya Bogor"
-                                class="w-full h-auto rounded-xl shadow-md cursor-zoom-in select-none">
-                        </button>
+                    @foreach($companies as $company)
+                        {{-- Map Preview --}}
+                        <div x-show="selectedCompany === '{{ $company->company_id }}'"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform scale-95"
+                             x-transition:enter-end="opacity-100 transform scale-100"
+                             class="relative bg-gradient-to-br from-green-50 to-emerald-50 p-3 md:p-6">
+                            @php
+                                // Check for map file based on company name in public/images/
+                                $mapPath = null;
+                                $defaultMapName = 'peta-' . strtolower(str_replace(' ', '-', $company->company_name)) . '.png';
+                                $defaultMapPath = public_path('images/' . $defaultMapName);
+                                if (file_exists($defaultMapPath)) {
+                                    $mapPath = asset('images/' . $defaultMapName);
+                                }
+                            @endphp
 
-                        <div class="absolute top-6 right-6 md:top-8 md:right-8">
-                            <button type="button" onclick="openMapModal()"
-                                class="bg-white/95 backdrop-blur-sm text-gray-800 px-3 md:px-5 py-2 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 inline-flex items-center gap-2 hover:bg-white hover:-translate-y-1 text-xs md:text-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                                </svg>
-                                <span class="hidden sm:inline">Interactive Map</span>
-                                <span class="sm:hidden">Map</span>
-                            </button>
+                            @if($mapPath)
+                                <button type="button" onclick="openMapModal()"
+                                    class="block w-full text-left rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    aria-label="Open Interactive Garden Map">
+                                    <img src="{{ $mapPath }}" alt="Peta {{ $company->company_name }}"
+                                        class="w-full h-auto rounded-xl shadow-md cursor-zoom-in select-none">
+                                </button>
+
+                                <div class="absolute top-6 right-6 md:top-8 md:right-8">
+                                    <button type="button" onclick="openMapModal()"
+                                        class="bg-white/95 backdrop-blur-sm text-gray-800 px-3 md:px-5 py-2 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 inline-flex items-center gap-2 hover:bg-white hover:-translate-y-1 text-xs md:text-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Interactive Map</span>
+                                        <span class="sm:hidden">Map</span>
+                                    </button>
+                                </div>
+                            @else
+                                <div class="flex flex-col items-center justify-center py-16 px-6 text-center">
+                                    <svg class="w-20 h-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                    </svg>
+                                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Map Not Available</h3>
+                                    <p class="text-gray-500">
+                                        The map for {{ $company->company_name }} is currently not available.
+                                    </p>
+                                </div>
+                            @endif
                         </div>
-                    </div>
+                    @endforeach
 
                     {{-- Legend Section --}}
                     <div class="p-4 md:p-6 bg-gradient-to-br from-gray-50 to-white border-t border-gray-100">

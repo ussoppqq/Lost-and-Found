@@ -37,7 +37,7 @@ class Create extends Component
             'email' => 'nullable|email|unique:users,email',
             'phone_number' => 'required|string|regex:/^62[0-9]{9,13}$/|unique:users,phone_number',
             'role_id' => 'required|exists:roles,role_id',
-            'password' => 'required|min:8|confirmed',
+            'password' => ['required', 'min:8', 'confirmed', new \App\Rules\UniquePassword()],
         ];
     }
 

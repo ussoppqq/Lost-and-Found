@@ -19,13 +19,25 @@
 
             <!-- Search & Filter -->
             <div class="bg-gray-50 rounded-2xl border border-gray-200 p-6 mb-6">
-            <div class="grid md:grid-cols-2 gap-6">
+            <div class="grid md:grid-cols-3 gap-4">
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
                     placeholder="Search by item name, location, or description..."
                     class="w-full px-5 py-3.5 rounded-xl border-2 border-gray-300"
                 />
+
+                <select
+                    wire:model.live="companyFilter"
+                    class="w-full px-5 py-3.5 rounded-xl border-2 border-gray-300"
+                >
+                    <option value="">All Kebun Raya</option>
+                    @foreach($companies as $company)
+                        <option value="{{ $company->company_id }}">
+                            {{ $company->company_name }}
+                        </option>
+                    @endforeach
+                </select>
 
                 <select
                     wire:model.live="categoryFilter"

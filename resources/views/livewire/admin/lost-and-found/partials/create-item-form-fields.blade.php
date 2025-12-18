@@ -150,9 +150,22 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700">Location *</label>
-                <input type="text" wire:model="report_location" placeholder="e.g., Lobby, Cafeteria, Parking Area"
+                <select wire:model="report_location"
                     class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">-- Select Location --</option>
+                    @php
+                        $groupedLocations = $locations->groupBy('area');
+                    @endphp
+                    @foreach($groupedLocations as $area => $locs)
+                        <optgroup label="{{ $area }}">
+                            @foreach($locs as $loc)
+                                <option value="{{ $loc->name }}">{{ $loc->name }}</option>
+                            @endforeach
+                        </optgroup>
+                    @endforeach
+                </select>
                 @error('report_location') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                <p class="text-xs text-gray-500 mt-1">Select from predefined locations for your company</p>
             </div>
 
             <div>

@@ -335,21 +335,45 @@
 
                     <!-- User menu -->
                     <div class="flex items-center space-x-4">
-                        <!-- Profile dropdown -->
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open"
-                                class="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-100">
-                                <img class="w-8 h-8 rounded-full"
-                                    src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->full_name ?? 'Admin') }}&background=1f2937&color=fff"
-                                    alt="Profile">
-                                <div class="text-left">
-                                    <span
-                                        class="text-sm font-medium text-gray-700 block">{{ auth()->user()->full_name ?? 'Admin' }}</span>
-                                    <span class="text-xs text-gray-500">
-                                        {{ auth()->user()->isAdmin() ? 'Admin' : 'Moderator' }}
-                                    </span>
-                                </div>
-                            </button>
+                        {{-- Profile Dropdown --}}
+<div class="relative" x-data="{ open: false }">
+    <button
+        @click="open = !open"
+        class="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-100 transition focus:outline-none"
+    >
+        @php
+            $user = auth()->user();
+            $initials = collect(explode(' ', $user->full_name ?? 'User'))
+                ->map(fn($word) => strtoupper(substr($word, 0, 1)))
+                ->join('');
+        @endphp
+
+        {{-- Avatar --}}
+        @if($user->avatar)
+            <img
+                src="{{ Storage::url($user->avatar) }}"
+                alt="Avatar"
+                class="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm"
+            >
+        @else
+            <div
+                class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center
+                       text-gray-800 font-bold text-xs border border-gray-200 shadow-sm"
+            >
+                {{ $initials }}
+            </div>
+        @endif
+
+        {{-- Name & Role --}}
+        <div class="text-left hidden sm:block">
+            <span class="text-sm font-medium text-gray-700 block">
+                {{ $user->full_name }}
+            </span>
+            <span class="text-xs text-gray-500">
+                {{ $user->isAdmin() ? 'Admin' : ($user->isModerator() ? 'Moderator' : 'User') }}
+            </span>
+        </div>
+    </button>
 
                             <!-- Dropdown menu -->
                             <div x-show="open" @click.away="open = false" x-transition

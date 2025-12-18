@@ -93,9 +93,9 @@ class CreateItem extends Component
 
             // PERBAIKAN: Validasi untuk photos dan newPhotos
             $rules['photos'] = 'nullable|array|max:5';
-            $rules['photos.*'] = 'nullable|image|max:2048';
+            $rules['photos.*'] = 'nullable|image|max:5120';
             $rules['newPhotos'] = 'nullable|array';
-            $rules['newPhotos.*'] = 'nullable|image|max:2048';
+            $rules['newPhotos.*'] = 'nullable|image|max:5120';
         }
 
         if ($this->report_type === 'FOUND') {
@@ -114,10 +114,10 @@ class CreateItem extends Component
     {
         return [
             'photos.*.image' => 'All files must be valid images (jpg, png, jpeg, gif).',
-            'photos.*.max' => 'Each photo must not exceed 2MB.',
+            'photos.*.max' => 'Each photo must not exceed 5MB.',
             'photos.max' => 'You can upload a maximum of 5 photos.',
             'newPhotos.*.image' => 'All files must be valid images.',
-            'newPhotos.*.max' => 'Each photo must not exceed 2MB.',
+            'newPhotos.*.max' => 'Each photo must not exceed 5MB.',
             'category_id.required' => 'Please select a category.',
             'item_name.required' => 'Item name is required.',
             'reporterMode.required' => 'Please select reporter type.',
@@ -556,8 +556,13 @@ class CreateItem extends Component
 
     public function render()
     {
-        $categories = Category::where('company_id', auth()->user()->company_id)->get();
-        $posts = Post::where('company_id', auth()->user()->company_id)->get();
+        $companyId = auth()->user()->company_id;
+        $categories = Category::where('company_id', $companyId)->get();
+        $posts = Post::where('company_id', $companyId)->get();
+        $locations = \App\Models\Location::where('company_id', $companyId)
+            ->orderBy('area')
+            ->orderBy('name')
+            ->get();
 
         $statusOptions = [];
         if ($this->report_type === 'FOUND') {
@@ -572,6 +577,7 @@ class CreateItem extends Component
         return view('livewire.admin.lost-and-found.create-item', [
             'categories' => $categories,
             'posts' => $posts,
+            'locations' => $locations,
             'statusOptions' => $statusOptions,
         ]);
     }

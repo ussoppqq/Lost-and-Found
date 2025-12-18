@@ -40,7 +40,7 @@ class Profile extends Component
     public function saveAvatar()
     {
         $this->validate([
-            'newAvatar' => 'required|image|max:2048', // 2MB max
+            'newAvatar' => 'required|image|max:5120', // 5MB max
         ]);
 
         $user = Auth::user();
@@ -72,6 +72,7 @@ class Profile extends Component
 
         $user = Auth::user();
         $user->full_name    = $this->full_name;
+        $user->nickname     = $this->nickname;
         $user->phone_number = $this->phone_number;
         $user->email        = $this->email;
 
@@ -92,7 +93,7 @@ class Profile extends Component
     {
         $this->validate([
             'current_password' => 'required',
-            'new_password' => 'required|min:8|confirmed',
+            'new_password' => ['required', 'min:8', 'confirmed', new \App\Rules\UniquePassword(auth()->id())],
         ]);
 
         $user = Auth::user();
@@ -110,6 +111,25 @@ class Profile extends Component
         $this->new_password_confirmation = '';
 
         session()->flash('success', 'Password changed successfully!');
+    }
+
+    /**
+     * Check if password is unique (real-time validation)
+     */
+    public function checkPasswordUnique()
+    {
+        if (empty($this->new_password) || strlen($this->new_password) < 8) {
+            return ['unique' => true, 'message' => '']; // Don't check if password is too short
+        }
+
+        $users = \App\Models\User::where('user_id', '!=', Auth::id())->get();
+        foreach ($users as $user) {
+            if (Hash::check($this->new_password, $user->password)) {
+                return ['unique' => false, 'message' => 'This password is already being used by another user.'];
+            }
+        }
+
+        return ['unique' => true, 'message' => 'Password is unique'];
     }
 
     public function render()

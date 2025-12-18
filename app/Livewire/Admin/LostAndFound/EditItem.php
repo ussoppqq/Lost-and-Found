@@ -55,7 +55,7 @@ class EditItem extends Component
             'sensitivity_level' => 'required|in:NORMAL,RESTRICTED',
             'category_id' => 'required|exists:categories,category_id',
             'post_id' => 'required|exists:posts,post_id',
-            'photos.*' => 'nullable|image|max:2048',
+            'photos.*' => 'nullable|image|max:5120',
         ];
     }
 

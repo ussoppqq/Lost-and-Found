@@ -43,12 +43,6 @@
                                     {{ $initials }}
                                 </div>
                             @endif
-                            {{-- Pencil Icon Overlay --}}
-                            <a href="{{ route('profile') }}" class="absolute bottom-3 right-0 h-6 w-6 bg-gray-800 rounded-full flex items-center justify-center shadow-md hover:bg-gray-900 transition-colors">
-                                <svg class="h-3.5 w-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                            </a>
                         </div>
                         <h3 class="font-semibold text-gray-900 text-sm">{{ $user->full_name }}</h3>
                         <p class="text-xs text-gray-500 mt-1">{{ $user->email }}</p>
@@ -152,12 +146,6 @@
                                         {{ $initials }}
                                     </div>
                                 @endif
-                                {{-- Pencil Icon Overlay --}}
-                                <a href="{{ route('profile') }}" class="absolute -bottom-1 -right-1 h-5 w-5 bg-gray-800 rounded-full flex items-center justify-center shadow-md hover:bg-gray-900 transition-colors">
-                                    <svg class="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                    </svg>
-                                </a>
                             </div>
                             <div>
                                 <h3 class="font-semibold text-gray-900 text-sm">{{ $user->full_name }}</h3>

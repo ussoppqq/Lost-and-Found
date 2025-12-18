@@ -185,10 +185,106 @@
                     @error('current_password') <span class="text-xs text-red-600 mt-1">{{ $message }}</span> @enderror
                 </div>
 
-                <div>
+                <div x-data="{
+                    password: @entangle('new_password'),
+                    strength: 'weak',
+                    strengthWidth: '0',
+                    isUnique: true,
+                    uniqueMessage: '',
+                    checkingUnique: false,
+
+                    calculateStrength() {
+                        if (!this.password) {
+                            this.strength = 'weak';
+                            this.strengthWidth = '0';
+                            return;
+                        }
+
+                        let score = 0;
+                        if (this.password.length >= 8) score += 1;
+                        if (this.password.length >= 10) score += 1;
+                        if (/[a-z]/.test(this.password)) score += 1;
+                        if (/[A-Z]/.test(this.password)) score += 1;
+                        if (/[0-9]/.test(this.password)) score += 1;
+                        if (/[^A-Za-z0-9]/.test(this.password)) score += 1;
+
+                        if (score <= 2) {
+                            this.strength = 'Weak';
+                            this.strengthWidth = '33%';
+                        } else if (score <= 4) {
+                            this.strength = 'Medium';
+                            this.strengthWidth = '66%';
+                        } else {
+                            this.strength = 'Strong';
+                            this.strengthWidth = '100%';
+                        }
+
+                        // Check uniqueness
+                        if (this.password.length >= 8) {
+                            this.checkPasswordUnique();
+                        }
+                    },
+
+                    async checkPasswordUnique() {
+                        this.checkingUnique = true;
+                        try {
+                            const result = await @this.checkPasswordUnique();
+                            this.isUnique = result.unique;
+                            this.uniqueMessage = result.message;
+                        } catch(e) {
+                            console.error('Error checking password:', e);
+                        }
+                        this.checkingUnique = false;
+                    }
+                }" x-init="$watch('password', () => calculateStrength())">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">New Password *</label>
                     <input type="password" wire:model="new_password"
-                           class="w-full px-4 py-3 text-sm rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800">
+                           class="w-full px-4 py-3 text-sm rounded-xl border-2 border-gray-300 focus:border-gray-800 focus:ring-2 focus:ring-gray-800"
+                           @input="calculateStrength()">
+
+                    {{-- Password Strength Indicator --}}
+                    <div class="mt-2" x-show="password">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-medium text-gray-600">Password Strength:</span>
+                            <span class="text-xs font-semibold" :class="{
+                                'text-red-600': strength === 'Weak',
+                                'text-yellow-600': strength === 'Medium',
+                                'text-green-600': strength === 'Strong'
+                            }" x-text="strength"></span>
+                        </div>
+                        <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full transition-all duration-300" :class="{
+                                'bg-red-500': strength === 'Weak',
+                                'bg-yellow-500': strength === 'Medium',
+                                'bg-green-500': strength === 'Strong'
+                            }" :style="'width: ' + strengthWidth"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Use uppercase, lowercase, numbers, and symbols for a strong password</p>
+                    </div>
+
+                    {{-- Unique Password Check --}}
+                    <div class="mt-2" x-show="password && password.length >= 8">
+                        <div class="flex items-center gap-2" x-show="checkingUnique">
+                            <svg class="w-4 h-4 animate-spin text-gray-500" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a12 12 0 0112-12V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <span class="text-xs text-gray-500">Checking password uniqueness...</span>
+                        </div>
+                        <div x-show="!checkingUnique && isUnique" class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="text-xs text-green-600 font-medium">Password is unique</span>
+                        </div>
+                        <div x-show="!checkingUnique && !isUnique" class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="text-xs text-red-600 font-medium" x-text="uniqueMessage"></span>
+                        </div>
+                    </div>
+
                     @error('new_password') <span class="text-xs text-red-600 mt-1">{{ $message }}</span> @enderror
                 </div>
 

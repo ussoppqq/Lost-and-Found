@@ -76,7 +76,7 @@ class CreateAndMatch extends Component
             'reporter_phone' => 'required|string|max:20',
             'reporter_email' => 'nullable|email|max:255',
             'photos' => 'nullable|array|max:5',
-            'photos.*' => 'nullable|image|max:2048',
+            'photos.*' => 'nullable|image|max:5120',
         ];
 
         // FOUND specific validations

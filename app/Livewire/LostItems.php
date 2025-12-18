@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Report;
+use App\Models\Company;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -12,10 +13,12 @@ class LostItems extends Component
 
     public $search = '';
     public $categoryFilter = '';
+    public $companyFilter = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
         'categoryFilter' => ['except' => ''],
+        'companyFilter' => ['except' => ''],
     ];
 
     public function updatingSearch()
@@ -28,11 +31,20 @@ class LostItems extends Component
         $this->resetPage();
     }
 
+    public function updatingCompanyFilter()
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
-        $query = Report::with(['item.photos', 'item.category', 'user'])
+        $query = Report::with(['item.photos', 'item.category', 'user', 'company'])
             ->where('report_type', 'LOST')
             ->where('report_status', 'OPEN');
+
+        if ($this->companyFilter) {
+            $query->where('company_id', $this->companyFilter);
+        }
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -55,9 +67,12 @@ class LostItems extends Component
         $categories = \App\Models\Category::orderBy('category_name')
             ->get();
 
+        $companies = Company::orderBy('company_name')->get();
+
         return view('livewire.lost-items', [
             'lostItems' => $lostItems,
             'categories' => $categories,
+            'companies' => $companies,
         ])->layout('components.layouts.user');
     }
 }

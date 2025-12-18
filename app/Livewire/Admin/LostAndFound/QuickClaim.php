@@ -31,12 +31,12 @@ class QuickClaim extends Component
         'brand' => 'nullable|string|max:255',
         'color' => 'nullable|string|max:255',
         'claimNotes' => 'nullable|string|max:1000',
-        'tempPhotos.*' => 'nullable|image|max:2048',
+        'tempPhotos.*' => 'nullable|image|max:5120',
     ];
 
     protected $messages = [
         'tempPhotos.*.image' => 'Each file must be an image',
-        'tempPhotos.*.max' => 'Each photo must not exceed 2MB',
+        'tempPhotos.*.max' => 'Each photo must not exceed 5MB',
     ];
 
     public function mount($sourceReport, $targetReport)
@@ -67,7 +67,7 @@ class QuickClaim extends Component
     public function updatedTempPhotos()
     {
         $this->validate([
-            'tempPhotos.*' => 'image|max:2048',
+            'tempPhotos.*' => 'image|max:5120',
         ]);
     }
 
