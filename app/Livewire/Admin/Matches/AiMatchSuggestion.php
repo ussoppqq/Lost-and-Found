@@ -37,8 +37,6 @@ class AiMatchSuggestion extends Component
 
         if ($firstLostReport) {
             $this->selectedLostReportId = $firstLostReport->report_id;
-            // Don't auto-analyze on mount to avoid API calls
-            // User can click "Analyze with AI" button
         }
     }
 
@@ -83,8 +81,21 @@ class AiMatchSuggestion extends Component
                 $aiData = json_decode($aiData, true);
             }
 
+            // Get lost_report_id dari selected atau dari aiData
+            $lostReportId = $this->selectedLostReportId;
+            
+            // Jika tidak ada selected (dari batch), cari dari context
+            if (!$lostReportId && isset($aiData['lost_report_id'])) {
+                $lostReportId = $aiData['lost_report_id'];
+            }
+
+            if (!$lostReportId) {
+                session()->flash('error', 'Lost report ID not found!');
+                return;
+            }
+
             // Check if match already exists
-            $existingMatch = MatchedItem::where('lost_report_id', $this->selectedLostReportId)
+            $existingMatch = MatchedItem::where('lost_report_id', $lostReportId)
                 ->where('found_report_id', $foundReportId)
                 ->first();
 
@@ -101,7 +112,7 @@ class AiMatchSuggestion extends Component
             MatchedItem::create([
                 'match_id' => Str::uuid(),
                 'company_id' => auth()->user()->company_id,
-                'lost_report_id' => $this->selectedLostReportId,
+                'lost_report_id' => $lostReportId,
                 'found_report_id' => $foundReportId,
                 'match_status' => 'PENDING',
                 'confidence_score' => $aiData['confidence'] ?? 0,
@@ -116,8 +127,10 @@ class AiMatchSuggestion extends Component
             session()->flash('success', 'Match created successfully from AI suggestion!');
             $this->dispatch('match-created');
             
-            // Refresh suggestions
-            $this->analyzeMatches();
+            // Refresh suggestions if single analysis
+            if ($this->selectedLostReportId) {
+                $this->analyzeMatches();
+            }
 
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to create match: ' . $e->getMessage());
@@ -155,6 +168,12 @@ class AiMatchSuggestion extends Component
         } catch (\Exception $e) {
             session()->flash('error', 'Batch analysis failed: ' . $e->getMessage());
         }
+    }
+
+    public function closeBatchResults()
+    {
+        $this->batchResults = [];
+        $this->showBatchAnalysis = false;
     }
 
     public function render()

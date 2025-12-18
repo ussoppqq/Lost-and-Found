@@ -41,14 +41,184 @@
             </div>
             <button 
                 wire:click="runBatchAnalysis"
-                class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold flex items-center transition">
-                <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                wire:loading.attr="disabled"
+                class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold flex items-center transition disabled:opacity-50">
+                <svg wire:loading.remove wire:target="runBatchAnalysis" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
-                Batch Analysis
+                <svg wire:loading wire:target="runBatchAnalysis" class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span wire:loading.remove wire:target="runBatchAnalysis">Batch Analysis</span>
+                <span wire:loading wire:target="runBatchAnalysis">Analyzing...</span>
             </button>
         </div>
     </div>
+
+    <!-- BATCH ANALYSIS RESULTS SECTION -->
+    @if(!empty($batchResults))
+    <div class="mb-6 bg-white rounded-lg shadow-lg border-2 border-purple-300">
+        <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-indigo-50">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-gray-900 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Batch Analysis Results
+                    </h3>
+                    <p class="text-xs text-gray-600 mt-1">Analyzed {{ count($batchResults) }} lost reports</p>
+                </div>
+                <button 
+                    wire:click="closeBatchResults"
+                    class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="p-4 bg-gray-50 border-b border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                @php
+                    $totalMatches = 0;
+                    $highConfidence = 0;
+                    $mediumConfidence = 0;
+                    $lowConfidence = 0;
+                    
+                    foreach($batchResults as $result) {
+                        if(isset($result['matches'])) {
+                            $totalMatches += count($result['matches']);
+                            foreach($result['matches'] as $match) {
+                                if($match['confidence'] >= 80) $highConfidence++;
+                                elseif($match['confidence'] >= 60) $mediumConfidence++;
+                                else $lowConfidence++;
+                            }
+                        }
+                    }
+                @endphp
+
+                <!-- Total Matches -->
+                <div class="bg-white rounded-lg p-3 shadow">
+                    <div class="text-xs text-gray-600 mb-1">Total Matches Found</div>
+                    <div class="text-2xl font-bold text-indigo-600">{{ $totalMatches }}</div>
+                </div>
+
+                <!-- High Confidence -->
+                <div class="bg-white rounded-lg p-3 shadow">
+                    <div class="text-xs text-gray-600 mb-1">High Confidence (≥80%)</div>
+                    <div class="text-2xl font-bold text-green-600">{{ $highConfidence }}</div>
+                </div>
+
+                <!-- Medium Confidence -->
+                <div class="bg-white rounded-lg p-3 shadow">
+                    <div class="text-xs text-gray-600 mb-1">Medium Confidence (60-79%)</div>
+                    <div class="text-2xl font-bold text-yellow-600">{{ $mediumConfidence }}</div>
+                </div>
+
+                <!-- Low Confidence -->
+                <div class="bg-white rounded-lg p-3 shadow">
+                    <div class="text-xs text-gray-600 mb-1">Low Confidence (<60%)</div>
+                    <div class="text-2xl font-bold text-gray-600">{{ $lowConfidence }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results List -->
+        <div class="divide-y divide-gray-200 max-h-[600px] overflow-y-auto">
+            @foreach($batchResults as $result)
+                <div class="p-4">
+                    <!-- Lost Report Header -->
+                    <div class="flex items-start space-x-3 mb-3">
+                        @if($result['lost_report']->photo_url)
+                            <img src="{{ Storage::url($result['lost_report']->photo_url) }}" 
+                                alt="{{ $result['lost_report']->item_name }}"
+                                class="w-16 h-16 rounded object-cover border-2 border-red-200">
+                        @else
+                            <div class="w-16 h-16 bg-red-100 rounded flex items-center justify-center border-2 border-red-200">
+                                <svg class="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16"/>
+                                </svg>
+                            </div>
+                        @endif
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded">
+                                    {{ $result['lost_report']->formatted_report_number }}
+                                </span>
+                                <h4 class="font-bold text-gray-900">{{ $result['lost_report']->item_name }}</h4>
+                            </div>
+                            <p class="text-sm text-gray-600">{{ Str::limit($result['lost_report']->report_description, 80) }}</p>
+                        </div>
+                        <div class="text-right">
+                            @if(isset($result['matches']) && count($result['matches']) > 0)
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-800">
+                                    {{ count($result['matches']) }} matches
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-600">
+                                    No matches
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Matched Found Reports -->
+                    @if(isset($result['matches']) && count($result['matches']) > 0)
+                        <div class="ml-20 space-y-2">
+                            @foreach($result['matches'] as $index => $match)
+                                <div class="bg-gray-50 rounded-lg p-3 border-l-4 {{ $match['confidence'] >= 80 ? 'border-green-500' : ($match['confidence'] >= 60 ? 'border-yellow-500' : 'border-gray-400') }}">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-start space-x-3 flex-1">
+                                            @if($match['found_report']->photo_url)
+                                                <img src="{{ Storage::url($match['found_report']->photo_url) }}" 
+                                                    alt="{{ $match['found_report']->item_name }}"
+                                                    class="w-12 h-12 rounded object-cover">
+                                            @else
+                                                <div class="w-12 h-12 bg-green-100 rounded flex items-center justify-center">
+                                                    <svg class="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                </div>
+                                            @endif
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center space-x-2 mb-1">
+                                                    <span class="px-2 py-0.5 bg-green-600 text-white text-xs font-bold rounded">
+                                                        {{ $match['found_report']->formatted_report_number }}
+                                                    </span>
+                                                    <span class="px-2 py-0.5 rounded text-xs font-bold {{ $match['confidence'] >= 80 ? 'bg-green-600 text-white' : ($match['confidence'] >= 60 ? 'bg-yellow-600 text-white' : 'bg-gray-600 text-white') }}">
+                                                        {{ $match['confidence'] }}%
+                                                    </span>
+                                                </div>
+                                                <p class="text-sm font-semibold text-gray-900">{{ $match['found_report']->item_name }}</p>
+                                                <p class="text-xs text-gray-600 line-clamp-1">{{ $match['reasoning'] }}</p>
+                                            </div>
+                                        </div>
+                                        <button 
+                                            wire:click="createMatchFromSuggestion('{{ $match['found_report']->report_id }}', {{ json_encode(array_merge($match, ['lost_report_id' => $result['lost_report']->report_id])) }})"
+                                            class="ml-3 px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold flex items-center transition">
+                                            <svg class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                            </svg>
+                                            Create
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="ml-20 text-sm text-gray-500 italic">
+                            No potential matches found for this report
+                        </div>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left: Lost Reports List -->

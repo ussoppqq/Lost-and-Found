@@ -310,22 +310,25 @@ PROMPT;
 
     /**
      * Batch analyze multiple reports
+     * FIX: Return format yang benar untuk blade
      */
     public function batchAnalyze(array $lostReportIds): array
     {
         $results = [];
 
         foreach ($lostReportIds as $reportId) {
-            $lostReport = Report::find($reportId);
+            $lostReport = Report::with('category')->find($reportId);
+            
             if ($lostReport && $lostReport->report_type === 'LOST') {
-                $matches = $this->findPotentialMatches($lostReport, 3);
+                // Find matches untuk lost report ini
+                $matches = $this->findPotentialMatches($lostReport, 5);
                 
-                if (!empty($matches)) {
-                    $results[] = [
-                        'lost_report' => $lostReport,
-                        'potential_matches' => $matches,
-                    ];
-                }
+                // SELALU tambahkan ke results, bahkan jika tidak ada matches
+                // Blade akan handle tampilan "No matches"
+                $results[] = [
+                    'lost_report' => $lostReport,
+                    'matches' => $matches, // Bisa empty array
+                ];
             }
         }
 
